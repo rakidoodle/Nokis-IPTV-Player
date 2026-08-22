@@ -19,7 +19,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - Home, Live TV, Movies, Series, Favorites, Guide, and Settings screens are keyboard accessible.
 - Reusable empty, loading, and error states provide consistent feedback.
 - IPTV profiles support local or remote M3U playlists, Xtream API services, and Stalker/Ministra portals.
-- Profile metadata is stored in SQLite while Phase 5 credentials remain memory-only and are redacted from diagnostics.
+- Profile metadata is stored in SQLite while credentials are encrypted for the current Windows user and redacted from diagnostics.
 - Connection tests validate local M3U headers, remote playlists, and provider server reachability.
 
 ## Requirements
@@ -55,7 +55,7 @@ dotnet run --project .\src\MyIPTV.App\MyIPTV.App.csproj
 
 See [Architecture](docs/architecture.md) for the dependency design.
 See [User interface](docs/user-interface.md) for navigation, themes, responsive behavior, and accessibility.
-See [IPTV profiles](docs/profiles.md) for profile setup, connection testing, and Phase 5 security limits.
+See [IPTV profiles](docs/profiles.md) for profile setup, connection testing, and credential security.
 
 ## Local application data
 
@@ -65,8 +65,9 @@ Runtime data is stored under `%LocalAppData%\MyIPTV`:
 - `settings.json` — non-sensitive user preferences only
 - `Cache` — reserved for disposable cached data
 - `Logs` — reserved for application log files
+- `Credentials` — DPAPI-encrypted credential files, one per profile
 
-IPTV passwords and authentication tokens are never written to these ordinary settings or database records. During Phase 5, passwords are held only in process memory and disappear when the application exits. Windows-protected credential storage will be introduced in Phase 6.
+IPTV passwords and authentication tokens are never written to settings, logs, or SQLite records. Each credential file is encrypted with Windows Data Protection API (DPAPI) using `CurrentUser` scope. Windows manages the encryption key, so the file can only be decrypted by the same Windows account on the same Windows installation. Credentials normally need to be entered again after moving the application data to another computer, reinstalling Windows, or losing the Windows user profile.
 
 ## Testing dependency
 
@@ -76,6 +77,6 @@ See [Runtime dependencies](docs/dependencies.md) for package versions, purposes,
 
 ## Security and legal usage
 
-Do not place IPTV passwords, tokens, complete credential-bearing URLs, or real accounts in source code or tests. Future credentials will be stored using Windows-protected storage and excluded from logs and the application database.
+Do not place IPTV passwords, tokens, complete credential-bearing URLs, or real accounts in source code or tests. Credentials are stored using Windows DPAPI protection and excluded from logs and the application database. Deleting a profile also deletes its protected credential file.
 
 Only connect MyIPTV to media services and streams that you own or are authorized to access. The project must not be used to bypass subscriptions, authentication, DRM, or server security.

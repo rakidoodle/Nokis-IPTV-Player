@@ -12,5 +12,7 @@ public interface IApplicationPaths
 
     string CacheDirectory { get; }
 
+    string CredentialsDirectory { get; }
+
     void EnsureDirectoriesExist();
 }

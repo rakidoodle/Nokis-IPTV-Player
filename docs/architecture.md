@@ -30,3 +30,9 @@ Core does not reference the user interface, database, network, or media player. 
 7. Closing the window stops and disposes the Host cleanly.
 
 Application configuration describes deployment-time behavior such as network timeouts. User settings describe preferences such as theme and volume. Keeping them separate prevents ordinary preferences from becoming an accidental credential store.
+
+## Credential boundary
+
+`ICredentialService` keeps password handling independent from profile and provider code. Its Windows implementation serializes the smallest required credential payload, protects it with DPAPI `CurrentUser` scope, and atomically writes one opaque file per profile under `%LocalAppData%\MyIPTV\Credentials`.
+
+SQLite contains profile metadata but no password or token columns. Logs contain only a profile identifier and operation result; usernames, passwords, protected bytes, and credential-bearing URLs are excluded. Plaintext serialization buffers are cleared after encryption or decryption. If a protected file is missing, damaged, or belongs to another Windows account, the service returns no credentials and the UI asks for the password again.

@@ -39,7 +39,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         services.AddSingleton<IDatabaseService, SqliteDatabaseService>();
         services.AddSingleton<IProfileRepository, SqliteProfileRepository>();
-        services.AddSingleton<ICredentialService, SessionCredentialService>();
+        services.AddSingleton<ICredentialService, WindowsCredentialService>();
         services.AddSingleton<IProfileValidator, ProfileValidator>();
         services.AddSingleton<IProfileConnectionTester, ProfileConnectionTester>();
         services.AddSingleton<IActiveProfileService, ActiveProfileService>();

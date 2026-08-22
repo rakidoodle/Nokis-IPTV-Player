@@ -10,6 +10,7 @@ Versions are centralized in `Directory.Packages.props`. Preview packages are not
 | Microsoft.Extensions.Logging.Debug | 10.0.11 | Structured development logging | MIT |
 | Microsoft.Extensions.Options.ConfigurationExtensions | 10.0.11 | Validated configuration binding | MIT |
 | Microsoft.Data.Sqlite | 10.0.11 | Local SQLite database access | MIT |
+| System.Security.Cryptography.ProtectedData | 10.0.11 | Windows DPAPI credential protection | MIT |
 | MSTest | 4.3.3 | Automated testing | MIT |
 
 All listed packages are maintained by Microsoft or the .NET Foundation ecosystem and are suitable for normal application distribution. Transitive dependencies are reviewed through NuGet restore and vulnerability auditing.

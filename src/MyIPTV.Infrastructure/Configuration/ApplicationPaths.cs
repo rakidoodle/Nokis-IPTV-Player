@@ -27,6 +27,7 @@ public sealed class ApplicationPaths : IApplicationPaths
         SettingsPath = Path.Combine(DataDirectory, "settings.json");
         LogsDirectory = Path.Combine(DataDirectory, "Logs");
         CacheDirectory = Path.Combine(DataDirectory, "Cache");
+        CredentialsDirectory = Path.Combine(DataDirectory, "Credentials");
     }
 
     public string DataDirectory { get; }
@@ -39,11 +40,14 @@ public sealed class ApplicationPaths : IApplicationPaths
 
     public string CacheDirectory { get; }
 
+    public string CredentialsDirectory { get; }
+
     public void EnsureDirectoriesExist()
     {
         Directory.CreateDirectory(DataDirectory);
         Directory.CreateDirectory(LogsDirectory);
         Directory.CreateDirectory(CacheDirectory);
+        Directory.CreateDirectory(CredentialsDirectory);
     }
 
     private static bool IsSafeDirectoryName(string directoryName) =>

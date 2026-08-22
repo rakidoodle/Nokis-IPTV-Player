@@ -184,7 +184,7 @@ public partial class ProfilesViewModel : ObservableObject
         ServerAddress = value.ServerAddress;
         Username = value.Username ?? string.Empty;
         Password = string.Empty;
-        SetStatus("Editing profile. Leave password blank to keep the current session password.", isError: false);
+        SetStatus("Editing profile. Leave password blank to keep the saved Windows-protected password.", isError: false);
     }
 
     partial void OnSelectedProfileTypeChanged(ProfileTypeOption value)

@@ -209,7 +209,7 @@
                                     Margin="0,0,0,14"
                                     Foreground="{DynamicResource WarningBrush}"
                                     FontSize="12"
-                                    Text="Phase 5 security: passwords are held in memory for this run only and are never saved or logged."
+                                    Text="Password is encrypted for your Windows account and is never stored in the database or logs."
                                     TextWrapping="Wrap" />
                             </StackPanel>
                         </StackPanel>

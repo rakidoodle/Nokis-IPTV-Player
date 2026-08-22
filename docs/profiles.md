@@ -28,8 +28,8 @@ Select a saved profile to edit, test, connect, or delete it. Deletion requires c
 
 Diagnostics report friendly errors and do not write addresses, usernames, passwords, or response bodies to logs.
 
-## Phase 5 credential behavior
+## Credential security
 
-Profile names, types, server addresses, and usernames are stored in SQLite. Passwords are kept only in memory for the running application and are never stored in SQLite, settings files, or logs. Closing MyIPTV clears them, so they must be entered again after restart.
+Profile names, types, server addresses, and usernames are stored in SQLite. Passwords are never stored in SQLite, settings files, or logs. They are serialized into a separate credential file and encrypted with Windows Data Protection API (DPAPI) using the current Windows user account.
 
-Phase 6 will replace the temporary in-memory credential service with Windows-protected persistent storage.
+The same Windows account on the same Windows installation can decrypt the credentials after MyIPTV restarts. Other Windows accounts cannot. Moving the encrypted files to another computer or losing the Windows user profile normally makes them unrecoverable, in which case enter the password again. Deleting a profile removes its protected credential file.
