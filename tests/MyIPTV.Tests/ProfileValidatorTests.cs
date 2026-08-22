@@ -42,6 +42,23 @@ public sealed class ProfileValidatorTests
     }
 
     [TestMethod]
+    public void ValidateRequiresMinistraRestCredentials()
+    {
+        ProfileDraft draft = new()
+        {
+            Name = "Ministra Demo",
+            ConnectionType = ProfileConnectionType.StalkerPortal,
+            ServerAddress = "https://example.invalid/stalker_portal",
+            Username = "demo-user",
+        };
+
+        ProfileValidationResult result = _validator.Validate(draft, requireCredentials: true);
+
+        Assert.IsFalse(result.IsValid);
+        Assert.AreEqual("Password is required for a supported Ministra REST profile.", result.Message);
+    }
+
+    [TestMethod]
     public void ValidateAcceptsAbsoluteLocalM3uPath()
     {
         ProfileDraft draft = new()

@@ -64,16 +64,22 @@ public sealed class ProfileValidator : IProfileValidator
             return ProfileValidationResult.Failure("Server and portal URLs must not contain a query string or fragment.");
         }
 
-        if (draft.ConnectionType == ProfileConnectionType.XtreamApi)
+        if (draft.ConnectionType is ProfileConnectionType.XtreamApi or ProfileConnectionType.StalkerPortal)
         {
             if (string.IsNullOrWhiteSpace(draft.Username))
             {
-                return ProfileValidationResult.Failure("Username is required for an Xtream profile.");
+                return ProfileValidationResult.Failure(
+                    draft.ConnectionType == ProfileConnectionType.XtreamApi
+                        ? "Username is required for an Xtream profile."
+                        : "Username is required for a supported Ministra REST profile.");
             }
 
             if (requireCredentials && string.IsNullOrEmpty(draft.Password))
             {
-                return ProfileValidationResult.Failure("Password is required for an Xtream profile.");
+                return ProfileValidationResult.Failure(
+                    draft.ConnectionType == ProfileConnectionType.XtreamApi
+                        ? "Password is required for an Xtream profile."
+                        : "Password is required for a supported Ministra REST profile.");
             }
         }
 

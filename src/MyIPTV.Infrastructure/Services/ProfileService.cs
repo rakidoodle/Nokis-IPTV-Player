@@ -28,7 +28,7 @@ public sealed partial class ProfileService(
         ProfileCredentials? existingCredentials = draft.Id.HasValue
             ? await credentialService.RetrieveAsync(draft.Id.Value, cancellationToken)
             : null;
-        bool requiresPassword = draft.ConnectionType == ProfileConnectionType.XtreamApi &&
+        bool requiresPassword = draft.ConnectionType != ProfileConnectionType.M3uPlaylist &&
                                 existingCredentials is null &&
                                 string.IsNullOrEmpty(draft.Password);
         ProfileValidationResult validation = validator.Validate(draft, requiresPassword);
@@ -102,7 +102,7 @@ public sealed partial class ProfileService(
         ProfileDraft effectiveDraft = await WithStoredCredentialsAsync(draft, cancellationToken);
         ProfileValidationResult validation = validator.Validate(
             effectiveDraft,
-            requireCredentials: effectiveDraft.ConnectionType == ProfileConnectionType.XtreamApi);
+            requireCredentials: effectiveDraft.ConnectionType != ProfileConnectionType.M3uPlaylist);
         return validation.IsValid
             ? await connectionTester.TestAsync(effectiveDraft, cancellationToken)
             : ConnectionTestResult.Failure(validation.Message);

@@ -6,7 +6,7 @@ The Profiles screen manages IPTV sources that you own or are authorized to acces
 
 - **M3U Playlist** accepts a local `.m3u` or `.m3u8` file, or a remote HTTP/HTTPS playlist URL.
 - **Xtream API** accepts an HTTP/HTTPS server address, username, and password.
-- **Stalker / Ministra Portal** accepts an HTTP/HTTPS portal address and optional username and password.
+- **Stalker / Ministra Portal** accepts an HTTP/HTTPS portal address plus the username and password issued for a supported subscriber REST connection.
 
 URLs containing embedded credentials or sensitive query parameters are rejected. Enter credentials in the dedicated fields instead.
 
@@ -26,7 +26,7 @@ Select a saved profile to edit, test, connect, or delete it. Deletion requires c
 - A remote M3U test requests the playlist and verifies its header.
 - Connecting an M3U profile performs the full parse and reports imported, malformed, and duplicate entry counts.
 - An Xtream quick test verifies base-server reachability. **Connect** performs authenticated catalog loading.
-- Stalker/Ministra tests currently verify base-server reachability only. Portal authentication arrives in its dedicated provider phase.
+- A Stalker/Ministra quick test verifies base-server reachability. **Connect** uses the supported username/password REST v2 interface. Device-bound or MAC-based portal access is deliberately rejected; see [Stalker / Ministra compatibility](stalker-ministra.md).
 
 Diagnostics report friendly errors and do not write addresses, usernames, passwords, or response bodies to logs.
 

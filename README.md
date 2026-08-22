@@ -2,7 +2,7 @@
 
 MyIPTV is a Windows desktop media-player project for connecting to IPTV sources that the user is authorized to access.
 
-The repository currently contains the verified .NET 10/WPF application foundation, profile management, secure credentials, M3U importing, and authorized Xtream catalog loading. Playback and the full content browsers are not implemented yet.
+The repository currently contains the verified .NET 10/WPF application foundation, profile management, secure credentials, M3U importing, authorized Xtream catalog loading, and safe Ministra REST live-channel loading. Playback and the full content browsers are not implemented yet.
 
 ## Foundation features
 
@@ -23,6 +23,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - Connection tests validate local M3U headers, remote playlists, and provider server reachability.
 - A cancellable, streaming M3U/M3U8 importer handles common channel metadata, malformed entries, duplicates, and large playlists.
 - Authorized Xtream profiles authenticate and load live TV, movie, series, episode, category, and short-EPG data through a credential-safe provider boundary.
+- Authorized Ministra REST profiles authenticate with username/password and load live channels without device or MAC impersonation.
 
 ## Requirements
 
@@ -60,6 +61,7 @@ See [User interface](docs/user-interface.md) for navigation, themes, responsive 
 See [IPTV profiles](docs/profiles.md) for profile setup, connection testing, and credential security.
 See [M3U playlists](docs/m3u-playlists.md) for supported metadata, importing, limits, and current catalog behavior.
 See [Xtream profiles](docs/xtream.md) for supported API operations and security limitations.
+See [Stalker / Ministra compatibility](docs/stalker-ministra.md) for the supported REST interface and deliberate legacy-device limitations.
 
 ## Local application data
 

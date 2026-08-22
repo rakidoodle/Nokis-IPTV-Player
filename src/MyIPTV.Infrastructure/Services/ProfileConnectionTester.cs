@@ -108,7 +108,7 @@ public sealed partial class ProfileConnectionTester(
         return draft.ConnectionType == ProfileConnectionType.XtreamApi
             ? ConnectionTestResult.Success("Xtream server is reachable. Use Connect to authenticate and load its catalog.")
             : ConnectionTestResult.Success(
-                "Server is reachable. Stalker/Ministra authentication will be validated when that provider module is enabled.");
+                "Server is reachable. Use Connect to validate the supported Ministra REST interface and load live channels.");
     }
 
     private static bool IsLocalPath(string address) =>

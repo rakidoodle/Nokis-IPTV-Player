@@ -48,3 +48,5 @@ Successful imports atomically replace that profile's entries in `IChannelCatalog
 `IContentProvider` is the provider-independent catalog boundary. The M3U implementation delegates to the streaming playlist importer. The Xtream implementation authenticates, maps provider DTOs into Core models, and atomically replaces the live and media catalogs only after every required response succeeds.
 
 Xtream's legacy API requires credentials in request query strings and playback paths. Its dedicated named `HttpClient` removes all framework HTTP loggers, while application logs contain only profile IDs and item counts. Response bodies, request URIs, credentials, and generated playback URLs are never logged. Credential-bearing model `ToString()` methods redact stream URLs.
+
+Stalker/Ministra support stays isolated under `Infrastructure/Providers/Stalker`. It uses the documented username/password REST flow, keeps bearer sessions in memory, and atomically publishes direct HTTP/HTTPS live channels. Legacy MAG/STB interfaces that depend on MAC addresses, serial numbers, or device emulation are deliberately outside the provider boundary and return a clear compatibility diagnostic.

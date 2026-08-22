@@ -7,6 +7,7 @@ using MyIPTV.Infrastructure.Data;
 using MyIPTV.Infrastructure.Providers.M3U;
 using MyIPTV.Infrastructure.Providers;
 using MyIPTV.Infrastructure.Providers.Xtream;
+using MyIPTV.Infrastructure.Providers.Stalker;
 using MyIPTV.Infrastructure.Security;
 
 namespace MyIPTV.Infrastructure.Services;
@@ -50,8 +51,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IMediaCatalog, InMemoryMediaCatalog>();
         services.AddSingleton<IPlaylistImportService, M3uPlaylistImportService>();
         services.AddSingleton<IXtreamClient, XtreamClient>();
+        services.AddSingleton<IStalkerClient, StalkerClient>();
         services.AddSingleton<IContentProvider, M3uContentProvider>();
         services.AddSingleton<IContentProvider, XtreamProvider>();
+        services.AddSingleton<IContentProvider, StalkerProvider>();
         services.AddSingleton<IActiveProfileService, ActiveProfileService>();
         services.AddSingleton<IProfileService, ProfileService>();
 
