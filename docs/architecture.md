@@ -18,3 +18,15 @@ MyIPTV.Tests ─────────────► Core and Infrastructure
 - `MyIPTV.Tests` contains automated tests using synthetic data only.
 
 Core does not reference the user interface, database, network, or media player. This keeps business rules independently testable and prevents provider-specific behavior from spreading through the application.
+
+## Startup flow
+
+1. WPF creates `App`.
+2. The .NET Generic Host loads configuration and constructs the dependency-injection container.
+3. Configuration values are validated before services are used.
+4. SQLite applies any embedded migrations that have not already run.
+5. Non-sensitive user settings are loaded.
+6. Navigation resolves `HomeViewModel`, and WPF displays its matching View.
+7. Closing the window stops and disposes the Host cleanly.
+
+Application configuration describes deployment-time behavior such as network timeouts. User settings describe preferences such as theme and volume. Keeping them separate prevents ordinary preferences from becoming an accidental credential store.
