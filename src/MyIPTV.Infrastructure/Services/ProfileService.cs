@@ -9,8 +9,9 @@ public sealed partial class ProfileService(
     ICredentialService credentialService,
     IProfileValidator validator,
     IProfileConnectionTester connectionTester,
-    IPlaylistImportService playlistImportService,
+    IEnumerable<IContentProvider> contentProviders,
     IChannelCatalog channelCatalog,
+    IMediaCatalog mediaCatalog,
     IActiveProfileService activeProfileService,
     ILogger<ProfileService> logger) : IProfileService
 {
@@ -55,6 +56,10 @@ public sealed partial class ProfileService(
         {
             channelCatalog.RemoveProfile(profile.Id);
         }
+        else
+        {
+            mediaCatalog.RemoveProfile(profile.Id);
+        }
 
         if (draft.ConnectionType == ProfileConnectionType.M3uPlaylist)
         {
@@ -84,6 +89,7 @@ public sealed partial class ProfileService(
         await repository.DeleteAsync(profileId, cancellationToken);
         await credentialService.DeleteAsync(profileId, cancellationToken);
         channelCatalog.RemoveProfile(profileId);
+        mediaCatalog.RemoveProfile(profileId);
         activeProfileService.Clear(profileId);
         LogProfileDeleted(profileId);
     }
@@ -112,18 +118,20 @@ public sealed partial class ProfileService(
             return ConnectionTestResult.Failure(saved.Message);
         }
 
-        if (saved.Profile.ConnectionType == ProfileConnectionType.M3uPlaylist)
+        IContentProvider? provider = contentProviders.FirstOrDefault(
+            item => item.ConnectionType == saved.Profile.ConnectionType);
+        if (provider is not null)
         {
-            PlaylistImportResult imported = await playlistImportService.ImportAsync(
+            ProviderLoadResult loaded = await provider.LoadCatalogAsync(
                 saved.Profile,
                 cancellationToken);
-            if (!imported.IsSuccess)
+            if (!loaded.IsSuccess)
             {
-                return ConnectionTestResult.Failure(imported.Message);
+                return ConnectionTestResult.Failure(loaded.Message);
             }
 
             activeProfileService.SetActive(saved.Profile);
-            return ConnectionTestResult.Success(imported.Message);
+            return ConnectionTestResult.Success(loaded.Message);
         }
 
         ProfileDraft savedDraft = new()

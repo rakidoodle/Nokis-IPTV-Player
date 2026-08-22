@@ -8,4 +8,8 @@ public sealed record IptvChannel(
     string? LogoUrl,
     string Group,
     string? EpgId,
-    bool Favorite = false);
+    bool Favorite = false)
+{
+    public override string ToString() =>
+        $"IptvChannel {{ Id = {Id}, ProfileId = {ProfileId}, Name = {Name}, StreamUrl = [REDACTED] }}";
+}

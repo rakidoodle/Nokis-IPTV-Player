@@ -105,11 +105,10 @@ public sealed partial class ProfileConnectionTester(
                 : ConnectionTestResult.Failure("Playlist contains no recognizable M3U header.");
         }
 
-        string providerName = draft.ConnectionType == ProfileConnectionType.XtreamApi
-            ? "Xtream"
-            : "Stalker/Ministra";
-        return ConnectionTestResult.Success(
-            $"Server is reachable. {providerName} account authentication will be validated when that provider module is enabled.");
+        return draft.ConnectionType == ProfileConnectionType.XtreamApi
+            ? ConnectionTestResult.Success("Xtream server is reachable. Use Connect to authenticate and load its catalog.")
+            : ConnectionTestResult.Success(
+                "Server is reachable. Stalker/Ministra authentication will be validated when that provider module is enabled.");
     }
 
     private static bool IsLocalPath(string address) =>

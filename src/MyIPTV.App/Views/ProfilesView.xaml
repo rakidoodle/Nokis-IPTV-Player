@@ -241,9 +241,9 @@
                         <WrapPanel Margin="0,12,0,0" HorizontalAlignment="Right">
                             <Button
                                 Margin="0,0,8,0"
-                                AutomationProperties.Name="Cancel playlist import"
+                                AutomationProperties.Name="Cancel provider loading"
                                 Command="{Binding ConnectCancelCommand}"
-                                Content="Cancel Import"
+                                Content="Cancel Loading"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Visibility="{Binding IsImporting, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             <Button

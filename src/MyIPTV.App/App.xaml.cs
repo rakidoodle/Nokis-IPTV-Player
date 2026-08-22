@@ -44,6 +44,14 @@ public partial class App : Application
                 serviceProvider.GetRequiredService<IApplicationConfiguration>();
             client.Timeout = TimeSpan.FromSeconds(configuration.Network.TimeoutSeconds);
         });
+        builder.Services
+            .AddHttpClient("Xtream", (serviceProvider, client) =>
+            {
+                IApplicationConfiguration configuration =
+                    serviceProvider.GetRequiredService<IApplicationConfiguration>();
+                client.Timeout = TimeSpan.FromSeconds(configuration.Network.TimeoutSeconds);
+            })
+            .RemoveAllLoggers();
 
         builder.Services.AddSingleton<INavigationService, NavigationService>();
         builder.Services.AddSingleton<IUserNotificationService, UserNotificationService>();

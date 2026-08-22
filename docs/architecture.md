@@ -42,3 +42,9 @@ SQLite contains profile metadata but no password or token columns. Logs contain 
 `IM3uPlaylistParser` reads playlist text incrementally from a stream, maps provider metadata into provider-independent `IptvChannel` records, and returns counts instead of logging individual entries. `IPlaylistImportService` owns local-file and remote-HTTP loading. Remote responses use `ResponseHeadersRead`, so the whole source file is not buffered before parsing.
 
 Successful imports atomically replace that profile's entries in `IChannelCatalog`. The catalog is intentionally in memory during Phase 7; reconnect after an application restart to import it again. Persistent channel tables and indexes belong to the later database phase, while the virtualized channel browser belongs to Phase 11.
+
+## Content providers
+
+`IContentProvider` is the provider-independent catalog boundary. The M3U implementation delegates to the streaming playlist importer. The Xtream implementation authenticates, maps provider DTOs into Core models, and atomically replaces the live and media catalogs only after every required response succeeds.
+
+Xtream's legacy API requires credentials in request query strings and playback paths. Its dedicated named `HttpClient` removes all framework HTTP loggers, while application logs contain only profile IDs and item counts. Response bodies, request URIs, credentials, and generated playback URLs are never logged. Credential-bearing model `ToString()` methods redact stream URLs.
