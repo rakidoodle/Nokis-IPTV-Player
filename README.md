@@ -14,6 +14,10 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - SQLite migrations create and version the local database safely.
 - Managed `HttpClient` instances have a validated 30-second timeout.
 - Central exception handling logs technical details and shows friendly messages.
+- Responsive media-style navigation adapts from a labeled sidebar to a compact icon rail.
+- Dark and light themes persist between application restarts.
+- Home, Live TV, Movies, Series, Favorites, Guide, and Settings screens are keyboard accessible.
+- Reusable empty, loading, and error states provide consistent feedback.
 
 ## Requirements
 
@@ -47,6 +51,7 @@ dotnet run --project .\src\MyIPTV.App\MyIPTV.App.csproj
 - `docs` — engineering and user documentation
 
 See [Architecture](docs/architecture.md) for the dependency design.
+See [User interface](docs/user-interface.md) for navigation, themes, responsive behavior, and accessibility.
 
 ## Local application data
 

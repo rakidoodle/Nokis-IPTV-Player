@@ -1,28 +1,128 @@
 <UserControl x:Class="MyIPTV.App.Views.HomeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             d:DesignHeight="450"
-             d:DesignWidth="700"
-             mc:Ignorable="d">
-    <Grid Background="#0F172A">
-        <StackPanel
-            Width="560"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,30,32,28">
             <TextBlock
-                Foreground="#F8FAFC"
-                FontSize="34"
+                AutomationProperties.HeadingLevel="Level1"
+                FontSize="32"
                 FontWeight="SemiBold"
                 Text="{Binding Heading}" />
             <TextBlock
-                Margin="0,14,0,0"
-                Foreground="#CBD5E1"
+                MaxWidth="720"
+                Margin="0,8,0,0"
+                HorizontalAlignment="Left"
+                Foreground="{DynamicResource TextSecondaryBrush}"
                 FontSize="16"
-                LineHeight="25"
+                LineHeight="24"
                 Text="{Binding Description}"
                 TextWrapping="Wrap" />
+
+            <WrapPanel Margin="0,28,0,0">
+                <Border
+                    Width="220"
+                    Margin="0,0,14,14"
+                    Style="{StaticResource CardBorderStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            Foreground="{DynamicResource TextSecondaryBrush}"
+                            Text="PROFILES" />
+                        <TextBlock
+                            Margin="0,8,0,0"
+                            FontSize="30"
+                            FontWeight="SemiBold"
+                            Text="0" />
+                        <TextBlock
+                            Margin="0,5,0,0"
+                            Foreground="{DynamicResource TextMutedBrush}"
+                            Text="No source connected" />
+                    </StackPanel>
+                </Border>
+                <Border
+                    Width="220"
+                    Margin="0,0,14,14"
+                    Style="{StaticResource CardBorderStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            Foreground="{DynamicResource TextSecondaryBrush}"
+                            Text="FAVORITES" />
+                        <TextBlock
+                            Margin="0,8,0,0"
+                            FontSize="30"
+                            FontWeight="SemiBold"
+                            Text="0" />
+                        <TextBlock
+                            Margin="0,5,0,0"
+                            Foreground="{DynamicResource TextMutedBrush}"
+                            Text="Build your collection" />
+                    </StackPanel>
+                </Border>
+                <Border
+                    Width="220"
+                    Margin="0,0,14,14"
+                    Style="{StaticResource CardBorderStyle}">
+                    <StackPanel>
+                        <TextBlock
+                            Foreground="{DynamicResource TextSecondaryBrush}"
+                            Text="RECENTLY WATCHED" />
+                        <TextBlock
+                            Margin="0,8,0,0"
+                            FontSize="30"
+                            FontWeight="SemiBold"
+                            Text="0" />
+                        <TextBlock
+                            Margin="0,5,0,0"
+                            Foreground="{DynamicResource TextMutedBrush}"
+                            Text="Nothing played yet" />
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <Border
+                MaxWidth="760"
+                Margin="0,14,0,0"
+                HorizontalAlignment="Left"
+                Style="{StaticResource CardBorderStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border
+                        Width="54"
+                        Height="54"
+                        Background="{DynamicResource SelectedBrush}"
+                        CornerRadius="12">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="24"
+                            Foreground="{DynamicResource AccentBrush}"
+                            Text="&#xE8B7;" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="16,0,24,0">
+                        <TextBlock
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Text="Get started" />
+                        <TextBlock
+                            Margin="0,5,0,0"
+                            Foreground="{DynamicResource TextSecondaryBrush}"
+                            Text="Profile management arrives in the next development phase."
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Button
+                        Grid.Column="2"
+                        AutomationProperties.Name="Open Live TV"
+                        Command="{Binding BrowseLiveTvCommand}"
+                        Content="Explore Live TV"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+                </Grid>
+            </Border>
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>

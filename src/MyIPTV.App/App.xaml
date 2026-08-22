@@ -4,8 +4,33 @@
              xmlns:viewModels="clr-namespace:MyIPTV.App.ViewModels"
              xmlns:views="clr-namespace:MyIPTV.App.Views">
     <Application.Resources>
-        <DataTemplate DataType="{x:Type viewModels:HomeViewModel}">
-            <views:HomeView />
-        </DataTemplate>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Theme.Dark.xaml" />
+                <ResourceDictionary Source="Resources/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate DataType="{x:Type viewModels:HomeViewModel}">
+                <views:HomeView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:LiveTvViewModel}">
+                <views:SectionView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:MoviesViewModel}">
+                <views:SectionView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:SeriesViewModel}">
+                <views:SectionView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:FavoritesViewModel}">
+                <views:SectionView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:GuideViewModel}">
+                <views:SectionView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:SettingsViewModel}">
+                <views:SectionView />
+            </DataTemplate>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

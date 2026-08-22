@@ -1,11 +1,19 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MyIPTV.Core.Abstractions;
 
 namespace MyIPTV.App.ViewModels;
 
-public sealed class HomeViewModel : ObservableObject
+public sealed partial class HomeViewModel(INavigationService navigationService) : ObservableObject
 {
-    public string Heading { get; } = "Welcome to MyIPTV";
+    public string Heading { get; } = "Good to see you";
 
     public string Description { get; } =
-        "The application foundation is ready. Add an authorized IPTV profile in a later phase.";
+        "Connect a legitimate IPTV source to start building your personal media library.";
+
+    [RelayCommand]
+    private void BrowseLiveTv()
+    {
+        navigationService.NavigateTo<LiveTvViewModel>();
+    }
 }

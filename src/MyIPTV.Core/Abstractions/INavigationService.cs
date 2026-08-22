@@ -7,4 +7,6 @@ public interface INavigationService
     event EventHandler? CurrentViewModelChanged;
 
     void NavigateTo<TViewModel>() where TViewModel : class;
+
+    void NavigateTo(Type viewModelType);
 }

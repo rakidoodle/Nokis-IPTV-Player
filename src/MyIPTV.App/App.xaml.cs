@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using MyIPTV.App.Services;
 using MyIPTV.App.ViewModels;
 using MyIPTV.Core.Abstractions;
+using MyIPTV.Core.Models;
 using MyIPTV.Infrastructure.Services;
 
 namespace MyIPTV.App;
@@ -46,7 +47,14 @@ public partial class App : Application
 
         builder.Services.AddSingleton<INavigationService, NavigationService>();
         builder.Services.AddSingleton<IUserNotificationService, UserNotificationService>();
+        builder.Services.AddSingleton<IThemeService, ThemeService>();
         builder.Services.AddSingleton<HomeViewModel>();
+        builder.Services.AddSingleton<LiveTvViewModel>();
+        builder.Services.AddSingleton<MoviesViewModel>();
+        builder.Services.AddSingleton<SeriesViewModel>();
+        builder.Services.AddSingleton<FavoritesViewModel>();
+        builder.Services.AddSingleton<GuideViewModel>();
+        builder.Services.AddSingleton<SettingsViewModel>();
         builder.Services.AddSingleton<MainWindowViewModel>();
         builder.Services.AddSingleton<MainWindow>();
 
@@ -66,10 +74,12 @@ public partial class App : Application
             await databaseService.InitializeAsync();
 
             ISettingsService settingsService = _host.Services.GetRequiredService<ISettingsService>();
-            _ = await settingsService.LoadAsync();
-
-            INavigationService navigationService = _host.Services.GetRequiredService<INavigationService>();
-            navigationService.NavigateTo<HomeViewModel>();
+            AppSettings settings = await settingsService.LoadAsync();
+            IThemeService themeService = _host.Services.GetRequiredService<IThemeService>();
+            AppTheme initialTheme = Enum.TryParse(settings.Theme, ignoreCase: true, out AppTheme savedTheme)
+                ? savedTheme
+                : AppTheme.Dark;
+            themeService.ApplyTheme(initialTheme);
 
             MainWindow mainWindow = _host.Services.GetRequiredService<MainWindow>();
             MainWindow = mainWindow;

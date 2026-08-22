@@ -6,7 +6,7 @@ public sealed record AppSettings
 
     public int Version { get; init; } = CurrentVersion;
 
-    public string Theme { get; init; } = "System";
+    public string Theme { get; init; } = "Dark";
 
     public string StartPage { get; init; } = "Home";
 
