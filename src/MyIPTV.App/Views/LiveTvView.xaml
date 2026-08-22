@@ -23,74 +23,159 @@
                 Text="{Binding Subtitle}" />
         </StackPanel>
 
-        <Grid Grid.Row="1" Margin="0,20,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="300" />
-            </Grid.ColumnDefinitions>
+        <ScrollViewer
+            Grid.Row="1"
+            Margin="0,20,0,0"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Disabled">
+            <Grid MinWidth="840">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="165" />
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <Border
-                Background="#05070B"
-                BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="1"
-                CornerRadius="12">
-                <vlc:VideoView
-                    x:Name="VideoSurface"
-                    AutomationProperties.Name="Video player"
-                    Background="Black"
-                    MediaPlayer="{Binding Player.NativeMediaPlayer}">
-                    <Grid
-                        Background="Black"
-                        Visibility="{Binding Player.ShowPlayerOverlay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            IsHitTestVisible="False">
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                FontFamily="Segoe Fluent Icons"
-                                Foreground="{DynamicResource TextMutedBrush}"
-                                FontSize="42"
-                                Text="&#xE714;" />
-                            <TextBlock
-                                Margin="0,12,0,0"
-                                Foreground="{DynamicResource TextSecondaryBrush}"
-                                FontSize="16"
-                                Text="{Binding Player.StatusMessage}" />
-                        </StackPanel>
+                <Border Padding="12" Style="{StaticResource CardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock FontSize="17" FontWeight="SemiBold" Text="Categories" />
+                        <ListBox
+                            Grid.Row="1"
+                            Margin="0,10,0,0"
+                            AutomationProperties.Name="Channel categories"
+                            ItemsSource="{Binding Categories}"
+                            ItemContainerStyle="{StaticResource NavigationItemStyle}"
+                            SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
+                            ScrollViewer.CanContentScroll="True"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            VirtualizingPanel.VirtualizationMode="Recycling"
+                            Style="{StaticResource NavigationListBoxStyle}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Padding="5" Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                     </Grid>
-                </vlc:VideoView>
-            </Border>
+                </Border>
 
-            <Border Grid.Column="1" Margin="16,0,0,0" Style="{StaticResource CardBorderStyle}">
-                <Grid>
+                <Border Grid.Column="1" Margin="12,0,0,0" Padding="12" Style="{StaticResource CardBorderStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock FontSize="17" FontWeight="SemiBold" Text="Channels" />
+                        <ListBox
+                            Grid.Row="1"
+                            Margin="0,10,0,0"
+                            AutomationProperties.Name="Live channels"
+                            ItemsSource="{Binding FilteredChannels}"
+                            ItemContainerStyle="{StaticResource NavigationItemStyle}"
+                            SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
+                            ScrollViewer.CanContentScroll="True"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            VirtualizingPanel.VirtualizationMode="Recycling"
+                            Style="{StaticResource NavigationListBoxStyle}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="5,6">
+                                        <TextBlock FontWeight="SemiBold" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock
+                                            Margin="0,3,0,0"
+                                            Foreground="{DynamicResource TextMutedBrush}"
+                                            FontSize="11"
+                                            Text="{Binding Group}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <Button
+                            Grid.Row="2"
+                            Margin="0,10,0,0"
+                            AutomationProperties.Name="Play selected channel"
+                            Command="{Binding PlaySelectedChannelCommand}"
+                            Content="Play selected channel"
+                            Style="{StaticResource PrimaryButtonStyle}" />
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Column="2" Margin="12,0,0,0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock
-                        AutomationProperties.HeadingLevel="Level2"
-                        FontSize="20"
-                        FontWeight="SemiBold"
-                        Text="{Binding Player.Title}"
-                        TextWrapping="Wrap" />
-                    <StackPanel Grid.Row="1" Margin="0,20,0,0">
-                        <TextBlock Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Text="NOW" />
-                        <TextBlock Margin="0,4,0,0" Text="{Binding Player.CurrentProgram}" TextWrapping="Wrap" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="2" Margin="0,16,0,0">
-                        <TextBlock Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Text="NEXT" />
-                        <TextBlock Margin="0,4,0,0" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding Player.NextProgram}" TextWrapping="Wrap" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="3" Margin="0,22,0,0" VerticalAlignment="Bottom">
-                        <TextBlock Foreground="{DynamicResource TextMutedBrush}" Text="{Binding EmptyTitle}" TextWrapping="Wrap" />
-                        <TextBlock Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Text="{Binding EmptyMessage}" TextWrapping="Wrap" />
-                    </StackPanel>
+                    <Border
+                        Background="#05070B"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12">
+                        <vlc:VideoView
+                            x:Name="VideoSurface"
+                            AutomationProperties.Name="Video player"
+                            Background="Black"
+                            MediaPlayer="{Binding Player.NativeMediaPlayer}">
+                            <Grid
+                                Background="Black"
+                                Visibility="{Binding Player.ShowPlayerOverlay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    IsHitTestVisible="False">
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        FontFamily="Segoe Fluent Icons"
+                                        Foreground="{DynamicResource TextMutedBrush}"
+                                        FontSize="42"
+                                        Text="&#xE714;" />
+                                    <TextBlock
+                                        Margin="0,12,0,0"
+                                        Foreground="{DynamicResource TextSecondaryBrush}"
+                                        FontSize="16"
+                                        Text="{Binding Player.StatusMessage}" />
+                                </StackPanel>
+                            </Grid>
+                        </vlc:VideoView>
+                    </Border>
+
+                    <Border Grid.Row="1" Margin="0,12,0,0" Padding="14" Style="{StaticResource CardBorderStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="52" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image
+                                Width="44"
+                                Height="44"
+                                AutomationProperties.Name="Current channel logo"
+                                Source="{Binding Player.LogoUrl}"
+                                Stretch="Uniform" />
+                            <StackPanel Grid.Column="1" Margin="10,0,12,0">
+                                <TextBlock
+                                    AutomationProperties.HeadingLevel="Level2"
+                                    FontSize="17"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding Player.Title}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <TextBlock Margin="0,5,0,0" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Text="NOW" />
+                                <TextBlock Text="{Binding Player.CurrentProgram}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Foreground="{DynamicResource TextMutedBrush}" Text="{Binding EmptyTitle}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Margin="0,5,0,0" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Text="NEXT" />
+                                <TextBlock Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding Player.NextProgram}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </Grid>
-            </Border>
-        </Grid>
+            </Grid>
+        </ScrollViewer>
 
         <Border Grid.Row="2" Margin="0,16,0,0" Padding="12" Style="{StaticResource CardBorderStyle}">
             <ScrollViewer

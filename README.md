@@ -25,6 +25,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - Authorized Xtream profiles authenticate and load live TV, movie, series, episode, category, and short-EPG data through a credential-safe provider boundary.
 - Authorized Ministra REST profiles authenticate with username/password and load live channels without device or MAC impersonation.
 - Bundled LibVLC playback supports HTTP/HTTPS IPTV media, transport controls, reconnect, aspect ratios, tracks, subtitles, and full screen.
+- The Live TV screen groups channels by category, virtualizes large lists, and plays the selected authorized stream.
 
 ## Requirements
 
@@ -64,6 +65,7 @@ See [M3U playlists](docs/m3u-playlists.md) for supported metadata, importing, li
 See [Xtream profiles](docs/xtream.md) for supported API operations and security limitations.
 See [Stalker / Ministra compatibility](docs/stalker-ministra.md) for the supported REST interface and deliberate legacy-device limitations.
 See [Media playback](docs/playback.md) for controls, formats, WPF behavior, and VideoLAN licensing.
+See [Live TV browser](docs/live-tv.md) for category filtering, playback, and large-list behavior.
 
 ## Local application data
 

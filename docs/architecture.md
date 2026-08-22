@@ -56,3 +56,5 @@ Stalker/Ministra support stays isolated under `Infrastructure/Providers/Stalker`
 `IPlaybackService` exposes provider-independent playback state and controls. `LibVlcPlaybackService` owns the native LibVLC lifetime, media disposal, track discovery, and sanitized playback logging. `IPlaybackVideoSource` is the narrow bridge used by the WPF `VideoView`; Core never references a VideoLAN type.
 
 Playback requests redact stream URLs from their diagnostic text. The engine logs only stable content IDs and content types, does not attach LibVLC diagnostic logging, and never records native media locations.
+
+The Live TV ViewModel reads immutable snapshots from `IChannelCatalog`, builds case-insensitive category summaries, and filters existing channel records without copying stream data. WPF category and channel lists use recycling virtualization so visual-tree size follows the viewport rather than catalog size.

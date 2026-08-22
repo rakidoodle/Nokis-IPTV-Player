@@ -74,6 +74,7 @@ public sealed class MainWindowViewModelTests
             FakePlaybackService playback = new();
             return new LiveTvViewModel(
                 new FakeChannelCatalog(),
+                playback,
                 new PlayerViewModel(playback, playback));
         }
     }
