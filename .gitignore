@@ -1,0 +1,45 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Aa]rtifacts/
+[Pp]ublish/
+
+# IDE user state
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test and coverage output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Application-generated state
+logs/
+*.log
+*.db
+*.db-shm
+*.db-wal
+appsettings.Local.json
+
+# Packages and installer output
+*.nupkg
+*.snupkg
+packages/
+installer-output/
+
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+secrets.json
+
+# Operating-system files
+Thumbs.db
+Desktop.ini
+.DS_Store
