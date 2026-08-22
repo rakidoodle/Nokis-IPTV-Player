@@ -36,3 +36,9 @@ Application configuration describes deployment-time behavior such as network tim
 `ICredentialService` keeps password handling independent from profile and provider code. Its Windows implementation serializes the smallest required credential payload, protects it with DPAPI `CurrentUser` scope, and atomically writes one opaque file per profile under `%LocalAppData%\MyIPTV\Credentials`.
 
 SQLite contains profile metadata but no password or token columns. Logs contain only a profile identifier and operation result; usernames, passwords, protected bytes, and credential-bearing URLs are excluded. Plaintext serialization buffers are cleared after encryption or decryption. If a protected file is missing, damaged, or belongs to another Windows account, the service returns no credentials and the UI asks for the password again.
+
+## M3U import flow
+
+`IM3uPlaylistParser` reads playlist text incrementally from a stream, maps provider metadata into provider-independent `IptvChannel` records, and returns counts instead of logging individual entries. `IPlaylistImportService` owns local-file and remote-HTTP loading. Remote responses use `ResponseHeadersRead`, so the whole source file is not buffered before parsing.
+
+Successful imports atomically replace that profile's entries in `IChannelCatalog`. The catalog is intentionally in memory during Phase 7; reconnect after an application restart to import it again. Persistent channel tables and indexes belong to the later database phase, while the virtualized channel browser belongs to Phase 11.

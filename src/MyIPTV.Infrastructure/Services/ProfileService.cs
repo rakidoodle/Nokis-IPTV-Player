@@ -9,6 +9,8 @@ public sealed partial class ProfileService(
     ICredentialService credentialService,
     IProfileValidator validator,
     IProfileConnectionTester connectionTester,
+    IPlaylistImportService playlistImportService,
+    IChannelCatalog channelCatalog,
     IActiveProfileService activeProfileService,
     ILogger<ProfileService> logger) : IProfileService
 {
@@ -49,6 +51,11 @@ public sealed partial class ProfileService(
 
         await repository.UpsertAsync(profile, cancellationToken);
 
+        if (profile.ConnectionType != ProfileConnectionType.M3uPlaylist)
+        {
+            channelCatalog.RemoveProfile(profile.Id);
+        }
+
         if (draft.ConnectionType == ProfileConnectionType.M3uPlaylist)
         {
             await credentialService.DeleteAsync(profile.Id, cancellationToken);
@@ -76,6 +83,7 @@ public sealed partial class ProfileService(
     {
         await repository.DeleteAsync(profileId, cancellationToken);
         await credentialService.DeleteAsync(profileId, cancellationToken);
+        channelCatalog.RemoveProfile(profileId);
         activeProfileService.Clear(profileId);
         LogProfileDeleted(profileId);
     }
@@ -102,6 +110,20 @@ public sealed partial class ProfileService(
         if (!saved.IsSuccess || saved.Profile is null)
         {
             return ConnectionTestResult.Failure(saved.Message);
+        }
+
+        if (saved.Profile.ConnectionType == ProfileConnectionType.M3uPlaylist)
+        {
+            PlaylistImportResult imported = await playlistImportService.ImportAsync(
+                saved.Profile,
+                cancellationToken);
+            if (!imported.IsSuccess)
+            {
+                return ConnectionTestResult.Failure(imported.Message);
+            }
+
+            activeProfileService.SetActive(saved.Profile);
+            return ConnectionTestResult.Success(imported.Message);
         }
 
         ProfileDraft savedDraft = new()

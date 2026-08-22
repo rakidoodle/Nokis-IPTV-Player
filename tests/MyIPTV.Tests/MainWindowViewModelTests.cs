@@ -61,6 +61,8 @@ public sealed class MainWindowViewModelTests
         {
             CurrentViewModel = viewModelType == typeof(HomeViewModel)
                 ? new HomeViewModel(this)
+                : viewModelType == typeof(LiveTvViewModel)
+                    ? new LiveTvViewModel(new FakeChannelCatalog())
                 : Activator.CreateInstance(viewModelType)
                   ?? throw new InvalidOperationException($"Could not create {viewModelType.Name}.");
             CurrentViewModelChanged?.Invoke(this, EventArgs.Empty);
@@ -99,5 +101,20 @@ public sealed class MainWindowViewModelTests
         public ApplicationOptions Application { get; } = new();
 
         public NetworkOptions Network { get; } = new();
+    }
+
+    private sealed class FakeChannelCatalog : IChannelCatalog
+    {
+        public event EventHandler? ChannelsChanged;
+
+        public IReadOnlyList<IptvChannel> GetAll() => [];
+
+        public IReadOnlyList<IptvChannel> GetForProfile(Guid profileId) => [];
+
+        public void ReplaceForProfile(Guid profileId, IReadOnlyList<IptvChannel> channels) =>
+            ChannelsChanged?.Invoke(this, EventArgs.Empty);
+
+        public void RemoveProfile(Guid profileId) =>
+            ChannelsChanged?.Invoke(this, EventArgs.Empty);
     }
 }

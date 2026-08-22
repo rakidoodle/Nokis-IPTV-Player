@@ -16,7 +16,7 @@ URLs containing embedded credentials or sensitive query parameters are rejected.
 2. Select **Add** and enter a descriptive profile name.
 3. Choose the connection type and complete its fields.
 4. Select **Test Connection** to run a safe diagnostic.
-5. Select **Save** to keep the profile metadata, or **Connect** to save, test, and mark it as the active profile for the current run.
+5. Select **Save** to keep the profile metadata, or **Connect** to save and activate it. For M3U profiles, **Connect** imports the channel catalog and can be canceled while it is running.
 
 Select a saved profile to edit, test, connect, or delete it. Deletion requires confirmation.
 
@@ -24,6 +24,7 @@ Select a saved profile to edit, test, connect, or delete it. Deletion requires c
 
 - A local M3U test verifies that the file exists and starts with the required `#EXTM3U` header.
 - A remote M3U test requests the playlist and verifies its header.
+- Connecting an M3U profile performs the full parse and reports imported, malformed, and duplicate entry counts.
 - Xtream and Stalker/Ministra tests currently verify base-server reachability only. Provider authentication and catalog requests arrive in later provider phases.
 
 Diagnostics report friendly errors and do not write addresses, usernames, passwords, or response bodies to logs.

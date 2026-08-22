@@ -12,13 +12,21 @@ public abstract partial class SectionViewModel(
     [ObservableProperty]
     private ViewState _state = ViewState.Empty;
 
+    [ObservableProperty]
+    private string _emptyTitle = emptyTitle;
+
+    [ObservableProperty]
+    private string _emptyMessage = emptyMessage;
+
     public string Title { get; } = title;
 
     public string Subtitle { get; } = subtitle;
 
-    public string EmptyTitle { get; } = emptyTitle;
-
-    public string EmptyMessage { get; } = emptyMessage;
-
     public string EmptyGlyph { get; } = emptyGlyph;
+
+    protected void SetEmptyContent(string title, string message)
+    {
+        EmptyTitle = title;
+        EmptyMessage = message;
+    }
 }

@@ -4,6 +4,7 @@ using MyIPTV.Core.Abstractions;
 using MyIPTV.Core.Models;
 using MyIPTV.Infrastructure.Configuration;
 using MyIPTV.Infrastructure.Data;
+using MyIPTV.Infrastructure.Providers.M3U;
 using MyIPTV.Infrastructure.Security;
 
 namespace MyIPTV.Infrastructure.Services;
@@ -42,6 +43,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ICredentialService, WindowsCredentialService>();
         services.AddSingleton<IProfileValidator, ProfileValidator>();
         services.AddSingleton<IProfileConnectionTester, ProfileConnectionTester>();
+        services.AddSingleton<IM3uPlaylistParser, M3uPlaylistParser>();
+        services.AddSingleton<IChannelCatalog, InMemoryChannelCatalog>();
+        services.AddSingleton<IPlaylistImportService, M3uPlaylistImportService>();
         services.AddSingleton<IActiveProfileService, ActiveProfileService>();
         services.AddSingleton<IProfileService, ProfileService>();
 

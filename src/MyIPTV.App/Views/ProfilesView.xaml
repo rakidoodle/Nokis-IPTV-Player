@@ -241,6 +241,13 @@
                         <WrapPanel Margin="0,12,0,0" HorizontalAlignment="Right">
                             <Button
                                 Margin="0,0,8,0"
+                                AutomationProperties.Name="Cancel playlist import"
+                                Command="{Binding ConnectCancelCommand}"
+                                Content="Cancel Import"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Visibility="{Binding IsImporting, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <Button
+                                Margin="0,0,8,0"
                                 Command="{Binding TestConnectionCommand}"
                                 Content="Test Connection"
                                 Style="{StaticResource SecondaryButtonStyle}" />

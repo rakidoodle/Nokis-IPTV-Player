@@ -37,6 +37,9 @@ public partial class ProfilesViewModel : ObservableObject
     private bool _isBusy;
 
     [ObservableProperty]
+    private bool _isImporting;
+
+    [ObservableProperty]
     private bool _isLoaded;
 
     [ObservableProperty]
@@ -123,19 +126,27 @@ public partial class ProfilesViewModel : ObservableObject
         });
     }
 
-    [RelayCommand]
-    private async Task ConnectAsync()
+    [RelayCommand(IncludeCancelCommand = true)]
+    private async Task ConnectAsync(CancellationToken cancellationToken)
     {
-        await RunBusyAsync(async () =>
+        IsImporting = true;
+        try
         {
-            ConnectionTestResult result = await _profileService.ConnectAsync(BuildDraft());
-            SetStatus(result.Message, !result.IsSuccess);
-            if (result.IsSuccess)
+            await RunBusyAsync(async () =>
             {
-                Password = string.Empty;
-                await ReloadAsync(SelectedProfile?.Id);
-            }
-        });
+                ConnectionTestResult result = await _profileService.ConnectAsync(BuildDraft(), cancellationToken);
+                SetStatus(result.Message, !result.IsSuccess);
+                if (result.IsSuccess)
+                {
+                    Password = string.Empty;
+                    await ReloadAsync(SelectedProfile?.Id);
+                }
+            });
+        }
+        finally
+        {
+            IsImporting = false;
+        }
     }
 
     [RelayCommand(CanExecute = nameof(HasSelectedProfile))]
@@ -249,6 +260,10 @@ public partial class ProfilesViewModel : ObservableObject
         try
         {
             await action();
+        }
+        catch (OperationCanceledException)
+        {
+            SetStatus("Operation canceled.", isError: false);
         }
         catch (Exception exception)
         {

@@ -21,6 +21,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - IPTV profiles support local or remote M3U playlists, Xtream API services, and Stalker/Ministra portals.
 - Profile metadata is stored in SQLite while credentials are encrypted for the current Windows user and redacted from diagnostics.
 - Connection tests validate local M3U headers, remote playlists, and provider server reachability.
+- A cancellable, streaming M3U/M3U8 importer handles common channel metadata, malformed entries, duplicates, and large playlists.
 
 ## Requirements
 
@@ -56,6 +57,7 @@ dotnet run --project .\src\MyIPTV.App\MyIPTV.App.csproj
 See [Architecture](docs/architecture.md) for the dependency design.
 See [User interface](docs/user-interface.md) for navigation, themes, responsive behavior, and accessibility.
 See [IPTV profiles](docs/profiles.md) for profile setup, connection testing, and credential security.
+See [M3U playlists](docs/m3u-playlists.md) for supported metadata, importing, limits, and current catalog behavior.
 
 ## Local application data
 
