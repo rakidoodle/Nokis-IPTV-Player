@@ -68,6 +68,7 @@ public partial class App : Application
         builder.Services.AddSingleton<HomeViewModel>();
         builder.Services.AddSingleton<ProfilesViewModel>();
         builder.Services.AddSingleton<LiveTvViewModel>();
+        builder.Services.AddSingleton<PlayerViewModel>();
         builder.Services.AddSingleton<MoviesViewModel>();
         builder.Services.AddSingleton<SeriesViewModel>();
         builder.Services.AddSingleton<FavoritesViewModel>();

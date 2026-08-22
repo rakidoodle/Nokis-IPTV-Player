@@ -50,3 +50,9 @@ Successful imports atomically replace that profile's entries in `IChannelCatalog
 Xtream's legacy API requires credentials in request query strings and playback paths. Its dedicated named `HttpClient` removes all framework HTTP loggers, while application logs contain only profile IDs and item counts. Response bodies, request URIs, credentials, and generated playback URLs are never logged. Credential-bearing model `ToString()` methods redact stream URLs.
 
 Stalker/Ministra support stays isolated under `Infrastructure/Providers/Stalker`. It uses the documented username/password REST flow, keeps bearer sessions in memory, and atomically publishes direct HTTP/HTTPS live channels. Legacy MAG/STB interfaces that depend on MAC addresses, serial numbers, or device emulation are deliberately outside the provider boundary and return a clear compatibility diagnostic.
+
+## Playback boundary
+
+`IPlaybackService` exposes provider-independent playback state and controls. `LibVlcPlaybackService` owns the native LibVLC lifetime, media disposal, track discovery, and sanitized playback logging. `IPlaybackVideoSource` is the narrow bridge used by the WPF `VideoView`; Core never references a VideoLAN type.
+
+Playback requests redact stream URLs from their diagnostic text. The engine logs only stable content IDs and content types, does not attach LibVLC diagnostic logging, and never records native media locations.

@@ -17,7 +17,7 @@
                 <views:ProfilesView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:LiveTvViewModel}">
-                <views:SectionView />
+                <views:LiveTvView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:MoviesViewModel}">
                 <views:SectionView />

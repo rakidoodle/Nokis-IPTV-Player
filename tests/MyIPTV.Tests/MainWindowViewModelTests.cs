@@ -44,7 +44,8 @@ public sealed class MainWindowViewModelTests
             navigation,
             new FakeApplicationConfiguration(),
             settings ?? new FakeSettingsService(),
-            theme ?? new FakeThemeService());
+            theme ?? new FakeThemeService(),
+            new FakePlaybackService());
 
     private sealed class FakeNavigationService : INavigationService
     {
@@ -62,10 +63,18 @@ public sealed class MainWindowViewModelTests
             CurrentViewModel = viewModelType == typeof(HomeViewModel)
                 ? new HomeViewModel(this)
                 : viewModelType == typeof(LiveTvViewModel)
-                    ? new LiveTvViewModel(new FakeChannelCatalog())
+                    ? CreateLiveTvViewModel()
                 : Activator.CreateInstance(viewModelType)
                   ?? throw new InvalidOperationException($"Could not create {viewModelType.Name}.");
             CurrentViewModelChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private static LiveTvViewModel CreateLiveTvViewModel()
+        {
+            FakePlaybackService playback = new();
+            return new LiveTvViewModel(
+                new FakeChannelCatalog(),
+                new PlayerViewModel(playback, playback));
         }
     }
 

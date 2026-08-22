@@ -11,6 +11,8 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly INavigationService _navigationService;
     private readonly ISettingsService _settingsService;
     private readonly IThemeService _themeService;
+    private readonly IPlaybackService _playbackService;
+    private readonly SynchronizationContext? _synchronizationContext;
 
     [ObservableProperty]
     private object? _currentViewModel;
@@ -24,15 +26,22 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = "Ready";
 
+    [ObservableProperty]
+    private string _playerStatusMessage;
+
     public MainWindowViewModel(
         INavigationService navigationService,
         IApplicationConfiguration configuration,
         ISettingsService settingsService,
-        IThemeService themeService)
+        IThemeService themeService,
+        IPlaybackService playbackService)
     {
         _navigationService = navigationService;
         _settingsService = settingsService;
         _themeService = themeService;
+        _playbackService = playbackService;
+        _synchronizationContext = SynchronizationContext.Current;
+        _playerStatusMessage = playbackService.StatusMessage;
         ApplicationName = configuration.Application.Name;
 
         NavigationItems =
@@ -49,6 +58,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         navigationService.CurrentViewModelChanged += OnCurrentViewModelChanged;
         themeService.ThemeChanged += OnThemeChanged;
+        playbackService.PlaybackChanged += OnPlaybackChanged;
         SelectedNavigationItem = NavigationItems[0];
     }
 
@@ -103,5 +113,16 @@ public partial class MainWindowViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(ThemeGlyph));
         OnPropertyChanged(nameof(ThemeButtonLabel));
+    }
+
+    private void OnPlaybackChanged(object? sender, EventArgs e)
+    {
+        if (_synchronizationContext is not null && SynchronizationContext.Current != _synchronizationContext)
+        {
+            _synchronizationContext.Post(_ => PlayerStatusMessage = _playbackService.StatusMessage, null);
+            return;
+        }
+
+        PlayerStatusMessage = _playbackService.StatusMessage;
     }
 }

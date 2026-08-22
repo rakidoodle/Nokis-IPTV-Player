@@ -9,6 +9,7 @@ using MyIPTV.Infrastructure.Providers;
 using MyIPTV.Infrastructure.Providers.Xtream;
 using MyIPTV.Infrastructure.Providers.Stalker;
 using MyIPTV.Infrastructure.Security;
+using MyIPTV.Infrastructure.Playback;
 
 namespace MyIPTV.Infrastructure.Services;
 
@@ -55,6 +56,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IContentProvider, M3uContentProvider>();
         services.AddSingleton<IContentProvider, XtreamProvider>();
         services.AddSingleton<IContentProvider, StalkerProvider>();
+        services.AddSingleton<LibVlcPlaybackService>();
+        services.AddSingleton<IPlaybackService>(provider => provider.GetRequiredService<LibVlcPlaybackService>());
+        services.AddSingleton<IPlaybackVideoSource>(provider => provider.GetRequiredService<LibVlcPlaybackService>());
         services.AddSingleton<IActiveProfileService, ActiveProfileService>();
         services.AddSingleton<IProfileService, ProfileService>();
 

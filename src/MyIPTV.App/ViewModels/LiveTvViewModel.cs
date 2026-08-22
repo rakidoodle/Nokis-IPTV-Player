@@ -6,7 +6,7 @@ public sealed class LiveTvViewModel : SectionViewModel
 {
     private readonly IChannelCatalog _channelCatalog;
 
-    public LiveTvViewModel(IChannelCatalog channelCatalog)
+    public LiveTvViewModel(IChannelCatalog channelCatalog, PlayerViewModel player)
         : base(
         "Live TV",
         "Browse channels from your authorized IPTV profiles.",
@@ -15,9 +15,12 @@ public sealed class LiveTvViewModel : SectionViewModel
         "\uE714")
     {
         _channelCatalog = channelCatalog;
+        Player = player;
         channelCatalog.ChannelsChanged += OnChannelsChanged;
         UpdateSummary();
     }
+
+    public PlayerViewModel Player { get; }
 
     private void OnChannelsChanged(object? sender, EventArgs e) => UpdateSummary();
 

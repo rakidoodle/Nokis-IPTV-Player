@@ -11,7 +11,8 @@ public sealed class LiveTvViewModelTests
     public void ImportedChannelsUpdateLiveTvSummary()
     {
         InMemoryChannelCatalog catalog = new();
-        LiveTvViewModel viewModel = new(catalog);
+        FakePlaybackService playback = new();
+        LiveTvViewModel viewModel = new(catalog, new PlayerViewModel(playback, playback));
         Guid profileId = Guid.NewGuid();
         catalog.ReplaceForProfile(
             profileId,

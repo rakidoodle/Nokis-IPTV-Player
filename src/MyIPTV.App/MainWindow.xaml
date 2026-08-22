@@ -215,7 +215,7 @@
                         VerticalAlignment="Center"
                         Foreground="{DynamicResource TextMutedBrush}"
                         FontSize="12"
-                        Text="Player idle" />
+                        Text="{Binding PlayerStatusMessage}" />
                 </Grid>
             </Border>
         </Grid>

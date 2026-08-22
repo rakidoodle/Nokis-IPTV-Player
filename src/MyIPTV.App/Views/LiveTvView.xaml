@@ -1,0 +1,193 @@
+<UserControl x:Class="MyIPTV.App.Views.LiveTvView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+             PreviewKeyDown="OnPreviewKeyDown">
+    <Grid Margin="32,24,32,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock
+                AutomationProperties.HeadingLevel="Level1"
+                FontSize="30"
+                FontWeight="SemiBold"
+                Text="{Binding Title}" />
+            <TextBlock
+                Margin="0,6,0,0"
+                Foreground="{DynamicResource TextSecondaryBrush}"
+                FontSize="15"
+                Text="{Binding Subtitle}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="300" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Background="#05070B"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="12">
+                <vlc:VideoView
+                    x:Name="VideoSurface"
+                    AutomationProperties.Name="Video player"
+                    Background="Black"
+                    MediaPlayer="{Binding Player.NativeMediaPlayer}">
+                    <Grid
+                        Background="Black"
+                        Visibility="{Binding Player.ShowPlayerOverlay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsHitTestVisible="False">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                FontFamily="Segoe Fluent Icons"
+                                Foreground="{DynamicResource TextMutedBrush}"
+                                FontSize="42"
+                                Text="&#xE714;" />
+                            <TextBlock
+                                Margin="0,12,0,0"
+                                Foreground="{DynamicResource TextSecondaryBrush}"
+                                FontSize="16"
+                                Text="{Binding Player.StatusMessage}" />
+                        </StackPanel>
+                    </Grid>
+                </vlc:VideoView>
+            </Border>
+
+            <Border Grid.Column="1" Margin="16,0,0,0" Style="{StaticResource CardBorderStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        AutomationProperties.HeadingLevel="Level2"
+                        FontSize="20"
+                        FontWeight="SemiBold"
+                        Text="{Binding Player.Title}"
+                        TextWrapping="Wrap" />
+                    <StackPanel Grid.Row="1" Margin="0,20,0,0">
+                        <TextBlock Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Text="NOW" />
+                        <TextBlock Margin="0,4,0,0" Text="{Binding Player.CurrentProgram}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Margin="0,16,0,0">
+                        <TextBlock Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Text="NEXT" />
+                        <TextBlock Margin="0,4,0,0" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding Player.NextProgram}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="3" Margin="0,22,0,0" VerticalAlignment="Bottom">
+                        <TextBlock Foreground="{DynamicResource TextMutedBrush}" Text="{Binding EmptyTitle}" TextWrapping="Wrap" />
+                        <TextBlock Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Text="{Binding EmptyMessage}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Margin="0,16,0,0" Padding="12" Style="{StaticResource CardBorderStyle}">
+            <ScrollViewer
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Disabled">
+            <Grid MinWidth="820">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Button
+                    AutomationProperties.Name="{Binding Player.PlayPauseLabel}"
+                    Command="{Binding Player.PlayPauseCommand}"
+                    Style="{StaticResource IconButtonStyle}"
+                    ToolTip="{Binding Player.PlayPauseLabel}">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="{Binding Player.PlayPauseGlyph}" />
+                </Button>
+                <Button
+                    Grid.Column="1"
+                    Margin="8,0,0,0"
+                    AutomationProperties.Name="Stop playback"
+                    Command="{Binding Player.StopCommand}"
+                    Style="{StaticResource IconButtonStyle}"
+                    ToolTip="Stop">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE71A;" />
+                </Button>
+                <Button
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    AutomationProperties.Name="{Binding Player.MuteLabel}"
+                    Command="{Binding Player.ToggleMuteCommand}"
+                    Style="{StaticResource IconButtonStyle}"
+                    ToolTip="{Binding Player.MuteLabel}">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="{Binding Player.MuteGlyph}" />
+                </Button>
+                <Slider
+                    Grid.Column="3"
+                    Margin="12,0"
+                    AutomationProperties.Name="Volume"
+                    Maximum="100"
+                    Minimum="0"
+                    TickFrequency="5"
+                    Value="{Binding Player.Volume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    VerticalAlignment="Center" />
+                <Button
+                    Grid.Column="4"
+                    AutomationProperties.Name="Reconnect stream"
+                    Command="{Binding Player.ReconnectCommand}"
+                    Style="{StaticResource IconButtonStyle}"
+                    ToolTip="Reconnect">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE72C;" />
+                </Button>
+                <ComboBox
+                    Grid.Column="5"
+                    Margin="10,0,0,0"
+                    AutomationProperties.Name="Aspect ratio"
+                    ItemsSource="{Binding Player.AspectRatios}"
+                    SelectedItem="{Binding Player.SelectedAspectRatio}"
+                    Style="{StaticResource FormComboBoxStyle}"
+                    ToolTip="Aspect ratio" />
+                <ComboBox
+                    Grid.Column="6"
+                    Margin="10,0,0,0"
+                    AutomationProperties.Name="Audio track"
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding Player.AudioTracks}"
+                    SelectedItem="{Binding Player.SelectedAudioTrack}"
+                    Style="{StaticResource FormComboBoxStyle}"
+                    ToolTip="Audio track" />
+                <ComboBox
+                    Grid.Column="7"
+                    Margin="10,0,0,0"
+                    AutomationProperties.Name="Subtitle track"
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding Player.SubtitleTracks}"
+                    SelectedItem="{Binding Player.SelectedSubtitleTrack}"
+                    Style="{StaticResource FormComboBoxStyle}"
+                    ToolTip="Subtitles" />
+                <Button
+                    Grid.Column="9"
+                    AutomationProperties.Name="Toggle full screen"
+                    Command="{Binding Player.ToggleFullScreenCommand}"
+                    Style="{StaticResource IconButtonStyle}"
+                    ToolTip="Full screen">
+                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE740;" />
+                </Button>
+            </Grid>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

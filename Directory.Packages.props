@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="LibVLCSharp" Version="3.10.1" />
+    <PackageVersion Include="LibVLCSharp.WPF" Version="3.10.1" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.11" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.11" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11" />
@@ -15,6 +17,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.11" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.11" />
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.11" />
+    <PackageVersion Include="VideoLAN.LibVLC.Windows" Version="3.0.23.1" />
     <PackageVersion Include="MSTest" Version="4.3.3" />
   </ItemGroup>
 </Project>
