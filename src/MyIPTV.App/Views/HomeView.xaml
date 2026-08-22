@@ -112,14 +112,14 @@
                         <TextBlock
                             Margin="0,5,0,0"
                             Foreground="{DynamicResource TextSecondaryBrush}"
-                            Text="Profile management arrives in the next development phase."
+                            Text="Add a local playlist or configure an authorized IPTV service."
                             TextWrapping="Wrap" />
                     </StackPanel>
                     <Button
                         Grid.Column="2"
-                        AutomationProperties.Name="Open Live TV"
-                        Command="{Binding BrowseLiveTvCommand}"
-                        Content="Explore Live TV"
+                        AutomationProperties.Name="Manage IPTV profiles"
+                        Command="{Binding ManageProfilesCommand}"
+                        Content="Add a profile"
                         Style="{StaticResource PrimaryButtonStyle}" />
                 </Grid>
             </Border>

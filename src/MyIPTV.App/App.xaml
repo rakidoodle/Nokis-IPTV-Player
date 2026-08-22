@@ -13,6 +13,9 @@
             <DataTemplate DataType="{x:Type viewModels:HomeViewModel}">
                 <views:HomeView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:ProfilesViewModel}">
+                <views:ProfilesView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:LiveTvViewModel}">
                 <views:SectionView />
             </DataTemplate>

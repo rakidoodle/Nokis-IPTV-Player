@@ -48,7 +48,9 @@ public partial class App : Application
         builder.Services.AddSingleton<INavigationService, NavigationService>();
         builder.Services.AddSingleton<IUserNotificationService, UserNotificationService>();
         builder.Services.AddSingleton<IThemeService, ThemeService>();
+        builder.Services.AddSingleton<IPlaylistFilePicker, PlaylistFilePicker>();
         builder.Services.AddSingleton<HomeViewModel>();
+        builder.Services.AddSingleton<ProfilesViewModel>();
         builder.Services.AddSingleton<LiveTvViewModel>();
         builder.Services.AddSingleton<MoviesViewModel>();
         builder.Services.AddSingleton<SeriesViewModel>();

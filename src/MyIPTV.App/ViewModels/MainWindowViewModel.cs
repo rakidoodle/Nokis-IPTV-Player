@@ -38,6 +38,7 @@ public partial class MainWindowViewModel : ObservableObject
         NavigationItems =
         [
             new("Home", "\uE80F", typeof(HomeViewModel)),
+            new("Profiles", "\uE77B", typeof(ProfilesViewModel)),
             new("Live TV", "\uE714", typeof(LiveTvViewModel)),
             new("Movies", "\uE8B2", typeof(MoviesViewModel)),
             new("Series", "\uE8D6", typeof(SeriesViewModel)),

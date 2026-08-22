@@ -4,6 +4,7 @@ using MyIPTV.Core.Abstractions;
 using MyIPTV.Core.Models;
 using MyIPTV.Infrastructure.Configuration;
 using MyIPTV.Infrastructure.Data;
+using MyIPTV.Infrastructure.Security;
 
 namespace MyIPTV.Infrastructure.Services;
 
@@ -37,6 +38,12 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IApplicationPaths, ApplicationPaths>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         services.AddSingleton<IDatabaseService, SqliteDatabaseService>();
+        services.AddSingleton<IProfileRepository, SqliteProfileRepository>();
+        services.AddSingleton<ICredentialService, SessionCredentialService>();
+        services.AddSingleton<IProfileValidator, ProfileValidator>();
+        services.AddSingleton<IProfileConnectionTester, ProfileConnectionTester>();
+        services.AddSingleton<IActiveProfileService, ActiveProfileService>();
+        services.AddSingleton<IProfileService, ProfileService>();
 
         return services;
     }

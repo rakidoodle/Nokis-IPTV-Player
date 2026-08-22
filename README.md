@@ -2,7 +2,7 @@
 
 MyIPTV is a Windows desktop media-player project for connecting to IPTV sources that the user is authorized to access.
 
-The repository currently contains the verified .NET 10/WPF application foundation, MVVM navigation, dependency injection, configuration, settings, logging, managed HTTP clients, and a versioned SQLite database. IPTV providers and playback are not implemented yet.
+The repository currently contains the verified .NET 10/WPF application foundation, MVVM navigation, dependency injection, configuration, settings, logging, managed HTTP clients, a versioned SQLite database, and an IPTV profile manager. Provider catalog loading and playback are not implemented yet.
 
 ## Foundation features
 
@@ -18,6 +18,9 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - Dark and light themes persist between application restarts.
 - Home, Live TV, Movies, Series, Favorites, Guide, and Settings screens are keyboard accessible.
 - Reusable empty, loading, and error states provide consistent feedback.
+- IPTV profiles support local or remote M3U playlists, Xtream API services, and Stalker/Ministra portals.
+- Profile metadata is stored in SQLite while Phase 5 credentials remain memory-only and are redacted from diagnostics.
+- Connection tests validate local M3U headers, remote playlists, and provider server reachability.
 
 ## Requirements
 
@@ -52,6 +55,7 @@ dotnet run --project .\src\MyIPTV.App\MyIPTV.App.csproj
 
 See [Architecture](docs/architecture.md) for the dependency design.
 See [User interface](docs/user-interface.md) for navigation, themes, responsive behavior, and accessibility.
+See [IPTV profiles](docs/profiles.md) for profile setup, connection testing, and Phase 5 security limits.
 
 ## Local application data
 
@@ -62,7 +66,7 @@ Runtime data is stored under `%LocalAppData%\MyIPTV`:
 - `Cache` — reserved for disposable cached data
 - `Logs` — reserved for application log files
 
-IPTV passwords and authentication tokens must never be written to these ordinary settings or database records. Windows-protected credential storage will be introduced in its dedicated security phase.
+IPTV passwords and authentication tokens are never written to these ordinary settings or database records. During Phase 5, passwords are held only in process memory and disappear when the application exits. Windows-protected credential storage will be introduced in Phase 6.
 
 ## Testing dependency
 

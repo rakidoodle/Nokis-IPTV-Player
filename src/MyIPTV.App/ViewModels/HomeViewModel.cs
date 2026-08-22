@@ -16,4 +16,10 @@ public sealed partial class HomeViewModel(INavigationService navigationService) 
     {
         navigationService.NavigateTo<LiveTvViewModel>();
     }
+
+    [RelayCommand]
+    private void ManageProfiles()
+    {
+        navigationService.NavigateTo<ProfilesViewModel>();
+    }
 }
