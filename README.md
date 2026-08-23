@@ -88,6 +88,7 @@ See [Logging and diagnostics](docs/logging.md) for log format, redaction, and pr
 See [Error handling](docs/error-handling.md) for failure behavior and troubleshooting boundaries.
 See [Performance](docs/performance.md) for large-catalog design and verification.
 See [Database](docs/database.md) for tables, migrations, indexes, and the credential boundary.
+See [Testing](docs/testing.md) for the synthetic test matrix and commands.
 
 ## Local application data
 

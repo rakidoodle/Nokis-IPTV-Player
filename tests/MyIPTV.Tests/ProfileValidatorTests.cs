@@ -72,4 +72,35 @@ public sealed class ProfileValidatorTests
 
         Assert.IsTrue(result.IsValid);
     }
+
+    [TestMethod]
+    [DataRow("ftp://example.invalid/list.m3u")]
+    [DataRow("javascript:alert(1)")]
+    [DataRow("relative/list.m3u")]
+    public void ValidateRejectsUnsupportedOrRelativeRemoteAddress(string address)
+    {
+        ProfileValidationResult result = _validator.Validate(new()
+        {
+            Name = "Unsafe address",
+            ConnectionType = ProfileConnectionType.M3uPlaylist,
+            ServerAddress = address,
+        }, requireCredentials: false);
+
+        Assert.IsFalse(result.IsValid);
+        Assert.Contains("HTTP/HTTPS", result.Message);
+    }
+
+    [TestMethod]
+    public void ValidateRejectsUrlUserInfo()
+    {
+        ProfileValidationResult result = _validator.Validate(new()
+        {
+            Name = "Embedded account",
+            ConnectionType = ProfileConnectionType.M3uPlaylist,
+            ServerAddress = "https://demo-user:secret@example.invalid/list.m3u",
+        }, requireCredentials: false);
+
+        Assert.IsFalse(result.IsValid);
+        Assert.Contains("inside the URL", result.Message);
+    }
 }
