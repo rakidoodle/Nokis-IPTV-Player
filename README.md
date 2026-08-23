@@ -6,7 +6,7 @@
 
 Noki's IPTV Player is a modern desktop app for watching IPTV sources that you own or are authorized to use. Connect an M3U playlist, an Xtream-compatible account, or a supported Stalker/Ministra portal; the app organizes the catalog and gives you a fast, familiar viewing experience powered by LibVLC.
 
-[Download the latest official beta](https://github.com/rakidoodle/Nokis-IPTV-Player/releases/latest) · [Read the installation guide](#installation) · [Report an issue](https://github.com/rakidoodle/Nokis-IPTV-Player/issues)
+[Download the latest official beta](https://github.com/rakidoodle/Nokis-IPTV-Player/releases/tag/v1.2.0-beta.6) · [Read the installation guide](#installation) · [Report an issue](https://github.com/rakidoodle/Nokis-IPTV-Player/issues)
 
 The app does not include channels, subscriptions, or credentials. Bring your own legitimate provider or playlist.
 
@@ -36,7 +36,7 @@ The app does not include channels, subscriptions, or credentials. Bring your own
 
 ## Installation
 
-1. Open the [latest beta release](https://github.com/rakidoodle/Nokis-IPTV-Player/releases/latest).
+1. Open the [latest beta release](https://github.com/rakidoodle/Nokis-IPTV-Player/releases/tag/v1.2.0-beta.6).
 2. Download `Nokis-IPTV-Player-1.2.0-beta.6-win-x64.zip`.
 3. Verify the SHA-256 value shown in the release notes if you want to confirm the download.
 4. Right-click the ZIP, choose **Extract All**, and open the extracted folder.
