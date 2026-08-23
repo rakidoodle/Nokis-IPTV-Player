@@ -21,6 +21,19 @@ public sealed class LoggingTests
     }
 
     [TestMethod]
+    public void SanitizerRedactsSensitiveHttpHeaders()
+    {
+        string input = "Authorization: Basic ZGVtbzpwYXNz\r\nCookie: sid=private\r\nX-Api-Key: key-value";
+
+        string result = LogSanitizer.Sanitize(input);
+
+        Assert.DoesNotContain("ZGVtbzpwYXNz", result);
+        Assert.DoesNotContain("sid=private", result);
+        Assert.DoesNotContain("key-value", result);
+        Assert.AreEqual(3, result.Split("[REDACTED]").Length - 1);
+    }
+
+    [TestMethod]
     public void FileProviderWritesStructuredSanitizedRecord()
     {
         using TemporaryApplicationPaths paths = new();
