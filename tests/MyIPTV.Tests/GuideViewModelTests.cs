@@ -1,4 +1,5 @@
 using MyIPTV.App.ViewModels;
+using MyIPTV.Core.Abstractions;
 using MyIPTV.Core.Models;
 
 namespace MyIPTV.Tests;
@@ -19,7 +20,7 @@ public sealed class GuideViewModelTests
                     [new EpgProgram("demo", now, now.AddHours(1), "Demo Show", "Synthetic")]),
             ],
         };
-        GuideViewModel viewModel = new(epg) { Source = "https://example.invalid/demo.xml" };
+        GuideViewModel viewModel = new(epg, new StubSettingsService()) { Source = "https://example.invalid/demo.xml" };
 
         await viewModel.RefreshGuideCommand.ExecuteAsync(null);
 
@@ -27,5 +28,16 @@ public sealed class GuideViewModelTests
         Assert.AreEqual("Demo Channel", viewModel.Rows[0].ChannelName);
         Assert.AreEqual("Demo Show", viewModel.Rows[0].Programs[0].Title);
         Assert.AreEqual("Guide refreshed.", viewModel.StatusMessage);
+    }
+
+    private sealed class StubSettingsService : ISettingsService
+    {
+        private AppSettings _settings = new();
+        public Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default) => Task.FromResult(_settings);
+        public Task SaveAsync(AppSettings settings, CancellationToken cancellationToken = default)
+        {
+            _settings = settings;
+            return Task.CompletedTask;
+        }
     }
 }

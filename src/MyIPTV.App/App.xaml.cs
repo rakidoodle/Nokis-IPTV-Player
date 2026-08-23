@@ -109,7 +109,13 @@ public partial class App : Application
                 : AppTheme.Dark;
             themeService.ApplyTheme(initialTheme);
 
+            IPlaybackService playbackService = _host.Services.GetRequiredService<IPlaybackService>();
+            playbackService.SetVolume(settings.DefaultVolume);
+            playbackService.SetAspectRatio(settings.AspectRatio);
+
             MainWindow mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            MainWindowViewModel mainViewModel = _host.Services.GetRequiredService<MainWindowViewModel>();
+            await mainViewModel.InitializeAsync();
             MainWindow = mainWindow;
             mainWindow.Show();
 

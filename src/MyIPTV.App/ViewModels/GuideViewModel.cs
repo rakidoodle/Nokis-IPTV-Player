@@ -8,6 +8,9 @@ namespace MyIPTV.App.ViewModels;
 public sealed partial class GuideViewModel : SectionViewModel
 {
     private readonly IEpgService _epgService;
+    private readonly ISettingsService _settingsService;
+    private int _refreshHours = 6;
+    private bool _displayLocalTime = true;
 
     [ObservableProperty]
     private string _source = string.Empty;
@@ -21,12 +24,14 @@ public sealed partial class GuideViewModel : SectionViewModel
     [ObservableProperty]
     private IReadOnlyList<GuideChannelRowViewModel> _rows = [];
 
-    public GuideViewModel(IEpgService epgService)
+    public GuideViewModel(IEpgService epgService, ISettingsService settingsService)
         : base("Program Guide", "See current and upcoming programs from an XMLTV source.",
             "No guide loaded", "Enter an XMLTV source above, then choose Refresh guide.", "\uE787")
     {
         _epgService = epgService;
+        _settingsService = settingsService;
         epgService.EpgChanged += OnEpgChanged;
+        _ = InitializeAsync();
     }
 
     public bool HasRows => Rows.Count > 0;
@@ -38,7 +43,9 @@ public sealed partial class GuideViewModel : SectionViewModel
         try
         {
             EpgRefreshResult result = await _epgService.RefreshAsync(
-                Source, TimeSpan.FromHours(6), cancellationToken);
+                Source, TimeSpan.FromHours(_refreshHours), cancellationToken);
+            AppSettings settings = await _settingsService.LoadAsync(cancellationToken);
+            await _settingsService.SaveAsync(settings with { EpgSource = Source.Trim() }, cancellationToken);
             StatusMessage = result.Message;
             await LoadRowsAsync(cancellationToken);
         }
@@ -58,8 +65,16 @@ public sealed partial class GuideViewModel : SectionViewModel
         Rows = schedules.Select(schedule => new GuideChannelRowViewModel(
             schedule.Channel.Id,
             schedule.Channel.DisplayName,
-            schedule.Programs.Select(program => new GuideProgramViewModel(program)).ToArray()))
+            schedule.Programs.Select(program => new GuideProgramViewModel(program, _displayLocalTime)).ToArray()))
             .ToArray();
         OnPropertyChanged(nameof(HasRows));
+    }
+
+    private async Task InitializeAsync()
+    {
+        AppSettings settings = await _settingsService.LoadAsync();
+        Source = settings.EpgSource;
+        _refreshHours = settings.EpgRefreshHours;
+        _displayLocalTime = !string.Equals(settings.EpgTimezoneBehavior, "UTC", StringComparison.OrdinalIgnoreCase);
     }
 }

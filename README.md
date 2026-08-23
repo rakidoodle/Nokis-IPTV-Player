@@ -32,6 +32,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - XMLTV EPG supports timezone-safe parsing, channel mapping, current/next programs, conditional refresh, and a virtualized guide.
 - The VOD browser provides categories, posters, provider metadata, playback, favorites, and Continue Watching.
 - The series browser loads provider details on demand and organizes episodes by season with playback progress and resume.
+- Settings persist start page, theme, language-ready preferences, player defaults, EPG behavior, and safe local-data controls.
 
 ## Requirements
 
@@ -78,6 +79,7 @@ See [Recently watched](docs/recently-watched.md) for saved progress, resume beha
 See [XMLTV program guide](docs/epg.md) for source setup, channel mapping, caching, and timezone behavior.
 See [Movies and VOD](docs/movies.md) for metadata, playback, favorites, and resume behavior.
 See [Series and episodes](docs/series.md) for on-demand episode loading, season navigation, playback, and resume behavior.
+See [Settings](docs/settings.md) for application preferences, data controls, and local storage locations.
 
 ## Local application data
 

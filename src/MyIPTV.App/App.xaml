@@ -32,7 +32,7 @@
                 <views:GuideView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:SettingsViewModel}">
-                <views:SectionView />
+                <views:SettingsView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

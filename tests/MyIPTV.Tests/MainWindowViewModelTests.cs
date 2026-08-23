@@ -38,6 +38,19 @@ public sealed class MainWindowViewModelTests
         Assert.AreEqual("Light theme applied", viewModel.StatusMessage);
     }
 
+    [TestMethod]
+    public async Task InitializeUsesConfiguredStartPage()
+    {
+        FakeNavigationService navigation = new();
+        FakeSettingsService settings = new() { Settings = new AppSettings { StartPage = "Live TV" } };
+        MainWindowViewModel viewModel = CreateViewModel(navigation, settings: settings);
+
+        await viewModel.InitializeAsync();
+
+        Assert.AreEqual("Live TV", viewModel.SelectedNavigationItem?.Label);
+        Assert.IsInstanceOfType<LiveTvViewModel>(viewModel.CurrentViewModel);
+    }
+
     private static MainWindowViewModel CreateViewModel(
         FakeNavigationService navigation,
         FakeThemeService? theme = null,
@@ -121,7 +134,7 @@ public sealed class MainWindowViewModelTests
 
     private sealed class FakeSettingsService : ISettingsService
     {
-        public AppSettings Settings { get; private set; } = new();
+        public AppSettings Settings { get; set; } = new();
 
         public Task<AppSettings> LoadAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult(Settings);

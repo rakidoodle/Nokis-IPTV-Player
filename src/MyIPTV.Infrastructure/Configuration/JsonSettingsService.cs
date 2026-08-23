@@ -66,6 +66,13 @@ public sealed partial class JsonSettingsService(
                 "Default volume must be between 0 and 100.");
         }
 
+        if (settings.EpgRefreshHours is < 1 or > 168)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(settings), settings.EpgRefreshHours,
+                "EPG refresh interval must be between 1 and 168 hours.");
+        }
+
         paths.EnsureDirectoriesExist();
         string temporaryPath = paths.SettingsPath + ".tmp";
 

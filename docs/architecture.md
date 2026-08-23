@@ -31,6 +31,8 @@ Core does not reference the user interface, database, network, or media player. 
 
 Application configuration describes deployment-time behavior such as network timeouts. User settings describe preferences such as theme and volume. Keeping them separate prevents ordinary preferences from becoming an accidental credential store.
 
+The Settings ViewModel reads and atomically writes the non-sensitive JSON preference record. Startup applies the saved theme, player volume, aspect ratio, and selected start page before presenting the main window. EPG preferences are shared with the Guide screen through the same service. Cache maintenance is limited to the resolved application cache directory; credential and database directories are separate and never included.
+
 ## Credential boundary
 
 `ICredentialService` keeps password handling independent from profile and provider code. Its Windows implementation serializes the smallest required credential payload, protects it with DPAPI `CurrentUser` scope, and atomically writes one opaque file per profile under `%LocalAppData%\MyIPTV\Credentials`.

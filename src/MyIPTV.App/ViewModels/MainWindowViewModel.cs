@@ -90,6 +90,16 @@ public partial class MainWindowViewModel : ObservableObject
 
     public bool HasSearchResults => SearchResults.Count > 0;
 
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        AppSettings settings = await _settingsService.LoadAsync(cancellationToken);
+        NavigationItemViewModel startItem = NavigationItems.FirstOrDefault(item =>
+            string.Equals(item.Label, settings.StartPage, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(item.Label.Replace(" ", string.Empty), settings.StartPage, StringComparison.OrdinalIgnoreCase))
+            ?? NavigationItems[0];
+        SelectedNavigationItem = startItem;
+    }
+
     partial void OnSearchTextChanged(string value)
     {
         CancellationTokenSource cancellation = new();

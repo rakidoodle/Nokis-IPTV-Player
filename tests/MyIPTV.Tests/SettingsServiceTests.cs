@@ -19,6 +19,13 @@ public sealed class SettingsServiceTests
             StartPage = "LiveTv",
             RememberLastProfile = false,
             DefaultVolume = 65,
+            Language = "en-US",
+            HardwareDecoding = false,
+            AspectRatio = "16:9",
+            ReconnectOnFailure = false,
+            EpgSource = "C:\\Guide\\demo.xml",
+            EpgRefreshHours = 12,
+            EpgTimezoneBehavior = "UTC",
         };
 
         await service.SaveAsync(expected);
@@ -50,5 +57,15 @@ public sealed class SettingsServiceTests
 
         await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(
             () => service.SaveAsync(new AppSettings { DefaultVolume = 101 }));
+    }
+
+    [TestMethod]
+    public async Task SaveAsyncRejectsInvalidEpgRefreshInterval()
+    {
+        using TemporaryApplicationPaths paths = new();
+        JsonSettingsService service = new(paths, NullLogger<JsonSettingsService>.Instance);
+
+        await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(
+            () => service.SaveAsync(new AppSettings { EpgRefreshHours = 0 }));
     }
 }
