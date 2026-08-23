@@ -8,6 +8,8 @@
 
 MyIPTV 1.0 uses a self-contained Windows x64 ZIP. This is the most dependable beginner-friendly option for the first release and keeps LibVLC's native runtime files beside the executable. Trimming and single-file bundling are disabled because WPF and LibVLC rely on reflection and native companion files.
 
+The x64 packaging script removes the unused LibVLC ARM64/x86 runtimes, native import libraries, and LibVLC HTTP-interface scripts. Noki's IPTV Player does not enable LibVLC's administrative HTTP interface. Release ZIPs should be scanned both as an archive and as an unpacked directory before upload.
+
 ## Create the package
 
 From the repository root, run:

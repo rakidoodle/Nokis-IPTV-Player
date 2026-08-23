@@ -26,6 +26,33 @@ if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed with exit code $LASTEXITCODE."
 }
 
+# VideoLAN.LibVLC.Windows carries native runtimes for every Windows architecture.
+# This artifact is x64-only, so keep only the selected runtime. The LibVLC HTTP
+# interface is never enabled by the app; excluding its scripts reduces package
+# size and avoids shipping an unused administrative web surface.
+$unusedRuntimePaths = @(
+    (Join-Path $publishDirectory 'libvlc\win-arm64'),
+    (Join-Path $publishDirectory 'libvlc\win-x86'),
+    (Join-Path $publishDirectory 'libvlc\win-x64\lua\http')
+)
+foreach ($unusedRuntimePath in $unusedRuntimePaths) {
+    $resolvedParent = [System.IO.Path]::GetFullPath((Split-Path -Parent $unusedRuntimePath))
+    if (-not $resolvedParent.StartsWith($publishDirectory, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Runtime pruning path resolved outside the publish directory: $unusedRuntimePath"
+    }
+
+    if (Test-Path -LiteralPath $unusedRuntimePath) {
+        Remove-Item -LiteralPath $unusedRuntimePath -Recurse -Force
+    }
+}
+
+foreach ($importLibrary in @('libvlc.lib', 'libvlccore.lib')) {
+    $importLibraryPath = Join-Path $publishDirectory "libvlc\win-x64\$importLibrary"
+    if (Test-Path -LiteralPath $importLibraryPath) {
+        Remove-Item -LiteralPath $importLibraryPath -Force
+    }
+}
+
 if (Test-Path -LiteralPath $archivePath) {
     Remove-Item -LiteralPath $archivePath -Force
 }

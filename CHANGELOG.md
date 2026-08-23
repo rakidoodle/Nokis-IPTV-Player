@@ -14,6 +14,7 @@
 - Normalize copied M3U links containing escaped ampersands and use playlist-compatible request headers.
 - Add authorized MAC-address authentication for compatible Stalker portals.
 - Remove the profile credential-protection notice from the editor.
+- Reduce the Windows x64 package to the required LibVLC runtime and remove the unused LibVLC HTTP-interface scripts.
 
 ## 1.1.0 - 2026-08-23
 
