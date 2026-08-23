@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.0-beta.1 - 2026-08-23
+## 1.2.0-beta.2 - 2026-08-23
 
 - Rename the application to Noki's IPTV Player.
 - Add Fluent-inspired Midnight and Ocean themes alongside refreshed dark and light palettes.
