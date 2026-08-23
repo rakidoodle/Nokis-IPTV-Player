@@ -25,21 +25,27 @@ public sealed class SqliteCatalogStateRepository(IApplicationPaths paths) : ICat
         {
             await InsertAsync(connection, transaction,
                 "INSERT INTO channels(profile_id, channel_id, name, group_name, epg_id) VALUES($p,$id,$name,$category,$extra);",
-                item.ProfileId, item.Id, item.Name, item.Group, item.EpgId, null, null, null, null, cancellationToken);
+                cancellationToken,
+                ("$p", item.ProfileId.ToString("D")), ("$id", item.Id), ("$name", item.Name),
+                ("$category", item.Group), ("$extra", Db(item.EpgId)));
         }
         foreach (MovieItem item in movies)
         {
             await InsertAsync(connection, transaction,
                 "INSERT INTO movies(profile_id, movie_id, name, category_id, rating, container_extension, description, year, duration) VALUES($p,$id,$name,$category,$extra,$container,$description,$year,$duration);",
-                item.ProfileId, item.Id, item.Name, item.CategoryId, item.Rating, item.ContainerExtension,
-                item.Description, item.Year, item.Duration, cancellationToken);
+                cancellationToken,
+                ("$p", item.ProfileId.ToString("D")), ("$id", item.Id), ("$name", item.Name),
+                ("$category", item.CategoryId), ("$extra", Db(item.Rating)), ("$container", Db(item.ContainerExtension)),
+                ("$description", Db(item.Description)), ("$year", Db(item.Year)), ("$duration", Db(item.Duration)));
         }
         foreach (SeriesItem item in series)
         {
             await InsertAsync(connection, transaction,
                 "INSERT INTO series(profile_id, series_id, name, category_id, plot, genre, rating, release_date) VALUES($p,$id,$name,$category,$extra,$container,$description,$year);",
-                item.ProfileId, item.Id, item.Name, item.CategoryId, item.Plot, item.Genre,
-                item.Rating, item.ReleaseDate, null, cancellationToken);
+                cancellationToken,
+                ("$p", item.ProfileId.ToString("D")), ("$id", item.Id), ("$name", item.Name),
+                ("$category", item.CategoryId), ("$extra", Db(item.Plot)), ("$container", Db(item.Genre)),
+                ("$description", Db(item.Rating)), ("$year", Db(item.ReleaseDate)));
         }
         foreach (EpisodeItem item in episodes)
         {
@@ -96,22 +102,16 @@ public sealed class SqliteCatalogStateRepository(IApplicationPaths paths) : ICat
 
     private static async Task InsertAsync(
         SqliteConnection connection, SqliteTransaction transaction, string sql,
-        Guid profileId, string id, string name, string category, string? extra,
-        string? container, string? description, string? year, string? duration,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        params (string Name, object Value)[] parameters)
     {
         await using SqliteCommand command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandText = sql;
-        command.Parameters.AddWithValue("$p", profileId.ToString("D"));
-        command.Parameters.AddWithValue("$id", id);
-        command.Parameters.AddWithValue("$name", name);
-        command.Parameters.AddWithValue("$category", category);
-        command.Parameters.AddWithValue("$extra", Db(extra));
-        command.Parameters.AddWithValue("$container", Db(container));
-        command.Parameters.AddWithValue("$description", Db(description));
-        command.Parameters.AddWithValue("$year", Db(year));
-        command.Parameters.AddWithValue("$duration", Db(duration));
+        foreach ((string name, object value) in parameters)
+        {
+            command.Parameters.AddWithValue(name, value);
+        }
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 

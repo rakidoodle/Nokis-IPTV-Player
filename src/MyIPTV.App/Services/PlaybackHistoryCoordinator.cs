@@ -34,6 +34,7 @@ public sealed partial class PlaybackHistoryCoordinator(
             }
             catch (OperationCanceledException)
             {
+                // Normal shutdown: the periodic timer was canceled intentionally.
             }
         }
 
@@ -75,6 +76,7 @@ public sealed partial class PlaybackHistoryCoordinator(
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            // The caller canceled this best-effort background save.
         }
         catch (Exception exception)
         {
