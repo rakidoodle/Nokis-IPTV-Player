@@ -88,7 +88,8 @@ public sealed partial class LiveTvViewModel : SectionViewModel
                 ContentKind.LiveTv,
                 channel.Name,
                 channel.StreamUrl,
-                channel.LogoUrl),
+                channel.LogoUrl,
+                ProfileId: channel.ProfileId),
             cancellationToken);
     }
 

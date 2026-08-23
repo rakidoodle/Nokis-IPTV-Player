@@ -45,6 +45,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IDatabaseService, SqliteDatabaseService>();
         services.AddSingleton<IProfileRepository, SqliteProfileRepository>();
         services.AddSingleton<IFavoriteRepository, SqliteFavoriteRepository>();
+        services.AddSingleton<IWatchHistoryRepository, SqliteWatchHistoryRepository>();
         services.AddSingleton<ICredentialService, WindowsCredentialService>();
         services.AddSingleton<IProfileValidator, ProfileValidator>();
         services.AddSingleton<IProfileConnectionTester, ProfileConnectionTester>();

@@ -68,3 +68,9 @@ Search results contain stable catalog identifiers, labels, and content kinds onl
 ## Favorites persistence
 
 `IFavoriteRepository` keeps favorite behavior independent from SQLite. Its SQLite implementation uses `(profile_id, content_type, content_id)` as a composite primary key and stores only the display title and addition timestamp alongside that key. It never persists a playback URL or provider secret. ViewModels subscribe to favorite changes so Live TV, movie, series, and Favorites screens stay synchronized. Deleting a profile removes its orphaned favorites.
+
+## Playback history
+
+`IWatchHistoryRepository` persists minimal playback history behind a provider-independent interface. `PlaybackHistoryCoordinator` is a hosted service that observes player state, checkpoints active VOD every 15 seconds, and flushes current progress during graceful shutdown. The database is initialized before hosted services start, preventing startup races with migrations.
+
+History keys use the same stable profile/content identity as favorites. Stored rows contain a title, timestamp, position, and optional duration, but no stream location or credential. A resume request resolves the current stream from the in-memory catalog and gives LibVLC only the saved start position.

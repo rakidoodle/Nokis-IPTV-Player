@@ -8,7 +8,8 @@ public sealed record PlaybackRequest(
     string? LogoUrl = null,
     string? CurrentProgram = null,
     string? NextProgram = null,
-    TimeSpan? StartPosition = null)
+    TimeSpan? StartPosition = null,
+    Guid? ProfileId = null)
 {
     public override string ToString() =>
         $"PlaybackRequest {{ ContentId = {ContentId}, ContentKind = {ContentKind}, Title = {Title}, StreamUrl = [REDACTED] }}";

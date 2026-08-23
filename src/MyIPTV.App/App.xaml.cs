@@ -65,6 +65,7 @@ public partial class App : Application
         builder.Services.AddSingleton<IUserNotificationService, UserNotificationService>();
         builder.Services.AddSingleton<IThemeService, ThemeService>();
         builder.Services.AddSingleton<IPlaylistFilePicker, PlaylistFilePicker>();
+        builder.Services.AddHostedService<PlaybackHistoryCoordinator>();
         builder.Services.AddSingleton<HomeViewModel>();
         builder.Services.AddSingleton<ProfilesViewModel>();
         builder.Services.AddSingleton<LiveTvViewModel>();
@@ -87,10 +88,10 @@ public partial class App : Application
 
         try
         {
-            await _host.StartAsync();
-
             IDatabaseService databaseService = _host.Services.GetRequiredService<IDatabaseService>();
             await databaseService.InitializeAsync();
+
+            await _host.StartAsync();
 
             ISettingsService settingsService = _host.Services.GetRequiredService<ISettingsService>();
             AppSettings settings = await settingsService.LoadAsync();

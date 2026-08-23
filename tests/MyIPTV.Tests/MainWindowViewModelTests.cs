@@ -3,6 +3,7 @@ using MyIPTV.App.ViewModels;
 using MyIPTV.Core.Abstractions;
 using MyIPTV.Core.Models;
 using Microsoft.Extensions.Logging.Abstractions;
+using MyIPTV.Infrastructure.Providers;
 
 namespace MyIPTV.Tests;
 
@@ -73,7 +74,7 @@ public sealed class MainWindowViewModelTests
         public void NavigateTo(Type viewModelType)
         {
             CurrentViewModel = viewModelType == typeof(HomeViewModel)
-                ? new HomeViewModel(this, new FakeFavoriteRepository())
+                ? CreateHomeViewModel()
                 : viewModelType == typeof(LiveTvViewModel)
                     ? CreateLiveTvViewModel()
                 : Activator.CreateInstance(viewModelType)
@@ -89,6 +90,18 @@ public sealed class MainWindowViewModelTests
                 playback,
                 new PlayerViewModel(playback, playback),
                 new FakeFavoriteRepository());
+        }
+
+        private HomeViewModel CreateHomeViewModel()
+        {
+            FakePlaybackService playback = new();
+            return new HomeViewModel(
+                this,
+                new FakeFavoriteRepository(),
+                new FakeWatchHistoryRepository(),
+                new FakeChannelCatalog(),
+                new InMemoryMediaCatalog(),
+                playback);
         }
     }
 

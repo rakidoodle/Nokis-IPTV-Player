@@ -28,7 +28,7 @@ public sealed class DatabaseServiceTests
 
             await using SqliteDataReader reader = await command.ExecuteReaderAsync();
             Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(3L, reader.GetInt64(0));
+            Assert.AreEqual(4L, reader.GetInt64(0));
             Assert.AreEqual(1L, reader.GetInt64(1));
         }
 

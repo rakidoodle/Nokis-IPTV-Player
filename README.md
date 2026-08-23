@@ -28,6 +28,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - The Live TV screen groups channels by category, virtualizes large lists, and plays the selected authorized stream.
 - Debounced global search finds loaded channels, movies, series, episodes, and categories without exposing stream addresses.
 - SQLite-backed favorites persist channels, movies, and series by stable provider IDs.
+- Recently watched history saves VOD progress and offers Continue Watching from Home.
 
 ## Requirements
 
@@ -70,6 +71,7 @@ See [Media playback](docs/playback.md) for controls, formats, WPF behavior, and 
 See [Live TV browser](docs/live-tv.md) for category filtering, playback, and large-list behavior.
 See [Global search](docs/search.md) for matching, ranking, keyboard use, and current catalog limits.
 See [Favorites](docs/favorites.md) for persistence, stable IDs, and stored data.
+See [Recently watched](docs/recently-watched.md) for saved progress, resume behavior, and privacy.
 
 ## Local application data
 

@@ -21,6 +21,10 @@ internal sealed class FakePlaybackService : IPlaybackService, IPlaybackVideoSour
 
     public string AspectRatio { get; private set; } = "Default";
 
+    public TimeSpan Position { get; set; }
+
+    public TimeSpan? Duration { get; set; }
+
     public IReadOnlyList<PlaybackTrack> AudioTracks { get; private set; } = [];
 
     public IReadOnlyList<PlaybackTrack> SubtitleTracks { get; private set; } = [];

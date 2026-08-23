@@ -18,6 +18,10 @@ public interface IPlaybackService
 
     string AspectRatio { get; }
 
+    TimeSpan Position { get; }
+
+    TimeSpan? Duration { get; }
+
     IReadOnlyList<PlaybackTrack> AudioTracks { get; }
 
     IReadOnlyList<PlaybackTrack> SubtitleTracks { get; }

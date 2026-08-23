@@ -15,6 +15,9 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
     private Media? _currentMedia;
     private bool _disposed;
     private bool _suppressStoppedEvent;
+    private TimeSpan? _pendingStartPosition;
+    private TimeSpan _lastPosition;
+    private TimeSpan? _lastDuration;
 
     public LibVlcPlaybackService(ILogger<LibVlcPlaybackService> logger)
     {
@@ -50,6 +53,14 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
 
     public string AspectRatio { get; private set; } = "Default";
 
+    public TimeSpan Position => State is MediaPlaybackState.Stopped or MediaPlaybackState.Ended or MediaPlaybackState.Error
+        ? _lastPosition
+        : TimeSpan.FromMilliseconds(Math.Max(0L, MediaPlayer.Time));
+
+    public TimeSpan? Duration => State is MediaPlaybackState.Stopped or MediaPlaybackState.Ended or MediaPlaybackState.Error
+        ? _lastDuration
+        : MediaPlayer.Length > 0 ? TimeSpan.FromMilliseconds(MediaPlayer.Length) : null;
+
     public IReadOnlyList<PlaybackTrack> AudioTracks { get; private set; } = [];
 
     public IReadOnlyList<PlaybackTrack> SubtitleTracks { get; private set; } = [];
@@ -77,6 +88,9 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
             _currentMedia = new Media(_libVlc, streamUri);
             _currentMedia.AddOption(":network-caching=1500");
             CurrentItem = request;
+            _pendingStartPosition = request.StartPosition;
+            _lastPosition = TimeSpan.Zero;
+            _lastDuration = null;
             AudioTracks = [];
             SubtitleTracks = [];
             SetState(MediaPlaybackState.Opening, $"Opening {request.Title}…");
@@ -112,6 +126,7 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
     public void StopPlayback()
     {
         ThrowIfDisposed();
+        CapturePlaybackProgress();
         MediaPlayer.Stop();
         SetState(MediaPlaybackState.Stopped, "Playback stopped");
     }
@@ -202,6 +217,13 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
 
     private void OnPlaying(object? sender, EventArgs e)
     {
+        if (_pendingStartPosition is { } startPosition && startPosition > TimeSpan.Zero)
+        {
+            long maximum = MediaPlayer.Length > 1000 ? MediaPlayer.Length - 1000 : long.MaxValue;
+            MediaPlayer.Time = Math.Min((long)startPosition.TotalMilliseconds, maximum);
+            _pendingStartPosition = null;
+        }
+
         RefreshTracks();
         SetState(MediaPlaybackState.Playing, CurrentItem is null ? "Playing" : $"Playing {CurrentItem.Title}");
     }
@@ -222,11 +244,15 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
         }
     }
 
-    private void OnEndReached(object? sender, EventArgs e) =>
+    private void OnEndReached(object? sender, EventArgs e)
+    {
+        CapturePlaybackProgress();
         SetState(MediaPlaybackState.Ended, "Stream ended or the server disconnected.");
+    }
 
     private void OnEncounteredError(object? sender, EventArgs e)
     {
+        CapturePlaybackProgress();
         SetState(MediaPlaybackState.Error, "Stream unavailable, timed out, or is unsupported.");
         if (CurrentItem is not null)
         {
@@ -242,6 +268,12 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
         SubtitleTracks = MediaPlayer.SpuDescription?
             .Select(track => new PlaybackTrack(track.Id, track.Name ?? $"Subtitle {track.Id}"))
             .ToArray() ?? [];
+    }
+
+    private void CapturePlaybackProgress()
+    {
+        _lastPosition = TimeSpan.FromMilliseconds(Math.Max(0L, MediaPlayer.Time));
+        _lastDuration = MediaPlayer.Length > 0 ? TimeSpan.FromMilliseconds(MediaPlayer.Length) : null;
     }
 
     private void SetState(MediaPlaybackState state, string statusMessage)
