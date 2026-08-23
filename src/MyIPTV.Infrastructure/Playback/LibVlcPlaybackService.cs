@@ -20,6 +20,7 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
     private TimeSpan? _lastDuration;
     private int _volume = 80;
     private int _volumeBeforeMute = 80;
+    private bool _isMuted;
 
     public LibVlcPlaybackService(ILogger<LibVlcPlaybackService> logger)
     {
@@ -51,7 +52,7 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
 
     public int Volume => _volume;
 
-    public bool IsMuted => MediaPlayer.Mute;
+    public bool IsMuted => _isMuted;
 
     public string AspectRatio { get; private set; } = "Fit";
 
@@ -141,10 +142,12 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
         if (_volume > 0)
         {
             _volumeBeforeMute = _volume;
+            _isMuted = false;
             MediaPlayer.Mute = false;
         }
         else
         {
+            _isMuted = true;
             MediaPlayer.Mute = true;
         }
         NotifyChanged();
@@ -153,14 +156,11 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
     public void ToggleMute()
     {
         ThrowIfDisposed();
-        if (MediaPlayer.Mute)
+        if (_isMuted)
         {
-            if (_volume == 0)
-            {
-                _volume = Math.Max(1, _volumeBeforeMute);
-                MediaPlayer.Volume = _volume;
-            }
-
+            _volume = Math.Max(1, _volumeBeforeMute);
+            MediaPlayer.Volume = _volume;
+            _isMuted = false;
             MediaPlayer.Mute = false;
         }
         else
@@ -168,6 +168,7 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
             _volumeBeforeMute = Math.Max(1, _volume);
             _volume = 0;
             MediaPlayer.Volume = 0;
+            _isMuted = true;
             MediaPlayer.Mute = true;
         }
         NotifyChanged();
@@ -237,7 +238,9 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
 
     private void OnBuffering(object? sender, MediaPlayerBufferingEventArgs e)
     {
-        if (e.Cache < 100)
+        // LibVLC can emit a late sub-100 buffering callback after playback has
+        // already begun. Never let that stale callback cover active video.
+        if (e.Cache < 100 && State is MediaPlaybackState.Opening or MediaPlaybackState.Buffering)
         {
             SetState(MediaPlaybackState.Buffering, $"Buffering {Math.Round(e.Cache):N0}%");
         }

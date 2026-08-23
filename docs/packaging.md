@@ -20,7 +20,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\package-win-x64.ps1
 
 The script creates:
 
-- `artifacts\Nokis-IPTV-Player-1.2.0-beta.2-win-x64.zip`
+- `artifacts\Nokis-IPTV-Player-1.2.0-beta.3-win-x64.zip`
 - `artifacts\SHA256SUMS.txt`
 - the unpacked verification copy under `artifacts\publish\win-x64`
 

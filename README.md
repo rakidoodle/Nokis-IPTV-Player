@@ -52,7 +52,7 @@ Runtime data is created under `%LocalAppData%\MyIPTV`. Source code, tests, and b
 
 For normal use with the release ZIP:
 
-1. Extract `Nokis-IPTV-Player-1.2.0-beta.2-win-x64.zip` to a folder you control.
+1. Extract `Nokis-IPTV-Player-1.2.0-beta.3-win-x64.zip` to a folder you control.
 2. Open the extracted folder and double-click `MyIPTV.App.exe`.
 3. Open **Profiles**, choose **Add**, select the correct connection type, and enter the details issued by your provider.
 4. Choose **Test Connection**, then **Connect** to load the catalog.

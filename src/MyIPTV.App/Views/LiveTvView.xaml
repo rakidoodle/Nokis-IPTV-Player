@@ -167,7 +167,7 @@
                                         Stretch="Uniform"
                                         RenderTransformOrigin="0.5,0.5">
                                         <Image.RenderTransform>
-                                            <RotateTransform x:Name="LoadingRotation" />
+                                            <RotateTransform />
                                         </Image.RenderTransform>
                                         <Image.Style>
                                             <Style TargetType="Image">
@@ -183,8 +183,7 @@
                                             <EventTrigger RoutedEvent="FrameworkElement.Loaded">
                                                 <BeginStoryboard>
                                                     <Storyboard RepeatBehavior="Forever">
-                                                        <DoubleAnimation Storyboard.TargetName="LoadingRotation"
-                                                                         Storyboard.TargetProperty="Angle"
+                                                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(RotateTransform.Angle)"
                                                                          From="0" To="360" Duration="0:0:1.1" />
                                                     </Storyboard>
                                                 </BeginStoryboard>

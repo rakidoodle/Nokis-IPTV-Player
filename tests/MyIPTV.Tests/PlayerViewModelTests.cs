@@ -52,6 +52,12 @@ public sealed class PlayerViewModelTests
         Assert.AreEqual("16:9", playback.AspectRatio);
         Assert.HasCount(1, viewModel.AudioTracks);
         Assert.HasCount(2, viewModel.SubtitleTracks);
+
+        viewModel.ToggleMuteCommand.Execute(null);
+        Assert.AreEqual(100, viewModel.Volume);
+        Assert.AreEqual(100, playback.Volume);
+        Assert.IsFalse(viewModel.IsMuted);
+        Assert.AreEqual("Mute", viewModel.MuteLabel);
     }
 
     [TestMethod]

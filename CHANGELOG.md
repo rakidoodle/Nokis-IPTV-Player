@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0-beta.3 - 2026-08-23
+
+- Fix the rotating loading image storyboard name-scope exception.
+- Ignore stale buffering callbacks after playback has already started, preventing the overlay from hiding active video while audio plays.
+- Restore the exact pre-mute volume when unmuting and keep mute state synchronized independently of LibVLC callback timing.
+
 ## 1.2.0-beta.2 - 2026-08-23
 
 - Rename the application to Noki's IPTV Player.
