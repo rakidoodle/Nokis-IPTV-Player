@@ -52,6 +52,44 @@ public sealed class MainWindowViewModelTests
         Assert.IsInstanceOfType<LiveTvViewModel>(viewModel.CurrentViewModel);
     }
 
+    [TestMethod]
+    public async Task InitializeRestoresTheSavedSearchQuery()
+    {
+        FakeNavigationService navigation = new();
+        FakeSettingsService settings = new()
+        {
+            Settings = new AppSettings { LastSearchQuery = "remember this channel" },
+        };
+        MainWindowViewModel viewModel = CreateViewModel(navigation, settings: settings);
+
+        await viewModel.InitializeAsync();
+
+        Assert.AreEqual("remember this channel", viewModel.SearchText);
+        Assert.IsFalse(viewModel.IsSearchOpen);
+    }
+
+    [TestMethod]
+    public async Task OpeningSearchResultPreservesAndPersistsTheQuery()
+    {
+        FakeNavigationService navigation = new();
+        FakeSettingsService settings = new();
+        MainWindowViewModel viewModel = CreateViewModel(navigation, settings: settings);
+        viewModel.SearchText = "  demo news  ";
+        SearchResult result = new(
+            SearchResultKind.Category,
+            "news",
+            Guid.NewGuid(),
+            "News",
+            "Live category",
+            ContentKind.LiveTv);
+
+        await viewModel.OpenSearchResultCommand.ExecuteAsync(result);
+
+        Assert.AreEqual("  demo news  ", viewModel.SearchText);
+        Assert.AreEqual("demo news", settings.Settings.LastSearchQuery);
+        Assert.IsFalse(viewModel.IsSearchOpen);
+    }
+
     private static MainWindowViewModel CreateViewModel(
         FakeNavigationService navigation,
         FakeThemeService? theme = null,

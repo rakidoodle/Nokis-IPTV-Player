@@ -90,6 +90,23 @@ public sealed partial class LiveTvViewModel : SectionViewModel
             item.ProfileId == profileId && string.Equals(item.Id, channelId, StringComparison.Ordinal));
     }
 
+    public async Task<bool> SelectAndPlaySearchResultAsync(
+        Guid profileId,
+        string channelId,
+        CancellationToken cancellationToken = default)
+    {
+        SelectSearchResult(profileId, channelId);
+        if (SelectedChannel is null ||
+            SelectedChannel.ProfileId != profileId ||
+            !string.Equals(SelectedChannel.Id, channelId, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        await PlaySelectedChannelAsync(cancellationToken);
+        return true;
+    }
+
     [RelayCommand(CanExecute = nameof(CanPlaySelectedChannel), IncludeCancelCommand = true)]
     private async Task PlaySelectedChannelAsync(CancellationToken cancellationToken)
     {

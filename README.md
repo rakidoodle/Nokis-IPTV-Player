@@ -1,8 +1,22 @@
 # Noki's IPTV Player
 
-Noki's IPTV Player is a modern Windows desktop player for IPTV and media sources that you own or are authorized to use. It is built with C#, .NET 10, WPF, MVVM, SQLite, and LibVLC.
+> Your channels, movies, series, favorites, and TV guide—together in one polished Windows player.
 
-The application separates the interface from provider, database, credential, and playback code. In plain English, a ViewModel contains a screen's behavior while its XAML View controls what you see. Dependency injection connects those parts without hiding global state inside the application.
+**Official Beta · Windows 10/11 · Free and open source**
+
+Noki's IPTV Player is a modern desktop app for watching IPTV sources that you own or are authorized to use. Connect an M3U playlist, an Xtream-compatible account, or a supported Stalker/Ministra portal; the app organizes the catalog and gives you a fast, familiar viewing experience powered by LibVLC.
+
+[Download the latest official beta](https://github.com/rakidoodle/Nokis-IPTV-Player/releases/latest) · [Read the installation guide](#installation) · [Report an issue](https://github.com/rakidoodle/Nokis-IPTV-Player/issues)
+
+The app does not include channels, subscriptions, or credentials. Bring your own legitimate provider or playlist.
+
+## Why You'll Like It
+
+- **Start watching quickly.** Add a profile, test it, connect, and browse your library.
+- **Find any channel instantly.** Global search remembers your query; selecting a result opens Live TV, scrolls to the channel, and starts playback.
+- **Make it yours.** Choose from four modern themes, resize the channel panels, build favorites, and continue recently watched content.
+- **Enjoy a real desktop player.** Full-screen playback, volume and mute memory, reconnect controls, video sizing, audio tracks, and subtitles are built in.
+- **Keep private details local.** Passwords use Windows account protection, and sensitive values are redacted from logs and local catalog storage.
 
 ## Features
 
@@ -19,6 +33,17 @@ The application separates the interface from provider, database, credential, and
 - Structured local logs with credential, token, header, and URL-query redaction
 - Friendly error states for network, provider, malformed-data, database, and playback failures
 - Bounded background search and recycling virtualization designed for catalogs up to 50,000 entries
+
+## Installation
+
+1. Open the [latest beta release](https://github.com/rakidoodle/Nokis-IPTV-Player/releases/latest).
+2. Download `Nokis-IPTV-Player-1.2.0-beta.6-win-x64.zip`.
+3. Verify the SHA-256 value shown in the release notes if you want to confirm the download.
+4. Right-click the ZIP, choose **Extract All**, and open the extracted folder.
+5. Double-click `MyIPTV.App.exe`.
+6. Open **Profiles**, add your authorized source, choose **Test Connection**, and then choose **Connect**.
+
+The beta is portable: there is no installer and nothing is added to Windows startup. Keep the extracted files together. Because the beta is not yet code-signed, Windows SmartScreen may show an unknown-publisher warning; download only from this repository and verify the checksum.
 
 ## Requirements
 
@@ -48,11 +73,11 @@ NuGet is .NET's package manager. `dotnet restore` downloads the exact libraries 
 
 Runtime data is created under `%LocalAppData%\MyIPTV`. Source code, tests, and build output do not contain real IPTV accounts.
 
-## Running the Application
+## Using the Application
 
 For normal use with the release ZIP:
 
-1. Extract `Nokis-IPTV-Player-1.2.0-beta.3-win-x64.zip` to a folder you control.
+1. Extract `Nokis-IPTV-Player-1.2.0-beta.6-win-x64.zip` to a folder you control.
 2. Open the extracted folder and double-click `MyIPTV.App.exe`.
 3. Open **Profiles**, choose **Add**, select the correct connection type, and enter the details issued by your provider.
 4. Choose **Test Connection**, then **Connect** to load the catalog.
@@ -167,7 +192,7 @@ See [Error handling](docs/error-handling.md), [Settings](docs/settings.md), and 
 
 Only connect MyIPTV to playlists, accounts, media services, and streams that you own or are explicitly authorized to access. Do not use it to bypass subscriptions, authentication, geographic restrictions, DRM, or server security, and do not use another person's credentials. You are responsible for complying with your provider agreement and applicable law.
 
-MyIPTV does not discover accounts, scrape credentials, harvest MAC addresses, emulate subscriber devices to obtain access, or provide media services of its own.
+Noki's IPTV Player does not discover accounts, scrape credentials, harvest MAC addresses, emulate subscriber devices to obtain access, or provide media services of its own.
 
 ## Open-Source Licenses
 

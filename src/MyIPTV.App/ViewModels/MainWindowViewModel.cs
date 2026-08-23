@@ -17,6 +17,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly SynchronizationContext? _synchronizationContext;
     private CancellationTokenSource? _searchCancellation;
+    private bool _isRestoringSearchText;
 
     [ObservableProperty]
     private object? _currentViewModel;
@@ -93,6 +94,14 @@ public partial class MainWindowViewModel : ObservableObject
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         AppSettings settings = await _settingsService.LoadAsync(cancellationToken);
+        _isRestoringSearchText = true;
+        SearchText = settings.LastSearchQuery;
+        _isRestoringSearchText = false;
+        if (SearchText.Trim().Length >= 2)
+        {
+            StartSearch(SearchText, openWhenComplete: false);
+        }
+
         NavigationItemViewModel startItem = NavigationItems.FirstOrDefault(item =>
             string.Equals(item.Label, settings.StartPage, StringComparison.OrdinalIgnoreCase) ||
             string.Equals(item.Label.Replace(" ", string.Empty), settings.StartPage, StringComparison.OrdinalIgnoreCase))
@@ -101,6 +110,16 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     partial void OnSearchTextChanged(string value)
+    {
+        if (_isRestoringSearchText)
+        {
+            return;
+        }
+
+        StartSearch(value, openWhenComplete: true);
+    }
+
+    private void StartSearch(string value, bool openWhenComplete)
     {
         CancellationTokenSource cancellation = new();
         CancellationTokenSource? previous = Interlocked.Exchange(ref _searchCancellation, cancellation);
@@ -117,12 +136,12 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         IsSearchBusy = true;
-        IsSearchOpen = true;
-        _ = RunSearchAsync(value, cancellation.Token);
+        IsSearchOpen = openWhenComplete;
+        _ = RunSearchAsync(value, openWhenComplete, cancellation.Token);
     }
 
-    [RelayCommand]
-    private void OpenSearchResult(SearchResult? result)
+    [RelayCommand(IncludeCancelCommand = true)]
+    private async Task OpenSearchResultAsync(SearchResult? result, CancellationToken cancellationToken)
     {
         if (result is null)
         {
@@ -135,7 +154,13 @@ public partial class MainWindowViewModel : ObservableObject
                 _navigationService.NavigateTo<LiveTvViewModel>();
                 if (_navigationService.CurrentViewModel is LiveTvViewModel liveTv)
                 {
-                    liveTv.SelectSearchResult(result.ProfileId, result.Id);
+                    bool played = await liveTv.SelectAndPlaySearchResultAsync(
+                        result.ProfileId,
+                        result.Id,
+                        cancellationToken);
+                    StatusMessage = played
+                        ? $"Playing {result.Title}"
+                        : "That channel is no longer available in the connected profile.";
                 }
                 break;
             case SearchResultKind.Movie:
@@ -150,8 +175,15 @@ public partial class MainWindowViewModel : ObservableObject
                 break;
         }
 
-        StatusMessage = $"Opened {result.Title}";
-        SearchText = string.Empty;
+        if (result.Kind != SearchResultKind.LiveChannel)
+        {
+            StatusMessage = $"Opened {result.Title}";
+        }
+
+        AppSettings settings = await _settingsService.LoadAsync(cancellationToken);
+        await _settingsService.SaveAsync(
+            settings with { LastSearchQuery = SearchText.Trim() },
+            cancellationToken);
         IsSearchOpen = false;
     }
 
@@ -210,7 +242,10 @@ public partial class MainWindowViewModel : ObservableObject
         PlayerStatusMessage = _playbackService.StatusMessage;
     }
 
-    private async Task RunSearchAsync(string query, CancellationToken cancellationToken)
+    private async Task RunSearchAsync(
+        string query,
+        bool openWhenComplete,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -218,7 +253,7 @@ public partial class MainWindowViewModel : ObservableObject
             IReadOnlyList<SearchResult> results = await _searchService.SearchAsync(query, 50, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             SearchResults = results;
-            IsSearchOpen = true;
+            IsSearchOpen = openWhenComplete;
             OnPropertyChanged(nameof(HasSearchResults));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

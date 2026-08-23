@@ -5,7 +5,8 @@ namespace MyIPTV.Infrastructure.Services;
 
 public sealed class CatalogSearchService(
     IChannelCatalog channelCatalog,
-    IMediaCatalog mediaCatalog) : ISearchService
+    IMediaCatalog mediaCatalog,
+    IActiveProfileService activeProfileService) : ISearchService
 {
     public Task<IReadOnlyList<SearchResult>> SearchAsync(
         string query,
@@ -22,11 +23,18 @@ public sealed class CatalogSearchService(
         return Task.Run<IReadOnlyList<SearchResult>>(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
-            IReadOnlyList<IptvChannel> channels = channelCatalog.GetAll();
-            IReadOnlyList<ContentCategory> categories = mediaCatalog.GetCategories();
-            IReadOnlyList<MovieItem> movies = mediaCatalog.GetMovies();
-            IReadOnlyList<SeriesItem> series = mediaCatalog.GetSeries();
-            IReadOnlyList<EpisodeItem> episodes = mediaCatalog.GetEpisodes();
+            Guid? activeProfileId = activeProfileService.ActiveProfile?.Id;
+            IReadOnlyList<IptvChannel> channels = activeProfileId.HasValue
+                ? channelCatalog.GetForProfile(activeProfileId.Value)
+                : channelCatalog.GetAll();
+            IReadOnlyList<ContentCategory> categories = FilterActive(
+                mediaCatalog.GetCategories(), activeProfileId, item => item.ProfileId);
+            IReadOnlyList<MovieItem> movies = FilterActive(
+                mediaCatalog.GetMovies(), activeProfileId, item => item.ProfileId);
+            IReadOnlyList<SeriesItem> series = FilterActive(
+                mediaCatalog.GetSeries(), activeProfileId, item => item.ProfileId);
+            IReadOnlyList<EpisodeItem> episodes = FilterActive(
+                mediaCatalog.GetEpisodes(), activeProfileId, item => item.ProfileId);
             BoundedResultSet matches = new(limit);
             Add(matches, channels, item => item.Name, item => new(
                 SearchResultKind.LiveChannel,
@@ -63,6 +71,14 @@ public sealed class CatalogSearchService(
             return matches.Results;
         }, cancellationToken);
     }
+
+    private static IReadOnlyList<T> FilterActive<T>(
+        IReadOnlyList<T> source,
+        Guid? activeProfileId,
+        Func<T, Guid> profileId) =>
+        activeProfileId.HasValue
+            ? source.Where(item => profileId(item) == activeProfileId.Value).ToArray()
+            : source;
 
     private static void Add<T>(
         BoundedResultSet results,

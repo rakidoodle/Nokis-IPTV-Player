@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0-beta.6 - 2026-08-23
+
+- Preserve the last search query after selecting a result and restore it on the next launch.
+- Limit search results to the currently connected profile when one is active.
+- Automatically select, scroll to, and play a live channel chosen from search suggestions.
+
 ## 1.2.0-beta.5 - 2026-08-23
 
 - Make the wider, readable Live TV category and channel panels the default layout.

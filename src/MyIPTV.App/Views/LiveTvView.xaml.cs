@@ -189,11 +189,24 @@ public partial class LiveTvView : UserControl
 
     private void OnChannelSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (ChannelList.SelectedItem is not null)
+        if (ChannelList.SelectedItem is object selectedItem)
         {
             Dispatcher.BeginInvoke(
-                () => ChannelList.ScrollIntoView(ChannelList.SelectedItem),
-                DispatcherPriority.Loaded);
+                () =>
+                {
+                    if (!ReferenceEquals(ChannelList.SelectedItem, selectedItem))
+                    {
+                        return;
+                    }
+
+                    ChannelList.ScrollIntoView(selectedItem);
+                    ChannelList.UpdateLayout();
+                    if (ChannelList.ItemContainerGenerator.ContainerFromItem(selectedItem) is ListBoxItem container)
+                    {
+                        container.BringIntoView();
+                    }
+                },
+                DispatcherPriority.ContextIdle);
         }
     }
 

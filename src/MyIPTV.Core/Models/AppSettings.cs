@@ -27,4 +27,6 @@ public sealed record AppSettings
     public int EpgRefreshHours { get; init; } = 6;
 
     public string EpgTimezoneBehavior { get; init; } = "Local";
+
+    public string LastSearchQuery { get; init; } = string.Empty;
 }

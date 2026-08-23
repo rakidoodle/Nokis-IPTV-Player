@@ -152,6 +152,7 @@
                             x:Name="SearchBox"
                             AutomationProperties.HelpText="Press Control+F from anywhere in the application to search."
                             AutomationProperties.Name="Search media"
+                            GotKeyboardFocus="OnSearchBoxGotKeyboardFocus"
                             Style="{StaticResource SearchTextBoxStyle}"
                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock

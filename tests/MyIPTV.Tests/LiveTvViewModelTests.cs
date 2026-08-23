@@ -91,6 +91,25 @@ public sealed class LiveTvViewModelTests
     }
 
     [TestMethod]
+    public async Task SearchResultSelectsItsCategoryAndStartsPlayback()
+    {
+        InMemoryChannelCatalog catalog = new();
+        FakePlaybackService playback = new();
+        LiveTvViewModel viewModel = CreateViewModel(catalog, playback);
+        Guid profileId = Guid.NewGuid();
+        IptvChannel news = Channel("news", "Demo News", "News", profileId);
+        IptvChannel sports = Channel("sports", "Demo Sports", "Sports", profileId);
+        catalog.ReplaceForProfile(profileId, [news, sports]);
+
+        bool played = await viewModel.SelectAndPlaySearchResultAsync(profileId, sports.Id);
+
+        Assert.IsTrue(played);
+        Assert.AreEqual("Sports", viewModel.SelectedCategory?.Name);
+        Assert.AreEqual(sports, viewModel.SelectedChannel);
+        Assert.AreEqual(sports.Id, playback.CurrentItem?.ContentId);
+    }
+
+    [TestMethod]
     public async Task ToggleFavoriteUsesStableChannelIdentity()
     {
         InMemoryChannelCatalog catalog = new();

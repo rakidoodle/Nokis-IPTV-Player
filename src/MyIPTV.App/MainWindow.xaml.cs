@@ -39,6 +39,15 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnSearchBoxGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel viewModel &&
+            viewModel.SearchText.Trim().Length >= 2)
+        {
+            viewModel.IsSearchOpen = true;
+        }
+    }
+
     private void OnTitleBarMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (IsInsideControl(e.OriginalSource as DependencyObject))

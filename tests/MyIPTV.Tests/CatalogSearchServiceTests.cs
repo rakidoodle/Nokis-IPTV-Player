@@ -33,7 +33,7 @@ public sealed class CatalogSearchServiceTests
         [
             new("episode-1", profileId, "series-1", 1, 2, "Demo Episode", "https://example.test/episode", null, null, null),
         ]);
-        CatalogSearchService service = new(channels, media);
+        CatalogSearchService service = new(channels, media, new ActiveProfileService());
 
         IReadOnlyList<SearchResult> results = await service.SearchAsync("demo");
 
@@ -60,7 +60,7 @@ public sealed class CatalogSearchServiceTests
             new("prefix-b", profileId, "News World", "https://example.test/2", null, "General", null),
             new("prefix-a", profileId, "News Local", "https://example.test/3", null, "General", null),
         ]);
-        CatalogSearchService service = new(channels, new InMemoryMediaCatalog());
+        CatalogSearchService service = new(channels, new InMemoryMediaCatalog(), new ActiveProfileService());
 
         IReadOnlyList<SearchResult> results = await service.SearchAsync("news", 2);
 
@@ -72,7 +72,10 @@ public sealed class CatalogSearchServiceTests
     [TestMethod]
     public async Task SearchRejectsCancelledWork()
     {
-        CatalogSearchService service = new(new InMemoryChannelCatalog(), new InMemoryMediaCatalog());
+        CatalogSearchService service = new(
+            new InMemoryChannelCatalog(),
+            new InMemoryMediaCatalog(),
+            new ActiveProfileService());
         using CancellationTokenSource cancellation = new();
         cancellation.Cancel();
 
@@ -97,7 +100,7 @@ public sealed class CatalogSearchServiceTests
                 "Development",
                 null))
             .ToArray());
-        CatalogSearchService service = new(channels, new InMemoryMediaCatalog());
+        CatalogSearchService service = new(channels, new InMemoryMediaCatalog(), new ActiveProfileService());
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         IReadOnlyList<SearchResult> results = await service.SearchAsync("demo", 50);
@@ -108,5 +111,35 @@ public sealed class CatalogSearchServiceTests
         Assert.AreEqual("Demo Channel 00049", results[^1].Title);
         Assert.IsLessThan(TimeSpan.FromSeconds(5), stopwatch.Elapsed,
             $"Large-catalog search took {stopwatch.Elapsed}.");
+    }
+
+    [TestMethod]
+    public async Task SearchOnlyReturnsResultsForTheActiveProfile()
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        IptvProfile firstProfile = new(
+            Guid.NewGuid(), "First", ProfileConnectionType.M3uPlaylist,
+            "https://example.test/first.m3u", null, now, now);
+        IptvProfile secondProfile = new(
+            Guid.NewGuid(), "Second", ProfileConnectionType.M3uPlaylist,
+            "https://example.test/second.m3u", null, now, now);
+        InMemoryChannelCatalog channels = new();
+        channels.ReplaceForProfile(firstProfile.Id,
+        [
+            new("first-news", firstProfile.Id, "News First", "https://example.test/first", null, "News", null),
+        ]);
+        channels.ReplaceForProfile(secondProfile.Id,
+        [
+            new("second-news", secondProfile.Id, "News Second", "https://example.test/second", null, "News", null),
+        ]);
+        ActiveProfileService activeProfile = new();
+        activeProfile.SetActive(secondProfile);
+        CatalogSearchService service = new(channels, new InMemoryMediaCatalog(), activeProfile);
+
+        IReadOnlyList<SearchResult> results = await service.SearchAsync("news");
+
+        Assert.IsNotEmpty(results);
+        Assert.IsTrue(results.All(result => result.ProfileId == secondProfile.Id));
+        Assert.IsTrue(results.Any(result => result.Id == "second-news"));
     }
 }
