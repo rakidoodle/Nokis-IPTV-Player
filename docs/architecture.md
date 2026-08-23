@@ -39,6 +39,12 @@ Microsoft logging abstractions carry structured events from startup, profile con
 
 File logging is intentionally fail-safe: an unavailable log directory reports only a generic type to the debugger and never interrupts the application. Technical logs remain local and should still be reviewed before being shared.
 
+## Error boundaries
+
+Provider and parser boundaries translate expected transport, timeout, malformed-response, and size-limit failures into typed result messages. The playback boundary turns native end/error events into observable player states with a reconnect action. WPF image loading remains non-blocking and a missing poster falls back to its surrounding card rather than controlling catalog state.
+
+The application registers dispatcher, background-task, and process exception handlers as a final boundary. `IExceptionMessageService` maps known technical exception types to fixed user-safe explanations and never displays raw exception text, URLs, or server responses. Full exceptions flow only to the sanitizing logger. Database initialization adds an explicit error event before startup stops safely.
+
 ## Credential boundary
 
 `ICredentialService` keeps password handling independent from profile and provider code. Its Windows implementation serializes the smallest required credential payload, protects it with DPAPI `CurrentUser` scope, and atomically writes one opaque file per profile under `%LocalAppData%\MyIPTV\Credentials`.

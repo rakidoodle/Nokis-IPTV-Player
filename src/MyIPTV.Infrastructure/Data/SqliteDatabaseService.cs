@@ -18,6 +18,19 @@ public sealed partial class SqliteDatabaseService(
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
+        try
+        {
+            await InitializeCoreAsync(cancellationToken);
+        }
+        catch (Exception exception) when (exception is SqliteException or IOException or UnauthorizedAccessException)
+        {
+            LogDatabaseInitializationFailed(exception);
+            throw;
+        }
+    }
+
+    private async Task InitializeCoreAsync(CancellationToken cancellationToken)
+    {
         paths.EnsureDirectoriesExist();
 
         SqliteConnectionStringBuilder connectionString = new()
@@ -132,4 +145,7 @@ public sealed partial class SqliteDatabaseService(
 
     [LoggerMessage(EventId = 2002, Level = LogLevel.Information, Message = "Applied database migration {Version}: {MigrationName}.")]
     private partial void LogMigrationApplied(int version, string migrationName);
+
+    [LoggerMessage(EventId = 2003, Level = LogLevel.Error, Message = "Database initialization or migration failed.")]
+    private partial void LogDatabaseInitializationFailed(Exception exception);
 }

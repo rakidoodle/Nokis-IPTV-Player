@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.IO;
 using MyIPTV.Core.Abstractions;
 using MyIPTV.Core.Models;
 
@@ -55,7 +56,17 @@ public sealed partial class GuideViewModel : SectionViewModel
         }
     }
 
-    private async void OnEpgChanged(object? sender, EventArgs e) => await LoadRowsAsync();
+    private async void OnEpgChanged(object? sender, EventArgs e)
+    {
+        try
+        {
+            await LoadRowsAsync();
+        }
+        catch (Exception exception) when (exception is IOException or Microsoft.Data.Sqlite.SqliteException)
+        {
+            StatusMessage = "The saved guide could not be read. Refresh the EPG source and try again.";
+        }
+    }
 
     private async Task LoadRowsAsync(CancellationToken cancellationToken = default)
     {
@@ -72,9 +83,16 @@ public sealed partial class GuideViewModel : SectionViewModel
 
     private async Task InitializeAsync()
     {
-        AppSettings settings = await _settingsService.LoadAsync();
-        Source = settings.EpgSource;
-        _refreshHours = settings.EpgRefreshHours;
-        _displayLocalTime = !string.Equals(settings.EpgTimezoneBehavior, "UTC", StringComparison.OrdinalIgnoreCase);
+        try
+        {
+            AppSettings settings = await _settingsService.LoadAsync();
+            Source = settings.EpgSource;
+            _refreshHours = settings.EpgRefreshHours;
+            _displayLocalTime = !string.Equals(settings.EpgTimezoneBehavior, "UTC", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            StatusMessage = "EPG preferences could not be read; defaults are in use.";
+        }
     }
 }

@@ -143,19 +143,26 @@ public sealed partial class SettingsViewModel : SectionViewModel
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        AppSettings settings = await _settingsService.LoadAsync(cancellationToken);
-        StartPage = settings.StartPage;
-        Theme = settings.Theme;
-        Language = settings.Language;
-        RememberLastProfile = settings.RememberLastProfile;
-        DefaultVolume = settings.DefaultVolume;
-        HardwareDecoding = settings.HardwareDecoding;
-        AspectRatio = settings.AspectRatio;
-        ReconnectOnFailure = settings.ReconnectOnFailure;
-        EpgSource = settings.EpgSource;
-        EpgRefreshHours = settings.EpgRefreshHours;
-        EpgTimezoneBehavior = settings.EpgTimezoneBehavior;
-        StatusMessage = "Preferences are ready.";
+        try
+        {
+            AppSettings settings = await _settingsService.LoadAsync(cancellationToken);
+            StartPage = settings.StartPage;
+            Theme = settings.Theme;
+            Language = settings.Language;
+            RememberLastProfile = settings.RememberLastProfile;
+            DefaultVolume = settings.DefaultVolume;
+            HardwareDecoding = settings.HardwareDecoding;
+            AspectRatio = settings.AspectRatio;
+            ReconnectOnFailure = settings.ReconnectOnFailure;
+            EpgSource = settings.EpgSource;
+            EpgRefreshHours = settings.EpgRefreshHours;
+            EpgTimezoneBehavior = settings.EpgTimezoneBehavior;
+            StatusMessage = "Preferences are ready.";
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            StatusMessage = "Preferences could not be read; safe defaults are shown.";
+        }
     }
 
     private void OpenFolder(string path)

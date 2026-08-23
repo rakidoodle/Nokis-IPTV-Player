@@ -71,6 +71,7 @@ public partial class App : Application
 
         builder.Services.AddSingleton<INavigationService, NavigationService>();
         builder.Services.AddSingleton<IUserNotificationService, UserNotificationService>();
+        builder.Services.AddSingleton<IExceptionMessageService, ExceptionMessageService>();
         builder.Services.AddSingleton<IThemeService, ThemeService>();
         builder.Services.AddSingleton<IPlaylistFilePicker, PlaylistFilePicker>();
         builder.Services.AddHostedService<PlaybackHistoryCoordinator>();
@@ -183,15 +184,19 @@ public partial class App : Application
     {
         TryLogCritical(exception, userMessage);
 
+        IExceptionMessageService? messageService =
+            _host.Services.GetService<IExceptionMessageService>();
+        string safeUserMessage = messageService?.GetUserMessage(exception, userMessage) ?? userMessage;
+
         IUserNotificationService? notifications =
             _host.Services.GetService<IUserNotificationService>();
         if (notifications is not null)
         {
-            notifications.ShowError("MyIPTV", userMessage);
+            notifications.ShowError("MyIPTV", safeUserMessage);
         }
         else
         {
-            MessageBox.Show(userMessage, "MyIPTV", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(safeUserMessage, "MyIPTV", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
