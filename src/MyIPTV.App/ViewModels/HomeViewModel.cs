@@ -4,8 +4,24 @@ using MyIPTV.Core.Abstractions;
 
 namespace MyIPTV.App.ViewModels;
 
-public sealed partial class HomeViewModel(INavigationService navigationService) : ObservableObject
+public sealed partial class HomeViewModel : ObservableObject
 {
+    private readonly INavigationService _navigationService;
+    private readonly IFavoriteRepository _favoriteRepository;
+
+    [ObservableProperty]
+    private int _favoriteCount;
+
+    public HomeViewModel(
+        INavigationService navigationService,
+        IFavoriteRepository favoriteRepository)
+    {
+        _navigationService = navigationService;
+        _favoriteRepository = favoriteRepository;
+        favoriteRepository.FavoritesChanged += OnFavoritesChanged;
+        _ = RefreshFavoritesAsync();
+    }
+
     public string Heading { get; } = "Good to see you";
 
     public string Description { get; } =
@@ -14,12 +30,17 @@ public sealed partial class HomeViewModel(INavigationService navigationService) 
     [RelayCommand]
     private void BrowseLiveTv()
     {
-        navigationService.NavigateTo<LiveTvViewModel>();
+        _navigationService.NavigateTo<LiveTvViewModel>();
     }
 
     [RelayCommand]
     private void ManageProfiles()
     {
-        navigationService.NavigateTo<ProfilesViewModel>();
+        _navigationService.NavigateTo<ProfilesViewModel>();
     }
+
+    private async void OnFavoritesChanged(object? sender, EventArgs e) => await RefreshFavoritesAsync();
+
+    private async Task RefreshFavoritesAsync() =>
+        FavoriteCount = (await _favoriteRepository.GetAllAsync()).Count;
 }

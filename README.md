@@ -27,6 +27,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - Bundled LibVLC playback supports HTTP/HTTPS IPTV media, transport controls, reconnect, aspect ratios, tracks, subtitles, and full screen.
 - The Live TV screen groups channels by category, virtualizes large lists, and plays the selected authorized stream.
 - Debounced global search finds loaded channels, movies, series, episodes, and categories without exposing stream addresses.
+- SQLite-backed favorites persist channels, movies, and series by stable provider IDs.
 
 ## Requirements
 
@@ -68,6 +69,7 @@ See [Stalker / Ministra compatibility](docs/stalker-ministra.md) for the support
 See [Media playback](docs/playback.md) for controls, formats, WPF behavior, and VideoLAN licensing.
 See [Live TV browser](docs/live-tv.md) for category filtering, playback, and large-list behavior.
 See [Global search](docs/search.md) for matching, ranking, keyboard use, and current catalog limits.
+See [Favorites](docs/favorites.md) for persistence, stable IDs, and stored data.
 
 ## Local application data
 

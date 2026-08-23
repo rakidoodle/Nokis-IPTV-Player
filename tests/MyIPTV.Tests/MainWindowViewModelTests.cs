@@ -73,7 +73,7 @@ public sealed class MainWindowViewModelTests
         public void NavigateTo(Type viewModelType)
         {
             CurrentViewModel = viewModelType == typeof(HomeViewModel)
-                ? new HomeViewModel(this)
+                ? new HomeViewModel(this, new FakeFavoriteRepository())
                 : viewModelType == typeof(LiveTvViewModel)
                     ? CreateLiveTvViewModel()
                 : Activator.CreateInstance(viewModelType)
@@ -87,7 +87,8 @@ public sealed class MainWindowViewModelTests
             return new LiveTvViewModel(
                 new FakeChannelCatalog(),
                 playback,
-                new PlayerViewModel(playback, playback));
+                new PlayerViewModel(playback, playback),
+                new FakeFavoriteRepository());
         }
     }
 

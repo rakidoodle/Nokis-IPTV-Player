@@ -9,6 +9,7 @@ public sealed partial class LiveTvViewModel : SectionViewModel
 {
     private readonly IChannelCatalog _channelCatalog;
     private readonly IPlaybackService _playbackService;
+    private readonly IFavoriteRepository _favoriteRepository;
 
     [ObservableProperty]
     private IReadOnlyList<ChannelCategoryViewModel> _categories = [];
@@ -22,10 +23,14 @@ public sealed partial class LiveTvViewModel : SectionViewModel
     [ObservableProperty]
     private IptvChannel? _selectedChannel;
 
+    [ObservableProperty]
+    private bool _isSelectedFavorite;
+
     public LiveTvViewModel(
         IChannelCatalog channelCatalog,
         IPlaybackService playbackService,
-        PlayerViewModel player)
+        PlayerViewModel player,
+        IFavoriteRepository favoriteRepository)
         : base(
         "Live TV",
         "Browse channels from your authorized IPTV profiles.",
@@ -35,8 +40,10 @@ public sealed partial class LiveTvViewModel : SectionViewModel
     {
         _channelCatalog = channelCatalog;
         _playbackService = playbackService;
+        _favoriteRepository = favoriteRepository;
         Player = player;
         channelCatalog.ChannelsChanged += OnChannelsChanged;
+        favoriteRepository.FavoritesChanged += OnFavoritesChanged;
         UpdateCatalog();
     }
 
@@ -45,6 +52,10 @@ public sealed partial class LiveTvViewModel : SectionViewModel
     public bool HasChannels => Categories.Count > 0;
 
     public bool CanPlaySelectedChannel => SelectedChannel is not null;
+
+    public bool CanFavoriteSelectedChannel => SelectedChannel is not null;
+
+    public string FavoriteButtonText => IsSelectedFavorite ? "Remove favorite" : "Add favorite";
 
     public void SelectSearchResult(Guid profileId, string channelId)
     {
@@ -81,15 +92,47 @@ public sealed partial class LiveTvViewModel : SectionViewModel
             cancellationToken);
     }
 
+    [RelayCommand(CanExecute = nameof(CanFavoriteSelectedChannel))]
+    private async Task ToggleFavoriteAsync(CancellationToken cancellationToken)
+    {
+        if (SelectedChannel is null)
+        {
+            return;
+        }
+
+        IptvChannel channel = SelectedChannel;
+        await _favoriteRepository.SetAsync(
+            new FavoriteItem(channel.ProfileId, ContentKind.LiveTv, channel.Id, channel.Name, DateTimeOffset.UtcNow),
+            !IsSelectedFavorite,
+            cancellationToken);
+    }
+
     partial void OnSelectedCategoryChanged(ChannelCategoryViewModel? value) => ApplyCategory(value);
 
     partial void OnSelectedChannelChanged(IptvChannel? value)
     {
         OnPropertyChanged(nameof(CanPlaySelectedChannel));
+        OnPropertyChanged(nameof(CanFavoriteSelectedChannel));
         PlaySelectedChannelCommand.NotifyCanExecuteChanged();
+        ToggleFavoriteCommand.NotifyCanExecuteChanged();
+        _ = RefreshSelectedFavoriteAsync(value);
     }
 
     private void OnChannelsChanged(object? sender, EventArgs e) => UpdateCatalog();
+
+    private async void OnFavoritesChanged(object? sender, EventArgs e) =>
+        await RefreshSelectedFavoriteAsync(SelectedChannel);
+
+    private async Task RefreshSelectedFavoriteAsync(IptvChannel? channel)
+    {
+        bool isFavorite = channel is not null && await _favoriteRepository.ContainsAsync(
+            channel.ProfileId, ContentKind.LiveTv, channel.Id);
+        if (ReferenceEquals(channel, SelectedChannel))
+        {
+            IsSelectedFavorite = isFavorite;
+            OnPropertyChanged(nameof(FavoriteButtonText));
+        }
+    }
 
     private void UpdateCatalog()
     {

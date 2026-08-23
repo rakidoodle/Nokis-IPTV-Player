@@ -6,6 +6,8 @@
              xmlns:viewModels="clr-namespace:MyIPTV.App.ViewModels"
              d:DesignHeight="320"
              d:DesignWidth="560"
+             AutomationProperties.HelpText="{Binding Message, RelativeSource={RelativeSource Self}}"
+             AutomationProperties.Name="{Binding Title, RelativeSource={RelativeSource Self}}"
              mc:Ignorable="d">
     <Grid>
         <StackPanel

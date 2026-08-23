@@ -20,13 +20,13 @@
                 <views:LiveTvView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:MoviesViewModel}">
-                <views:SectionView />
+                <views:CatalogView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:SeriesViewModel}">
-                <views:SectionView />
+                <views:CatalogView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:FavoritesViewModel}">
-                <views:SectionView />
+                <views:FavoritesView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:GuideViewModel}">
                 <views:SectionView />

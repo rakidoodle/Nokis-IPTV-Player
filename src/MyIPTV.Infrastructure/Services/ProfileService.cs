@@ -12,6 +12,7 @@ public sealed partial class ProfileService(
     IEnumerable<IContentProvider> contentProviders,
     IChannelCatalog channelCatalog,
     IMediaCatalog mediaCatalog,
+    IFavoriteRepository favoriteRepository,
     IActiveProfileService activeProfileService,
     ILogger<ProfileService> logger) : IProfileService
 {
@@ -90,6 +91,7 @@ public sealed partial class ProfileService(
         await credentialService.DeleteAsync(profileId, cancellationToken);
         channelCatalog.RemoveProfile(profileId);
         mediaCatalog.RemoveProfile(profileId);
+        await favoriteRepository.RemoveForProfileAsync(profileId, cancellationToken);
         activeProfileService.Clear(profileId);
         LogProfileDeleted(profileId);
     }

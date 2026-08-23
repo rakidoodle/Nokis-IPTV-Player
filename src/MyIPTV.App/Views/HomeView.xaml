@@ -52,7 +52,7 @@
                             Margin="0,8,0,0"
                             FontSize="30"
                             FontWeight="SemiBold"
-                            Text="0" />
+                            Text="{Binding FavoriteCount}" />
                         <TextBlock
                             Margin="0,5,0,0"
                             Foreground="{DynamicResource TextMutedBrush}"

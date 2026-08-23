@@ -12,7 +12,7 @@ public sealed class LiveTvViewModelTests
     {
         InMemoryChannelCatalog catalog = new();
         FakePlaybackService playback = new();
-        LiveTvViewModel viewModel = new(catalog, playback, new PlayerViewModel(playback, playback));
+        LiveTvViewModel viewModel = CreateViewModel(catalog, playback);
         Guid profileId = Guid.NewGuid();
         catalog.ReplaceForProfile(
             profileId,
@@ -36,7 +36,7 @@ public sealed class LiveTvViewModelTests
     {
         InMemoryChannelCatalog catalog = new();
         FakePlaybackService playback = new();
-        LiveTvViewModel viewModel = new(catalog, playback, new PlayerViewModel(playback, playback));
+        LiveTvViewModel viewModel = CreateViewModel(catalog, playback);
         Guid profileId = Guid.NewGuid();
         catalog.ReplaceForProfile(profileId,
         [
@@ -57,7 +57,7 @@ public sealed class LiveTvViewModelTests
     {
         InMemoryChannelCatalog catalog = new();
         FakePlaybackService playback = new();
-        LiveTvViewModel viewModel = new(catalog, playback, new PlayerViewModel(playback, playback));
+        LiveTvViewModel viewModel = CreateViewModel(catalog, playback);
         Guid profileId = Guid.NewGuid();
         IptvChannel channel = Channel("7", "Demo News", "News", profileId);
         catalog.ReplaceForProfile(profileId, [channel]);
@@ -70,6 +70,24 @@ public sealed class LiveTvViewModelTests
         Assert.AreEqual("Demo News", playback.CurrentItem?.Title);
     }
 
+    [TestMethod]
+    public async Task ToggleFavoriteUsesStableChannelIdentity()
+    {
+        InMemoryChannelCatalog catalog = new();
+        FakePlaybackService playback = new();
+        FakeFavoriteRepository favorites = new();
+        LiveTvViewModel viewModel = new(
+            catalog, playback, new PlayerViewModel(playback, playback), favorites);
+        Guid profileId = Guid.NewGuid();
+        IptvChannel channel = Channel("favorite-7", "Demo News", "News", profileId);
+        catalog.ReplaceForProfile(profileId, [channel]);
+        viewModel.SelectedChannel = channel;
+
+        await viewModel.ToggleFavoriteCommand.ExecuteAsync(null);
+
+        Assert.IsTrue(await favorites.ContainsAsync(profileId, ContentKind.LiveTv, "favorite-7"));
+    }
+
     private static IptvChannel Channel(string id, string name, string group, Guid profileId) =>
         new(
             id,
@@ -79,4 +97,7 @@ public sealed class LiveTvViewModelTests
             null,
             group,
             $"demo.{id}");
+
+    private static LiveTvViewModel CreateViewModel(InMemoryChannelCatalog catalog, FakePlaybackService playback) =>
+        new(catalog, playback, new PlayerViewModel(playback, playback), new FakeFavoriteRepository());
 }

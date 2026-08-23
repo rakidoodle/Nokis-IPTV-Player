@@ -64,3 +64,7 @@ The Live TV ViewModel reads immutable snapshots from `IChannelCatalog`, builds c
 `ISearchService` exposes provider-independent catalog search. `CatalogSearchService` snapshots the channel and media catalogs, performs cancellable matching away from the UI thread, ranks title prefixes before title substrings, and clamps result counts. The window ViewModel adds a 300 ms debounce and cancels obsolete queries as the user types.
 
 Search results contain stable catalog identifiers, labels, and content kinds only. Stream URLs and provider credentials never cross into the search result model. Selecting a result navigates through `INavigationService`; live-channel results also select the matching channel in the browser.
+
+## Favorites persistence
+
+`IFavoriteRepository` keeps favorite behavior independent from SQLite. Its SQLite implementation uses `(profile_id, content_type, content_id)` as a composite primary key and stores only the display title and addition timestamp alongside that key. It never persists a playback URL or provider secret. ViewModels subscribe to favorite changes so Live TV, movie, series, and Favorites screens stay synchronized. Deleting a profile removes its orphaned favorites.
