@@ -17,7 +17,7 @@ public partial class App : Application
     private static readonly Action<ILogger, Exception?> LogApplicationStarted = LoggerMessage.Define(
         LogLevel.Information,
         new EventId(1, nameof(LogApplicationStarted)),
-        "MyIPTV started successfully.");
+        "Noki's IPTV Player started successfully.");
 
     private static readonly Action<ILogger, string, Exception?> LogCriticalError = LoggerMessage.Define<string>(
         LogLevel.Critical,
@@ -128,7 +128,7 @@ public partial class App : Application
         {
             HandleUnexpectedException(
                 exception,
-                "MyIPTV could not finish starting. Check the application logs for details.");
+                "Noki's IPTV Player could not finish starting. Check the application logs for details.");
             Shutdown(-1);
         }
     }
@@ -141,7 +141,7 @@ public partial class App : Application
         }
         catch (Exception exception)
         {
-            TryLogCritical(exception, "An error occurred while MyIPTV was stopping.");
+            TryLogCritical(exception, "An error occurred while Noki's IPTV Player was stopping.");
         }
         finally
         {
@@ -163,7 +163,7 @@ public partial class App : Application
     {
         HandleUnexpectedException(
             e.Exception,
-            "Something unexpected happened. You can continue using MyIPTV.");
+            "Something unexpected happened. You can continue using Noki's IPTV Player.");
         e.Handled = true;
     }
 
@@ -193,11 +193,11 @@ public partial class App : Application
             _host.Services.GetService<IUserNotificationService>();
         if (notifications is not null)
         {
-            notifications.ShowError("MyIPTV", safeUserMessage);
+            notifications.ShowError("Noki's IPTV Player", safeUserMessage);
         }
         else
         {
-            MessageBox.Show(safeUserMessage, "MyIPTV", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(safeUserMessage, "Noki's IPTV Player", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

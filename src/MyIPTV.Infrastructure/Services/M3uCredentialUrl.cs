@@ -9,6 +9,7 @@ internal static class M3uCredentialUrl
 
     public static M3uAddressParts Split(string address)
     {
+        address = Normalize(address);
         if (!Uri.TryCreate(address, UriKind.Absolute, out Uri? uri) ||
             !string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) &&
             !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
@@ -52,6 +53,12 @@ internal static class M3uCredentialUrl
             : null;
         return new(builder.Uri.AbsoluteUri, credentials, foundCredentials);
     }
+
+    public static string Normalize(string address) =>
+        address.Trim()
+            .Trim('"', '\'', '<', '>')
+            .Replace("&amp;", "&", StringComparison.OrdinalIgnoreCase)
+            .Replace("\\&", "&", StringComparison.Ordinal);
 
     public static string Add(string address, ProfileCredentials credentials)
     {

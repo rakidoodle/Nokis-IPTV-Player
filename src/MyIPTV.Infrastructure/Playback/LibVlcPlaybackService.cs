@@ -166,6 +166,8 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
         else
         {
             _volumeBeforeMute = Math.Max(1, _volume);
+            _volume = 0;
+            MediaPlayer.Volume = 0;
             MediaPlayer.Mute = true;
         }
         NotifyChanged();

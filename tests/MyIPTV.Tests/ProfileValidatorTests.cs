@@ -55,7 +55,7 @@ public sealed class ProfileValidatorTests
     }
 
     [TestMethod]
-    public void ValidateRequiresMinistraRestCredentials()
+    public void ValidateRequiresValidStalkerMacAddress()
     {
         ProfileDraft draft = new()
         {
@@ -68,7 +68,16 @@ public sealed class ProfileValidatorTests
         ProfileValidationResult result = _validator.Validate(draft, requireCredentials: true);
 
         Assert.IsFalse(result.IsValid);
-        Assert.AreEqual("Password is required for a supported Ministra REST profile.", result.Message);
+        Assert.AreEqual("Enter a MAC address in the format 00:1A:79:00:00:00.", result.Message);
+
+        ProfileValidationResult valid = _validator.Validate(new ProfileDraft
+        {
+            Name = draft.Name,
+            ConnectionType = draft.ConnectionType,
+            ServerAddress = draft.ServerAddress,
+            Username = "00:1A:79:12:34:56",
+        }, requireCredentials: true);
+        Assert.IsTrue(valid.IsValid);
     }
 
     [TestMethod]

@@ -19,10 +19,16 @@
                              Style="{StaticResource NavigationListBoxStyle}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Margin="6,4">
-                                    <TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding Title}" />
-                                    <TextBlock Margin="0,3,0,0" Foreground="{DynamicResource TextMutedBrush}" Text="{Binding KindLabel}" />
-                                </StackPanel>
+                                <Button Padding="6,4" HorizontalContentAlignment="Stretch"
+                                        Background="Transparent" BorderThickness="0"
+                                        Command="{Binding DataContext.PlayFavoriteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        ToolTip="Play this favorite">
+                                    <StackPanel>
+                                        <TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding Title}" />
+                                        <TextBlock Margin="0,3,0,0" Foreground="{DynamicResource TextMutedBrush}" Text="{Binding KindLabel}" />
+                                    </StackPanel>
+                                </Button>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

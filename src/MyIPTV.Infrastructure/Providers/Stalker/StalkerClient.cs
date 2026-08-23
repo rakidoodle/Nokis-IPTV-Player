@@ -21,6 +21,11 @@ public sealed class StalkerClient(IHttpClientFactory httpClientFactory) : IStalk
         string password,
         CancellationToken cancellationToken = default)
     {
+        if (IsMacAddress(username) && string.IsNullOrEmpty(password))
+        {
+            return await AuthenticateMacAsync(portalAddress, username, cancellationToken);
+        }
+
         Uri endpoint = BuildPortalEndpoint(portalAddress, "auth/token");
         using HttpRequestMessage request = new(HttpMethod.Post, endpoint)
         {
@@ -81,6 +86,11 @@ public sealed class StalkerClient(IHttpClientFactory httpClientFactory) : IStalk
         StalkerSession session,
         CancellationToken cancellationToken = default)
     {
+        if (session.IsMacSession)
+        {
+            return await GetMacLiveChannelsAsync(portalAddress, session, cancellationToken);
+        }
+
         Uri endpoint = BuildPortalEndpoint(
             portalAddress,
             $"api/users/{Uri.EscapeDataString(session.UserId)}/tv-channels");
@@ -138,6 +148,129 @@ public sealed class StalkerClient(IHttpClientFactory httpClientFactory) : IStalk
         }
 
         return result;
+    }
+
+    private async Task<StalkerSession> AuthenticateMacAsync(
+        string portalAddress,
+        string macAddress,
+        CancellationToken cancellationToken)
+    {
+        Uri endpoint = BuildPortalEndpoint(
+            portalAddress,
+            "server/load.php?type=stb&action=handshake&token=&JsHttpRequest=1-xml");
+        using HttpRequestMessage request = CreateMacRequest(endpoint, macAddress);
+        using HttpResponseMessage response = await SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new StalkerClientException(
+                StalkerClientError.Authentication,
+                "The Stalker portal rejected the MAC address.");
+        }
+
+        using JsonDocument document = await ReadJsonAsync<JsonDocument>(response, cancellationToken);
+        JsonElement envelope = document.RootElement;
+        JsonElement js = envelope.ValueKind == JsonValueKind.Object &&
+                         envelope.TryGetProperty("js", out JsonElement jsValue)
+            ? jsValue
+            : envelope;
+        string? token = Text(js, "token");
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            throw new StalkerClientException(
+                StalkerClientError.Authentication,
+                "The Stalker portal returned an invalid handshake.");
+        }
+
+        return new StalkerSession(token, macAddress.ToUpperInvariant(), 0, IsMacSession: true);
+    }
+
+    private async Task<IReadOnlyList<StalkerChannelDto>> GetMacLiveChannelsAsync(
+        string portalAddress,
+        StalkerSession session,
+        CancellationToken cancellationToken)
+    {
+        Uri endpoint = BuildPortalEndpoint(
+            portalAddress,
+            "server/load.php?type=itv&action=get_all_channels&JsHttpRequest=1-xml");
+        using HttpRequestMessage request = CreateMacRequest(endpoint, session.UserId, session.AccessToken);
+        using HttpResponseMessage response = await SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new StalkerClientException(
+                StalkerClientError.UnexpectedResponse,
+                "The Stalker portal returned an unexpected channel response.");
+        }
+
+        using JsonDocument document = await ReadJsonAsync<JsonDocument>(response, cancellationToken);
+        JsonElement channels = SelectResults(document.RootElement);
+        if (channels.ValueKind != JsonValueKind.Array)
+        {
+            throw new StalkerClientException(
+                StalkerClientError.UnexpectedResponse,
+                "The Stalker portal returned malformed channel data.");
+        }
+
+        List<StalkerChannelDto> result = [];
+        foreach (JsonElement item in channels.EnumerateArray())
+        {
+            string? id = Text(item, "id", "ch_id");
+            string? name = Text(item, "name", "title");
+            string? command = NormalizeStreamCommand(Text(item, "cmd", "url", "stream_url"));
+            if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(name))
+            {
+                continue;
+            }
+
+            result.Add(new StalkerChannelDto(
+                id.Trim(), name.Trim(), command,
+                Text(item, "logo", "logo_url"),
+                Text(item, "genre_name", "group", "category_name"),
+                Text(item, "xmltv_id", "epg_id")));
+        }
+
+        return result;
+    }
+
+    private static HttpRequestMessage CreateMacRequest(Uri endpoint, string macAddress, string? token = null)
+    {
+        HttpRequestMessage request = new(HttpMethod.Get, endpoint);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (QtEmbedded; U; Linux; C) MAG200 stbapp");
+        request.Headers.TryAddWithoutValidation(
+            "Cookie",
+            $"mac={Uri.EscapeDataString(macAddress)}; stb_lang=en; timezone=UTC");
+        request.Headers.TryAddWithoutValidation("X-User-Agent", "Model: MAG254; Link: Ethernet");
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
+        return request;
+    }
+
+    private static bool IsMacAddress(string value) =>
+        System.Text.RegularExpressions.Regex.IsMatch(
+            value.Trim(),
+            "^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}$");
+
+    private static string? NormalizeStreamCommand(string? command)
+    {
+        if (string.IsNullOrWhiteSpace(command))
+        {
+            return null;
+        }
+
+        string normalized = command.Trim();
+        foreach (string prefix in new[] { "ffmpeg ", "ffrt " })
+        {
+            if (normalized.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                normalized = normalized[prefix.Length..].Trim();
+                break;
+            }
+        }
+
+        return normalized;
     }
 
     internal static Uri BuildPortalEndpoint(string portalAddress, string relativePath)
@@ -211,10 +344,30 @@ public sealed class StalkerClient(IHttpClientFactory httpClientFactory) : IStalk
             return root;
         }
 
-        return root.ValueKind == JsonValueKind.Object &&
-               root.TryGetProperty("results", out JsonElement results)
-            ? results
-            : default;
+        if (root.ValueKind != JsonValueKind.Object)
+        {
+            return default;
+        }
+
+        if (root.TryGetProperty("results", out JsonElement results))
+        {
+            return results;
+        }
+
+        if (root.TryGetProperty("js", out JsonElement js))
+        {
+            if (js.ValueKind == JsonValueKind.Array)
+            {
+                return js;
+            }
+
+            if (js.ValueKind == JsonValueKind.Object && js.TryGetProperty("data", out JsonElement data))
+            {
+                return data;
+            }
+        }
+
+        return default;
     }
 
     private static string? Text(JsonElement item, params string[] propertyNames)

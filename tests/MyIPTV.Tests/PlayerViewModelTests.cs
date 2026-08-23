@@ -45,8 +45,8 @@ public sealed class PlayerViewModelTests
             [new PlaybackTrack(1, "English")],
             [new PlaybackTrack(-1, "Disabled"), new PlaybackTrack(2, "English CC")]);
 
-        Assert.AreEqual(100, viewModel.Volume);
-        Assert.AreEqual(100, playback.Volume);
+        Assert.AreEqual(0, viewModel.Volume);
+        Assert.AreEqual(0, playback.Volume);
         Assert.IsTrue(viewModel.IsMuted);
         Assert.AreEqual("Unmute", viewModel.MuteLabel);
         Assert.AreEqual("16:9", playback.AspectRatio);

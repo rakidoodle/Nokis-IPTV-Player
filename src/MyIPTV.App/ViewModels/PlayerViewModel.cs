@@ -69,8 +69,12 @@ public partial class PlayerViewModel : ObservableObject
 
     public bool IsPlaying => _playbackService.State == MediaPlaybackState.Playing;
 
+    public bool IsLoading =>
+        _playbackService.State is MediaPlaybackState.Opening or MediaPlaybackState.Buffering;
+
     public bool ShowPlayerOverlay =>
-        !HasCurrentItem || _playbackService.State is MediaPlaybackState.Error or MediaPlaybackState.Stopped or MediaPlaybackState.Ended;
+        IsLoading || !HasCurrentItem ||
+        _playbackService.State is MediaPlaybackState.Error or MediaPlaybackState.Stopped or MediaPlaybackState.Ended;
 
     public string PlayPauseLabel => IsPlaying ? "Pause" : "Resume";
 
@@ -168,6 +172,7 @@ public partial class PlayerViewModel : ObservableObject
         OnPropertyChanged(nameof(IsMuted));
         OnPropertyChanged(nameof(HasCurrentItem));
         OnPropertyChanged(nameof(IsPlaying));
+        OnPropertyChanged(nameof(IsLoading));
         OnPropertyChanged(nameof(ShowPlayerOverlay));
         OnPropertyChanged(nameof(PlayPauseLabel));
         OnPropertyChanged(nameof(PlayPauseGlyph));

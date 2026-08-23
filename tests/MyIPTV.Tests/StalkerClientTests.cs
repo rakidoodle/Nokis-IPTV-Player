@@ -65,6 +65,32 @@ public sealed class StalkerClientTests
     }
 
     [TestMethod]
+    public async Task MacAuthenticationAndChannelEnvelopeAreSupported()
+    {
+        int requestNumber = 0;
+        using HttpClient httpClient = new(new AsyncStubHandler((request, _) =>
+        {
+            requestNumber++;
+            Assert.IsTrue(request.Headers.TryGetValues("Cookie", out IEnumerable<string>? cookies));
+            StringAssert.Contains(cookies.Single(), "mac=00%3A1A%3A79%3A12%3A34%3A56");
+            return Task.FromResult(requestNumber == 1
+                ? JsonResponse("""{"js":{"token":"synthetic-mac-token"}}""")
+                : JsonResponse("""{"js":{"data":[{"id":"9","name":"Demo","cmd":"ffmpeg https://media.example.invalid/live/9.m3u8"}]}}"""));
+        }));
+        StalkerClient client = new(new StubHttpClientFactory(httpClient));
+
+        StalkerSession session = await client.AuthenticateAsync(
+            "https://example.invalid/stalker_portal/c/",
+            "00:1A:79:12:34:56",
+            string.Empty);
+        IReadOnlyList<StalkerChannelDto> channels = await client.GetLiveChannelsAsync(
+            "https://example.invalid/stalker_portal/c/", session);
+
+        Assert.IsTrue(session.IsMacSession);
+        Assert.AreEqual("https://media.example.invalid/live/9.m3u8", channels.Single().StreamUrl);
+    }
+
+    [TestMethod]
     public async Task LegacyOnlyPortalReturnsClearUnsupportedErrorWithoutLeakingPassword()
     {
         const string secret = "synthetic-secret-never-log";

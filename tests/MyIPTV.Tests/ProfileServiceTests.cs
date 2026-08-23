@@ -49,6 +49,26 @@ public sealed class ProfileServiceTests
         StringAssert.Contains(editor.ServerAddress, "password=synthetic-secret");
     }
 
+    [TestMethod]
+    public async Task M3uEscapedAmpersandsFromPastedLinksAreNormalized()
+    {
+        using ServiceFixture fixture = await ServiceFixture.CreateAsync();
+        ProfileSaveResult saved = await fixture.Service.SaveAsync(new ProfileDraft
+        {
+            Name = "Pasted M3U",
+            ConnectionType = ProfileConnectionType.M3uPlaylist,
+            ServerAddress = "https://example.invalid/get.php?username=demo\\&password=secret&amp;type=m3u_plus",
+        });
+
+        Assert.IsTrue(saved.IsSuccess);
+        Assert.IsNotNull(saved.Profile);
+        ProfileDraft? editor = await fixture.Service.GetDraftAsync(saved.Profile.Id);
+        Assert.IsNotNull(editor);
+        StringAssert.Contains(editor.ServerAddress, "type=m3u_plus");
+        Assert.IsFalse(editor.ServerAddress.Contains("\\&", StringComparison.Ordinal));
+        Assert.IsFalse(editor.ServerAddress.Contains("&amp;", StringComparison.OrdinalIgnoreCase));
+    }
+
     private static ProfileDraft Draft(string name) => new()
     {
         Name = name,

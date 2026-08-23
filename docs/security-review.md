@@ -15,8 +15,8 @@ Phase 27 reviewed credential storage, logs, SQLite data, HTTP clients, TLS behav
 
 ## Limitations and recommendations
 
-Some legitimate legacy IPTV providers expose only HTTP. MyIPTV allows those addresses for compatibility, but HTTP does not protect traffic or credentials in transit. Prefer HTTPS services with valid certificates whenever available. Anyone with access to the same unlocked Windows account can run software as that user; DPAPI is not a defense against a fully compromised account.
+Some legitimate legacy IPTV providers expose only HTTP. Noki's IPTV Player allows those addresses for compatibility, but HTTP does not protect traffic or credentials in transit. Prefer HTTPS services with valid certificates whenever available. Anyone with access to the same unlocked Windows account can run software as that user; DPAPI is not a defense against a fully compromised account.
 
-Stalker/Ministra support is limited to normal bearer-session authentication supplied by an authorized portal. MyIPTV does not spoof device identities, bypass subscriptions, disable TLS validation, or circumvent DRM.
+Stalker/Ministra support requires a MAC address assigned to an account or device the user is authorized to access. Noki's IPTV Player does not discover or invent identities, bypass subscriptions, disable TLS validation, or circumvent DRM.
 
 Dependency vulnerability status is checked with NuGet's transitive vulnerability audit as part of release acceptance.

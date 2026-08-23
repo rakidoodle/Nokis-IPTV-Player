@@ -75,7 +75,30 @@ public partial class ProfilesViewModel : ObservableObject
 
     public bool HasSelectedProfile => SelectedProfile is not null;
 
-    public bool ShowsCredentialFields => SelectedProfileType is not null;
+    public bool ShowsUsernameField =>
+        SelectedProfileType.Value is ProfileConnectionType.XtreamApi or ProfileConnectionType.StalkerPortal;
+
+    public bool ShowsPasswordField => SelectedProfileType.Value == ProfileConnectionType.XtreamApi;
+
+    public string AddressLabel => SelectedProfileType.Value switch
+    {
+        ProfileConnectionType.M3uPlaylist => "M3U link or local playlist",
+        ProfileConnectionType.XtreamApi => "Server link",
+        _ => "Portal link / URL",
+    };
+
+    public string AddressPlaceholder => SelectedProfileType.Value switch
+    {
+        ProfileConnectionType.M3uPlaylist => "https://provider.example/get.php?username=…&password=…",
+        ProfileConnectionType.XtreamApi => "https://provider.example:port",
+        _ => "https://provider.example/stalker_portal/c/",
+    };
+
+    public string UsernameLabel =>
+        SelectedProfileType.Value == ProfileConnectionType.StalkerPortal ? "MAC address" : "Username";
+
+    public string UsernamePlaceholder =>
+        SelectedProfileType.Value == ProfileConnectionType.StalkerPortal ? "00:1A:79:00:00:00" : "Account username";
 
     public bool ShowsBrowseButton =>
         SelectedProfileType.Value == ProfileConnectionType.M3uPlaylist;
@@ -200,13 +223,18 @@ public partial class ProfilesViewModel : ObservableObject
         ServerAddress = draft.ServerAddress;
         Username = draft.Username ?? string.Empty;
         Password = draft.Password ?? string.Empty;
-        SetStatus("Editing profile. Saved credentials are available for this Windows user.", isError: false);
+        SetStatus("Editing profile.", isError: false);
     }
 
     partial void OnSelectedProfileTypeChanged(ProfileTypeOption value)
     {
-        OnPropertyChanged(nameof(ShowsCredentialFields));
+        OnPropertyChanged(nameof(ShowsUsernameField));
+        OnPropertyChanged(nameof(ShowsPasswordField));
         OnPropertyChanged(nameof(ShowsBrowseButton));
+        OnPropertyChanged(nameof(AddressLabel));
+        OnPropertyChanged(nameof(AddressPlaceholder));
+        OnPropertyChanged(nameof(UsernameLabel));
+        OnPropertyChanged(nameof(UsernamePlaceholder));
     }
 
     private ProfileDraft BuildDraft() =>
@@ -215,7 +243,7 @@ public partial class ProfilesViewModel : ObservableObject
             Id = SelectedProfile?.Id,
             Name = ProfileName,
             ConnectionType = SelectedProfileType.Value,
-            ServerAddress = ServerAddress,
+            ServerAddress = NormalizePastedAddress(ServerAddress),
             Username = Username,
             Password = Password,
         };
@@ -291,6 +319,12 @@ public partial class ProfilesViewModel : ObservableObject
         StatusMessage = message;
         IsStatusError = isError;
     }
+
+    private static string NormalizePastedAddress(string address) =>
+        address.Trim()
+            .Trim('"', '\'', '<', '>')
+            .Replace("&amp;", "&", StringComparison.OrdinalIgnoreCase)
+            .Replace("\\&", "&", StringComparison.Ordinal);
 
     [LoggerMessage(
         EventId = 4001,

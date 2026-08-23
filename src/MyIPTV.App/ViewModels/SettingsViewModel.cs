@@ -59,7 +59,7 @@ public sealed partial class SettingsViewModel : SectionViewModel
     }
 
     public IReadOnlyList<string> StartPages { get; } = ["Home", "Live TV", "Movies", "Series", "Favorites", "Guide"];
-    public IReadOnlyList<string> Themes { get; } = ["Dark", "Light"];
+    public IReadOnlyList<string> Themes { get; } = ["Dark", "Light", "Midnight", "Ocean"];
     public IReadOnlyList<string> Languages { get; } = ["en-US"];
     public IReadOnlyList<string> AspectRatios { get; } = ["Default", "16:9", "4:3", "21:9", "1:1"];
     public IReadOnlyList<string> TimezoneBehaviors { get; } = ["Local", "UTC"];
@@ -100,7 +100,7 @@ public sealed partial class SettingsViewModel : SectionViewModel
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
         {
             StatusMessage = "Preferences could not be saved.";
-            _notifications.ShowError("Settings", "MyIPTV could not save these preferences. Check the data folder permissions.");
+            _notifications.ShowError("Settings", "Noki's IPTV Player could not save these preferences. Check the data folder permissions.");
         }
         finally
         {

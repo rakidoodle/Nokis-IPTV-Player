@@ -1,6 +1,6 @@
 param(
     [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?$')]
-    [string]$Version = '1.1.0'
+    [string]$Version = '1.2.0-beta.1'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -8,7 +8,7 @@ $repositoryRoot = [System.IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoo
 $artifactRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot 'artifacts'))
 $publishDirectory = [System.IO.Path]::GetFullPath((Join-Path $artifactRoot 'publish\win-x64'))
 $projectPath = Join-Path $repositoryRoot 'src\MyIPTV.App\MyIPTV.App.csproj'
-$archivePath = Join-Path $artifactRoot "MyIPTV-$Version-win-x64.zip"
+$archivePath = Join-Path $artifactRoot "Nokis-IPTV-Player-$Version-win-x64.zip"
 $checksumPath = Join-Path $artifactRoot 'SHA256SUMS.txt'
 
 if (-not $artifactRoot.StartsWith($repositoryRoot, [System.StringComparison]::OrdinalIgnoreCase) -or

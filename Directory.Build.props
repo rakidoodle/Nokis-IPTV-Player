@@ -1,11 +1,11 @@
 <Project>
   <PropertyGroup>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
-    <Version>1.1.0</Version>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
+    <Version>1.2.0-beta.1</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
     <Authors>MyIPTV contributors</Authors>
-    <Product>MyIPTV</Product>
+    <Product>Noki's IPTV Player</Product>
     <Deterministic>true</Deterministic>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>

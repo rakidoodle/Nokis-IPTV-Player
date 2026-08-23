@@ -70,7 +70,7 @@
                 <Border Margin="0,0,12,12" Style="{StaticResource CardBorderStyle}">
                     <StackPanel>
                         <TextBlock AutomationProperties.HeadingLevel="Level2" FontSize="19" FontWeight="SemiBold" Text="About" />
-                        <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="MyIPTV" />
+                        <TextBlock Margin="0,12,0,0" FontWeight="SemiBold" Text="Noki's IPTV Player" />
                         <TextBlock Margin="0,4,0,0" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding ApplicationVersion, StringFormat=Version {0}}" />
                         <TextBlock Margin="0,12,0,3" Foreground="{DynamicResource TextSecondaryBrush}" Text="Logs location" />
                         <TextBlock Text="{Binding LogsLocation}" TextTrimming="CharacterEllipsis" ToolTip="{Binding LogsLocation}" />

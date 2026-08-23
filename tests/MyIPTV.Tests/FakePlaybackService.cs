@@ -5,6 +5,7 @@ namespace MyIPTV.Tests;
 
 internal sealed class FakePlaybackService : IPlaybackService, IPlaybackVideoSource
 {
+    private int _volumeBeforeMute = 80;
     public event EventHandler? PlaybackChanged;
 
     public object NativeMediaPlayer { get; } = new();
@@ -61,7 +62,17 @@ internal sealed class FakePlaybackService : IPlaybackService, IPlaybackVideoSour
 
     public void ToggleMute()
     {
-        IsMuted = !IsMuted;
+        if (IsMuted)
+        {
+            Volume = _volumeBeforeMute;
+            IsMuted = false;
+        }
+        else
+        {
+            _volumeBeforeMute = Math.Max(1, Volume);
+            Volume = 0;
+            IsMuted = true;
+        }
         RaiseChanged();
     }
 

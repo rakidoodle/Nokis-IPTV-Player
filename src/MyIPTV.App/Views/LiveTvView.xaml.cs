@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
+using LibVLCSharp.Shared;
 using MyIPTV.App.ViewModels;
 
 namespace MyIPTV.App.Views;
@@ -12,6 +14,7 @@ public partial class LiveTvView : UserControl
     private ResizeMode _previousResizeMode;
     private Thickness _previousLayoutMargin;
     private Thickness _previousContentMargin;
+    private bool _previousTopmost;
 
     public LiveTvView()
     {
@@ -25,6 +28,7 @@ public partial class LiveTvView : UserControl
         if (DataContext is LiveTvViewModel viewModel)
         {
             viewModel.Player.FullScreenChanged += OnFullScreenChanged;
+            ReattachVideoSurface(viewModel);
         }
     }
 
@@ -54,6 +58,7 @@ public partial class LiveTvView : UserControl
             _previousResizeMode = window.ResizeMode;
             _previousLayoutMargin = LayoutRoot.Margin;
             _previousContentMargin = ContentScroller.Margin;
+            _previousTopmost = window.Topmost;
             if (window is MainWindow mainWindow)
             {
                 mainWindow.EnterContentFullScreen();
@@ -79,6 +84,7 @@ public partial class LiveTvView : UserControl
             Grid.SetRowSpan(ContentScroller, 3);
             window.WindowStyle = WindowStyle.None;
             window.ResizeMode = ResizeMode.NoResize;
+            window.Topmost = true;
             window.WindowState = WindowState.Maximized;
         }
         else
@@ -109,7 +115,33 @@ public partial class LiveTvView : UserControl
             window.WindowStyle = _previousStyle;
             window.ResizeMode = _previousResizeMode;
             window.WindowState = _previousState;
+            window.Topmost = _previousTopmost;
         }
+    }
+
+    private void OnChannelSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ChannelList.SelectedItem is not null)
+        {
+            Dispatcher.BeginInvoke(
+                () => ChannelList.ScrollIntoView(ChannelList.SelectedItem),
+                DispatcherPriority.Loaded);
+        }
+    }
+
+    private void ReattachVideoSurface(LiveTvViewModel viewModel)
+    {
+        if (viewModel.Player.NativeMediaPlayer is not MediaPlayer mediaPlayer)
+        {
+            return;
+        }
+
+        VideoSurface.MediaPlayer = null;
+        Dispatcher.BeginInvoke(() =>
+        {
+            VideoSurface.MediaPlayer = mediaPlayer;
+            VideoSurface.InvalidateVisual();
+        }, DispatcherPriority.Loaded);
     }
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)

@@ -1,12 +1,12 @@
-# MyIPTV
+# Noki's IPTV Player
 
-MyIPTV is a modern Windows desktop player for IPTV and media sources that you own or are authorized to use. It is built with C#, .NET 10, WPF, MVVM, SQLite, and LibVLC.
+Noki's IPTV Player is a modern Windows desktop player for IPTV and media sources that you own or are authorized to use. It is built with C#, .NET 10, WPF, MVVM, SQLite, and LibVLC.
 
 The application separates the interface from provider, database, credential, and playback code. In plain English, a ViewModel contains a screen's behavior while its XAML View controls what you see. Dependency injection connects those parts without hiding global state inside the application.
 
 ## Features
 
-- Multiple M3U/M3U8, Xtream-compatible, and supported Stalker/Ministra profiles
+- Multiple M3U/M3U8, Xtream-compatible, and authorized MAC-based Stalker/Ministra profiles
 - Duplicate-name protection and Windows-protected credentials that are restored when editing a profile
 - Local and remote playlists with streaming, cancellable parsing
 - Live TV with resizable category/channel panels, full screen, volume, track selection, and current/next program details
@@ -14,7 +14,7 @@ The application separates the interface from provider, database, credential, and
 - XMLTV EPG with safe parsing, caching, timezone conversion, now/next data, and a TV guide
 - Debounced global search across channels, movies, series, episodes, and categories
 - Persistent favorites, recently watched items, and non-sensitive preferences
-- Dark and light themes, responsive resizing, keyboard navigation, accessible names, and visible focus
+- Dark, light, Midnight, and Ocean themes, responsive resizing, keyboard navigation, accessible names, and visible focus
 - Safe development library under **Settings > Data** using non-functional `example.invalid` addresses
 - Structured local logs with credential, token, header, and URL-query redaction
 - Friendly error states for network, provider, malformed-data, database, and playback failures
@@ -52,7 +52,7 @@ Runtime data is created under `%LocalAppData%\MyIPTV`. Source code, tests, and b
 
 For normal use with the release ZIP:
 
-1. Extract `MyIPTV-1.1.0-win-x64.zip` to a folder you control.
+1. Extract `Nokis-IPTV-Player-1.2.0-beta.1-win-x64.zip` to a folder you control.
 2. Open the extracted folder and double-click `MyIPTV.App.exe`.
 3. Open **Profiles**, choose **Add**, select the correct connection type, and enter the details issued by your provider.
 4. Choose **Test Connection**, then **Connect** to load the catalog.

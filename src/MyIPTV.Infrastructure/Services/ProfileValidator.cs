@@ -1,5 +1,6 @@
 using MyIPTV.Core.Abstractions;
 using MyIPTV.Core.Models;
+using System.Text.RegularExpressions;
 
 namespace MyIPTV.Infrastructure.Services;
 
@@ -81,15 +82,19 @@ public sealed class ProfileValidator : IProfileValidator
                 return ProfileValidationResult.Failure(
                     draft.ConnectionType == ProfileConnectionType.XtreamApi
                         ? "Username is required for an Xtream profile."
-                        : "Username is required for a supported Ministra REST profile.");
+                        : "MAC address is required for a Stalker profile.");
             }
 
-            if (requireCredentials && string.IsNullOrEmpty(draft.Password))
+            if (draft.ConnectionType == ProfileConnectionType.StalkerPortal &&
+                !Regex.IsMatch(draft.Username.Trim(), "^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}$"))
             {
-                return ProfileValidationResult.Failure(
-                    draft.ConnectionType == ProfileConnectionType.XtreamApi
-                        ? "Password is required for an Xtream profile."
-                        : "Password is required for a supported Ministra REST profile.");
+                return ProfileValidationResult.Failure("Enter a MAC address in the format 00:1A:79:00:00:00.");
+            }
+
+            if (draft.ConnectionType == ProfileConnectionType.XtreamApi &&
+                requireCredentials && string.IsNullOrEmpty(draft.Password))
+            {
+                return ProfileValidationResult.Failure("Password is required for an Xtream profile.");
             }
         }
 

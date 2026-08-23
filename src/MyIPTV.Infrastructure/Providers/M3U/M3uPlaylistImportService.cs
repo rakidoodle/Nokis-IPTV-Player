@@ -101,7 +101,8 @@ public sealed partial class M3uPlaylistImportService(
     {
         HttpClient client = httpClientFactory.CreateClient("Iptv");
         using HttpRequestMessage request = new(HttpMethod.Get, profile.ServerAddress);
-        request.Headers.UserAgent.ParseAdd("MyIPTV/1.1");
+        request.Headers.UserAgent.ParseAdd("VLC/3.0.21 LibVLC/3.0.21");
+        request.Headers.Accept.ParseAdd("application/x-mpegURL, application/vnd.apple.mpegurl, text/plain, */*");
         using HttpResponseMessage response = await client.SendAsync(
             request,
             HttpCompletionOption.ResponseHeadersRead,

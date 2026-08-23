@@ -26,9 +26,10 @@ public sealed partial class StalkerProvider(
         }
 
         ProfileCredentials? credentials = await credentialService.RetrieveAsync(profile.Id, cancellationToken);
-        if (credentials is null || string.IsNullOrWhiteSpace(credentials.Username))
+        string? account = credentials?.Username ?? profile.Username;
+        if (string.IsNullOrWhiteSpace(account))
         {
-            return ProviderLoadResult.Failure("Enter the portal username and password again.");
+            return ProviderLoadResult.Failure("Enter the portal MAC address again.");
         }
 
         LogCatalogLoadStarted(profile.Id);
@@ -36,8 +37,8 @@ public sealed partial class StalkerProvider(
         {
             StalkerSession session = await client.AuthenticateAsync(
                 profile.ServerAddress,
-                credentials.Username,
-                credentials.Password,
+                account,
+                credentials?.Password ?? string.Empty,
                 cancellationToken);
             IReadOnlyList<StalkerChannelDto> channelDtos =
                 await client.GetLiveChannelsAsync(profile.ServerAddress, session, cancellationToken);

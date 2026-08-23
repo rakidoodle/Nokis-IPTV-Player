@@ -8,6 +8,9 @@ namespace MyIPTV.App.ViewModels;
 public sealed partial class FavoritesViewModel : SectionViewModel
 {
     private readonly IFavoriteRepository _favoriteRepository;
+    private readonly INavigationService _navigationService;
+    private readonly IChannelCatalog _channelCatalog;
+    private readonly IPlaybackService _playbackService;
 
     [ObservableProperty]
     private IReadOnlyList<FavoriteContentViewModel> _items = [];
@@ -15,11 +18,18 @@ public sealed partial class FavoritesViewModel : SectionViewModel
     [ObservableProperty]
     private FavoriteContentViewModel? _selectedItem;
 
-    public FavoritesViewModel(IFavoriteRepository favoriteRepository)
+    public FavoritesViewModel(
+        IFavoriteRepository favoriteRepository,
+        INavigationService navigationService,
+        IChannelCatalog channelCatalog,
+        IPlaybackService playbackService)
         : base("Favorites", "Keep your preferred channels, movies, and series close by.",
             "No favorites yet", "Use the favorite button on content to add it here.", "\uE734")
     {
         _favoriteRepository = favoriteRepository;
+        _navigationService = navigationService;
+        _channelCatalog = channelCatalog;
+        _playbackService = playbackService;
         favoriteRepository.FavoritesChanged += OnFavoritesChanged;
         _ = RefreshAsync();
     }
@@ -37,6 +47,40 @@ public sealed partial class FavoritesViewModel : SectionViewModel
         {
             await _favoriteRepository.SetAsync(SelectedItem.ToFavorite(), false, cancellationToken);
         }
+    }
+
+    [RelayCommand(IncludeCancelCommand = true)]
+    private async Task PlayFavoriteAsync(FavoriteContentViewModel? item, CancellationToken cancellationToken)
+    {
+        if (item is null || item.ContentKind != ContentKind.LiveTv)
+        {
+            return;
+        }
+
+        IptvChannel? channel = _channelCatalog.GetAll().FirstOrDefault(candidate =>
+            candidate.ProfileId == item.ProfileId &&
+            string.Equals(candidate.Id, item.ContentId, StringComparison.Ordinal));
+        if (channel is null)
+        {
+            return;
+        }
+
+        SelectedItem = item;
+        _navigationService.NavigateTo<LiveTvViewModel>();
+        if (_navigationService.CurrentViewModel is LiveTvViewModel liveTv)
+        {
+            liveTv.SelectSearchResult(channel.ProfileId, channel.Id);
+        }
+
+        await _playbackService.PlayAsync(
+            new PlaybackRequest(
+                channel.Id,
+                ContentKind.LiveTv,
+                channel.Name,
+                channel.StreamUrl,
+                channel.LogoUrl,
+                ProfileId: channel.ProfileId),
+            cancellationToken);
     }
 
     private async void OnFavoritesChanged(object? sender, EventArgs e) => await RefreshAsync();

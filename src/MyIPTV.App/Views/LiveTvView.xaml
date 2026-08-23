@@ -85,12 +85,14 @@
                         </Grid.RowDefinitions>
                         <TextBlock FontSize="17" FontWeight="SemiBold" Text="Channels" />
                         <ListBox
+                            x:Name="ChannelList"
                             Grid.Row="1"
                             Margin="0,10,0,0"
                             AutomationProperties.Name="Live channels"
                             ItemsSource="{Binding FilteredChannels}"
                             ItemContainerStyle="{StaticResource NavigationItemStyle}"
                             SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
+                            SelectionChanged="OnChannelSelectionChanged"
                             ScrollViewer.CanContentScroll="True"
                             VirtualizingPanel.IsVirtualizing="True"
                             VirtualizingPanel.VirtualizationMode="Recycling"
@@ -158,12 +160,54 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     IsHitTestVisible="False">
+                                    <Image
+                                        Width="72"
+                                        Height="72"
+                                        Source="/MyIPTV.App;component/Assets/app-icon.png"
+                                        Stretch="Uniform"
+                                        RenderTransformOrigin="0.5,0.5">
+                                        <Image.RenderTransform>
+                                            <RotateTransform x:Name="LoadingRotation" />
+                                        </Image.RenderTransform>
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Player.IsLoading}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                        <Image.Triggers>
+                                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                                <BeginStoryboard>
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <DoubleAnimation Storyboard.TargetName="LoadingRotation"
+                                                                         Storyboard.TargetProperty="Angle"
+                                                                         From="0" To="360" Duration="0:0:1.1" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Image.Triggers>
+                                    </Image>
                                     <TextBlock
                                         HorizontalAlignment="Center"
                                         FontFamily="Segoe Fluent Icons"
                                         Foreground="{DynamicResource TextMutedBrush}"
                                         FontSize="42"
-                                        Text="&#xE714;" />
+                                        Text="&#xE714;">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Player.IsLoading}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                     <TextBlock
                                         Margin="0,12,0,0"
                                         Foreground="{DynamicResource TextSecondaryBrush}"

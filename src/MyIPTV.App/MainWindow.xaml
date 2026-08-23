@@ -62,7 +62,7 @@
                         VerticalAlignment="Center"
                         CornerRadius="11">
                         <Image
-                            AutomationProperties.Name="MyIPTV logo"
+                            AutomationProperties.Name="Noki's IPTV Player logo"
                             Source="Assets/brand-logo.png"
                             Stretch="Uniform" />
                     </Border>
@@ -70,7 +70,7 @@
                         Grid.Column="1"
                         Margin="10,0,0,0"
                         VerticalAlignment="Center"
-                        FontSize="21"
+                        FontSize="16"
                         FontWeight="SemiBold"
                         Text="{Binding ApplicationName}"
                         Visibility="{Binding ActualWidth, ElementName=RootWindow, Converter={StaticResource SidebarLabelVisibilityConverter}}" />

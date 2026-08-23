@@ -5,7 +5,7 @@ The Settings screen groups non-sensitive preferences and local data controls in 
 ## General
 
 - **Start page** chooses the first library screen shown on the next launch.
-- **Theme** switches between dark and light resources when settings are saved.
+- **Theme** switches among dark, light, Midnight, and Ocean Fluent-inspired palettes when settings are saved.
 - **Language** currently provides English (`en-US`). The stored language identifier and resource boundary are ready for future localization.
 - **Remember last profile** controls whether a future profile-selection workflow may restore the previous choice. Credentials remain independently protected by Windows DPAPI.
 

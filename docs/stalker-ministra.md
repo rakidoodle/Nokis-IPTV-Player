@@ -1,6 +1,6 @@
 # Stalker / Ministra compatibility
 
-MyIPTV supports the documented subscriber REST flow that authenticates with a normal username and password, receives a short-lived OAuth bearer token, and reads the authenticated user's live channel list. Session tokens remain in memory and are redacted from object text and logs. The dedicated HTTP client also disables framework request logging because authorization headers are sensitive.
+Noki's IPTV Player supports authorized Stalker portals using the MAC address issued for the subscriber's own set-top-box profile. It performs the standard portal handshake, keeps the short-lived bearer token in memory, and reads the subscriber's live channel list. Compatible Ministra REST accounts from earlier versions remain supported internally.
 
 ## Supported portal behavior
 
@@ -13,7 +13,7 @@ Portal URLs ending in `/c`, `/c/index.html`, `/portal.php`, or `/server/load.php
 
 ## Deliberate limitations
 
-The legacy STB interface is device-bound and commonly requires a MAC address, set-top-box model, serial number, or device-specific client identity. MyIPTV does not emulate a MAG device, invent or harvest MAC addresses, copy an existing device identity, or call the legacy handshake interface. A portal that exposes only that interface receives a clear unsupported-portal diagnostic and its existing local catalog is left untouched.
+Only use a MAC address assigned to an account or device you are authorized to access. The app does not discover, invent, harvest, or bypass provider identities, subscriptions, TLS, or DRM.
 
 Some Ministra deployments put the REST API on a separate operator-configured virtual host or require a licensed official player. Those configurations cannot be inferred safely from a normal portal URL. Ask the service operator for a supported REST endpoint, an M3U playlist, or Xtream-compatible access instead.
 

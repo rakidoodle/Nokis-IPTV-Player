@@ -171,17 +171,32 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
 
-                            <TextBlock Text="Server / URL / local playlist" />
+                            <TextBlock Text="{Binding AddressLabel}" />
                             <Grid Margin="0,7,0,14">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBox
-                                    AutomationProperties.Name="Server URL or local playlist path"
-                                    MaxLength="2048"
-                                    Style="{StaticResource FormTextBoxStyle}"
-                                    Text="{Binding ServerAddress, UpdateSourceTrigger=PropertyChanged}" />
+                                <Grid>
+                                    <TextBox
+                                        AutomationProperties.Name="{Binding AddressLabel}"
+                                        MaxLength="2048"
+                                        Style="{StaticResource FormTextBoxStyle}"
+                                        Text="{Binding ServerAddress, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Margin="12,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                                               Foreground="{DynamicResource TextMutedBrush}" Text="{Binding AddressPlaceholder}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ServerAddress}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
                                 <Button
                                     Grid.Column="1"
                                     Margin="8,0,0,0"
@@ -192,29 +207,39 @@
                                     Visibility="{Binding ShowsBrowseButton, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             </Grid>
 
-                            <StackPanel Visibility="{Binding ShowsCredentialFields, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="Username" />
-                                <TextBox
-                                    Margin="0,7,0,14"
-                                    AutomationProperties.Name="IPTV username"
-                                    MaxLength="256"
-                                    Style="{StaticResource FormTextBoxStyle}"
-                                    Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" />
+                            <StackPanel Visibility="{Binding ShowsUsernameField, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{Binding UsernameLabel}" />
+                                <Grid Margin="0,7,0,14">
+                                    <TextBox
+                                        AutomationProperties.Name="{Binding UsernameLabel}"
+                                        MaxLength="256"
+                                        Style="{StaticResource FormTextBoxStyle}"
+                                        Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Margin="12,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                                               Foreground="{DynamicResource TextMutedBrush}" Text="{Binding UsernamePlaceholder}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Username}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </StackPanel>
 
+                            <StackPanel Visibility="{Binding ShowsPasswordField, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="Password" />
                                 <PasswordBox
-                                    Margin="0,7,0,7"
+                                    Margin="0,7,0,14"
                                     AutomationProperties.Name="IPTV password"
                                     behaviors:PasswordBoxAssistant.BindPassword="True"
                                     behaviors:PasswordBoxAssistant.BoundPassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     MaxLength="512"
                                     Style="{StaticResource FormPasswordBoxStyle}" />
-                                <TextBlock
-                                    Margin="0,0,0,14"
-                                    Foreground="{DynamicResource WarningBrush}"
-                                    FontSize="12"
-                                    Text="Credentials are protected for your Windows account and are never stored in the database or logs. M3U links may also include username and password query parameters."
-                                    TextWrapping="Wrap" />
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>

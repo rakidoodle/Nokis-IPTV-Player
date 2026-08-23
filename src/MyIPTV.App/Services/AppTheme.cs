@@ -4,4 +4,6 @@ public enum AppTheme
 {
     Dark,
     Light,
+    Midnight,
+    Ocean,
 }
