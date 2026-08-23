@@ -1,115 +1,175 @@
 # MyIPTV
 
-MyIPTV is a Windows desktop media-player project for connecting to IPTV sources that the user is authorized to access.
+MyIPTV is a modern Windows desktop player for IPTV and media sources that you own or are authorized to use. It is built with C#, .NET 10, WPF, MVVM, SQLite, and LibVLC.
 
-The repository currently contains the verified .NET 10/WPF application foundation, profile management, secure credentials, provider loading, native media playback, a virtualized channel browser, and global catalog search.
+The application separates the interface from provider, database, credential, and playback code. In plain English, a ViewModel contains a screen's behavior while its XAML View controls what you see. Dependency injection connects those parts without hiding global state inside the application.
 
-## Foundation features
+## Features
 
-- Generic Host controls startup and graceful shutdown.
-- Constructor dependency injection creates services and ViewModels.
-- MVVM navigation keeps screen logic out of window code-behind.
-- Validated application configuration comes from `appsettings.json`.
-- Non-sensitive user preferences are written atomically to local JSON.
-- SQLite migrations create and version the local database safely.
-- Managed `HttpClient` instances have a validated 30-second timeout.
-- Central exception handling logs technical details and shows friendly messages.
-- Responsive media-style navigation adapts from a labeled sidebar to a compact icon rail.
-- Dark and light themes persist between application restarts.
-- Home, Live TV, Movies, Series, Favorites, Guide, and Settings screens are keyboard accessible.
-- Reusable empty, loading, and error states provide consistent feedback.
-- IPTV profiles support local or remote M3U playlists, Xtream API services, and Stalker/Ministra portals.
-- Profile metadata is stored in SQLite while credentials are encrypted for the current Windows user and redacted from diagnostics.
-- Connection tests validate local M3U headers, remote playlists, and provider server reachability.
-- A cancellable, streaming M3U/M3U8 importer handles common channel metadata, malformed entries, duplicates, and large playlists.
-- Authorized Xtream profiles authenticate and load live TV, movie, series, episode, category, and short-EPG data through a credential-safe provider boundary.
-- Authorized Ministra REST profiles authenticate with username/password and load live channels without device or MAC impersonation.
-- Bundled LibVLC playback supports HTTP/HTTPS IPTV media, transport controls, reconnect, aspect ratios, tracks, subtitles, and full screen.
-- The Live TV screen groups channels by category, virtualizes large lists, and plays the selected authorized stream.
-- Debounced global search finds loaded channels, movies, series, episodes, and categories without exposing stream addresses.
-- SQLite-backed favorites persist channels, movies, and series by stable provider IDs.
-- Recently watched history saves VOD progress and offers Continue Watching from Home.
-- XMLTV EPG supports timezone-safe parsing, channel mapping, current/next programs, conditional refresh, and a virtualized guide.
-- The VOD browser provides categories, posters, provider metadata, playback, favorites, and Continue Watching.
-- The series browser loads provider details on demand and organizes episodes by season with playback progress and resume.
-- Settings persist start page, theme, language-ready preferences, player defaults, EPG behavior, and safe local-data controls.
-- Daily structured diagnostic logs are written locally through a defense-in-depth credential sanitizer.
-- Central exception policy converts network, malformed-data, file, and database failures into safe user-facing guidance.
-- Large catalogs use background bounded search, indexed category snapshots, cancellation, and recycling UI virtualization.
-- Versioned SQLite state covers profiles, safe catalog metadata, favorites, history, EPG, and mirrored preferences.
+- Multiple M3U/M3U8, Xtream-compatible, and supported Stalker/Ministra profiles
+- Local and remote playlists with streaming, cancellable parsing
+- Live TV categories, virtualized channel lists, current/next program details, and playback controls
+- Movie and series browsers with provider metadata, seasons, episodes, favorites, and resume progress
+- XMLTV EPG with safe parsing, caching, timezone conversion, now/next data, and a TV guide
+- Debounced global search across channels, movies, series, episodes, and categories
+- Persistent favorites, recently watched items, and non-sensitive preferences
+- Dark and light themes, responsive resizing, keyboard navigation, accessible names, and visible focus
+- Safe development library under **Settings > Data** using non-functional `example.invalid` addresses
+- Structured local logs with credential, token, header, and URL-query redaction
+- Friendly error states for network, provider, malformed-data, database, and playback failures
+- Bounded background search and recycling virtualization designed for catalogs up to 50,000 entries
 
 ## Requirements
 
-- Windows 10 or Windows 11, x64
+To run the packaged version:
+
+- 64-bit Windows 10 or Windows 11
+- About 500 MB free disk space after extraction
+- An IPTV playlist or account that you are authorized to use (optional for the safe demo library)
+
+The self-contained package already includes .NET and LibVLC. To develop the project, also install:
+
 - .NET 10 SDK
 - Git
-- Visual Studio Code or Visual Studio (optional; command-line builds are supported)
+- Visual Studio 2022 or Visual Studio Code is optional; PowerShell is sufficient
 
-## Build and test
+## Development Setup
 
-From PowerShell in the repository root:
+Open PowerShell in the repository folder and run:
 
 ```powershell
-dotnet restore
-dotnet build
-dotnet test
+dotnet --info
+dotnet restore .\MyIPTV.sln
+dotnet build .\MyIPTV.sln
 ```
 
-Run the starter application with:
+NuGet is .NET's package manager. `dotnet restore` downloads the exact libraries listed in `Directory.Packages.props`; it never downloads IPTV content.
+
+Runtime data is created under `%LocalAppData%\MyIPTV`. Source code, tests, and build output do not contain real IPTV accounts.
+
+## Running the Application
+
+For normal use with the release ZIP:
+
+1. Extract `MyIPTV-1.0.0-win-x64.zip` to a folder you control.
+2. Open the extracted folder and double-click `MyIPTV.App.exe`.
+3. Open **Profiles**, choose **Add**, select the correct connection type, and enter the details issued by your provider.
+4. Choose **Test Connection**, then **Connect** to load the catalog.
+5. Browse **Live TV**, **Movies**, **Series**, or **Guide** and select an item to play.
+
+To explore without an account, open **Settings**, find **Data**, and choose **Load demo library**. Demo addresses are intentionally non-playable.
+
+To run from source:
 
 ```powershell
 dotnet run --project .\src\MyIPTV.App\MyIPTV.App.csproj
 ```
 
-## Project structure
+## Building
 
-- `src/MyIPTV.App` — WPF user interface and application startup
-- `src/MyIPTV.Core` — models, interfaces, and provider-independent rules
-- `src/MyIPTV.Infrastructure` — database, network, security, provider, and playback implementations
-- `tests/MyIPTV.Tests` — automated tests using safe synthetic data
-- `docs` — engineering and user documentation
+Create a normal developer build:
 
-See [Architecture](docs/architecture.md) for the dependency design.
-See [User interface](docs/user-interface.md) for navigation, themes, responsive behavior, and accessibility.
-See [IPTV profiles](docs/profiles.md) for profile setup, connection testing, and credential security.
-See [M3U playlists](docs/m3u-playlists.md) for supported metadata, importing, limits, and current catalog behavior.
-See [Xtream profiles](docs/xtream.md) for supported API operations and security limitations.
-See [Stalker / Ministra compatibility](docs/stalker-ministra.md) for the supported REST interface and deliberate legacy-device limitations.
-See [Media playback](docs/playback.md) for controls, formats, WPF behavior, and VideoLAN licensing.
-See [Live TV browser](docs/live-tv.md) for category filtering, playback, and large-list behavior.
-See [Global search](docs/search.md) for matching, ranking, keyboard use, and current catalog limits.
-See [Favorites](docs/favorites.md) for persistence, stable IDs, and stored data.
-See [Recently watched](docs/recently-watched.md) for saved progress, resume behavior, and privacy.
-See [XMLTV program guide](docs/epg.md) for source setup, channel mapping, caching, and timezone behavior.
-See [Movies and VOD](docs/movies.md) for metadata, playback, favorites, and resume behavior.
-See [Series and episodes](docs/series.md) for on-demand episode loading, season navigation, playback, and resume behavior.
-See [Settings](docs/settings.md) for application preferences, data controls, and local storage locations.
-See [Logging and diagnostics](docs/logging.md) for log format, redaction, and privacy boundaries.
-See [Error handling](docs/error-handling.md) for failure behavior and troubleshooting boundaries.
-See [Performance](docs/performance.md) for large-catalog design and verification.
-See [Database](docs/database.md) for tables, migrations, indexes, and the credential boundary.
-See [Testing](docs/testing.md) for the synthetic test matrix and commands.
+```powershell
+dotnet restore .\MyIPTV.sln
+dotnet build .\MyIPTV.sln
+```
 
-## Local application data
+Create the verified production configuration:
 
-Runtime data is stored under `%LocalAppData%\MyIPTV`:
+```powershell
+dotnet clean .\MyIPTV.sln -c Release
+dotnet restore .\MyIPTV.sln
+dotnet build .\MyIPTV.sln -c Release --no-restore
+```
 
-- `myiptv.db` — versioned SQLite application database
-- `settings.json` — compatibility fallback for non-sensitive user preferences mirrored in SQLite
-- `Cache` — reserved for disposable cached data
-- `Logs` — reserved for application log files
-- `Credentials` — DPAPI-encrypted credential files, one per profile
+The solution enables nullable checks, current recommended .NET analyzers, deterministic output, and code-style analysis. Version metadata is centralized in `Directory.Build.props`.
 
-IPTV passwords and authentication tokens are never written to settings, logs, or SQLite records. Each credential file is encrypted with Windows Data Protection API (DPAPI) using `CurrentUser` scope. Windows manages the encryption key, so the file can only be decrypted by the same Windows account on the same Windows installation. Credentials normally need to be entered again after moving the application data to another computer, reinstalling Windows, or losing the Windows user profile.
+## Testing
 
-## Testing dependency
+Run the complete synthetic test suite:
 
-Tests use the Microsoft-supported MSTest framework. MSTest is actively maintained and distributed under the MIT license.
+```powershell
+dotnet test .\MyIPTV.sln
+```
 
-See [Runtime dependencies](docs/dependencies.md) for package versions, purposes, and licenses.
+Release acceptance uses:
 
-## Security and legal usage
+```powershell
+dotnet test .\MyIPTV.sln -c Release --no-build
+dotnet list .\MyIPTV.sln package --vulnerable --include-transitive
+```
 
-Do not place IPTV passwords, tokens, complete credential-bearing URLs, or real accounts in source code or tests. Credentials are stored using Windows DPAPI protection and excluded from logs and the application database. Deleting a profile also deletes its protected credential file.
+Tests cover M3U parsing and malformed input, provider mapping, XMLTV, SQLite repositories and migrations, search, favorites, URL validation, credential storage boundaries, redaction, settings, catalog persistence, errors, and large-library behavior. They use only generated data and reserved example domains. See [Testing](docs/testing.md).
 
-Only connect MyIPTV to media services and streams that you own or are authorized to access. The project must not be used to bypass subscriptions, authentication, DRM, or server security.
+## Packaging
+
+The recommended release is a self-contained Windows x64 ZIP. A framework-dependent package is smaller but requires the matching .NET Desktop Runtime. An installer or MSIX adds installation and upgrade behavior but needs additional signing and deployment decisions.
+
+Build the ZIP and SHA-256 checksum with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\package-win-x64.ps1
+```
+
+Output is written to `artifacts\`. Single-file bundling and trimming are disabled because WPF and LibVLC require reflection and native companion files. See [Windows packaging](docs/packaging.md).
+
+## Project Structure
+
+```text
+MyIPTV.sln
+├── src/
+│   ├── MyIPTV.App/             WPF Views, ViewModels, navigation, startup
+│   ├── MyIPTV.Core/            Models, interfaces, provider-independent rules
+│   └── MyIPTV.Infrastructure/  SQLite, security, providers, HTTP, EPG, playback
+├── tests/MyIPTV.Tests/         Synthetic automated tests
+├── samples/                    Safe non-functional development playlist
+├── scripts/                    Repeatable Windows packaging
+└── docs/                       Architecture and feature documentation
+```
+
+MVVM keeps screen logic out of code-behind. Interfaces define what a service does; infrastructure classes provide the implementation. DTOs are temporary shapes used to read provider responses without coupling those responses to the user interface. See [Architecture](docs/architecture.md).
+
+## Supported IPTV Sources
+
+- **M3U/M3U8:** local files and HTTP/HTTPS playlists; common `tvg-id`, `tvg-name`, `tvg-logo`, and `group-title` metadata
+- **Xtream-compatible APIs:** normal username/password authentication, live/VOD/series catalogs, episodes, categories, and available short EPG data
+- **Stalker/Ministra:** authorized username/password REST v2 portals that return direct HTTP/HTTPS channels
+- **XMLTV:** local files and HTTP/HTTPS XML or XML.GZ sources
+
+Provider implementations and server versions vary. Legacy MAG/STB flows requiring MAC/device impersonation are deliberately unsupported. DRM-protected streams depend on rights and playback support supplied by the provider. See [M3U](docs/m3u-playlists.md), [Xtream](docs/xtream.md), and [Stalker/Ministra](docs/stalker-ministra.md).
+
+## Security
+
+- Passwords are encrypted in per-profile files with Windows DPAPI `CurrentUser` protection.
+- Passwords, bearer sessions, playable URLs, and authentication tokens are excluded from SQLite.
+- Log messages and exceptions redact sensitive assignments, HTTP authorization/cookie/API-key headers, bearer values, and URL queries.
+- Default .NET TLS certificate validation is never disabled.
+- Provider HTTP diagnostics are suppressed where legacy APIs place credentials in request URLs.
+- XML parsing prohibits DTDs and external entities; remote responses and decompressed EPG data have size limits.
+
+Prefer HTTPS because plain HTTP cannot protect credentials or media traffic in transit. DPAPI protects stored files from other Windows accounts, but it cannot defend an already compromised, unlocked account. See [Security review](docs/security-review.md) and [Logging](docs/logging.md).
+
+## Troubleshooting
+
+- **The app does not start:** extract the entire ZIP before running; do not launch the executable from inside the archive. Review `%LocalAppData%\MyIPTV\Logs`.
+- **Windows shows a warning:** this local build is not code-signed. Verify `artifacts\SHA256SUMS.txt` against the ZIP before running it.
+- **Connection test fails:** confirm the address, account, internet connection, and subscription status. Use the dedicated username/password fields; credential-bearing URLs are rejected.
+- **A certificate error appears:** the server certificate is invalid or untrusted. MyIPTV will not bypass it; contact the provider.
+- **Channels load but do not play:** the source may be offline, expired, DRM-protected, or use a codec/protocol unsupported by the bundled LibVLC runtime.
+- **EPG is empty:** check the XMLTV source and channel IDs, then refresh the Guide. Provider channel names and XMLTV IDs must map correctly.
+- **Credentials fail after moving PCs:** DPAPI data belongs to the original Windows account and installation. Enter the password again on the new PC.
+- **Reset disposable data:** use **Settings > Data** to clear cache or watch history. Profile deletion separately removes its encrypted credential.
+
+See [Error handling](docs/error-handling.md), [Settings](docs/settings.md), and [Release checklist](docs/release-checklist.md).
+
+## Legal Usage
+
+Only connect MyIPTV to playlists, accounts, media services, and streams that you own or are explicitly authorized to access. Do not use it to bypass subscriptions, authentication, geographic restrictions, DRM, or server security, and do not use another person's credentials. You are responsible for complying with your provider agreement and applicable law.
+
+MyIPTV does not discover accounts, scrape credentials, harvest MAC addresses, emulate subscriber devices to obtain access, or provide media services of its own.
+
+## Open-Source Licenses
+
+MyIPTV uses open-source components including .NET, CommunityToolkit.Mvvm, Microsoft.Extensions, Microsoft.Data.Sqlite, MSTest, LibVLCSharp, and the VideoLAN LibVLC Windows runtime. The Microsoft and toolkit dependencies are MIT-licensed; LibVLCSharp and LibVLC are LGPL-2.1-or-later.
+
+Redistributors must retain and satisfy the notices and license terms of every bundled dependency, especially the LGPL terms for VideoLAN components. See [Runtime dependencies and licenses](docs/dependencies.md) for exact versions and purposes. The repository does not grant rights to third-party IPTV content, branding, or service credentials.
