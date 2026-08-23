@@ -1,0 +1,5 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="demo.news" group-title="Demo News",Demo News
+https://example.invalid/live/demo-news.m3u8
+#EXTINF:-1 tvg-id="demo.sports" group-title="Demo Sports",Demo Sports
+https://example.invalid/live/demo-sports.m3u8

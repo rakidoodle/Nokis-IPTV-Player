@@ -18,6 +18,7 @@ public sealed partial class SettingsViewModel : SectionViewModel
     private readonly IDataMaintenanceService _dataMaintenanceService;
     private readonly IUserNotificationService _notifications;
     private readonly IApplicationPaths _paths;
+    private readonly IDevelopmentDataService _developmentData;
 
     [ObservableProperty] private string _startPage = "Home";
     [ObservableProperty] private string _theme = "Dark";
@@ -39,6 +40,7 @@ public sealed partial class SettingsViewModel : SectionViewModel
         IPlaybackService playbackService,
         IWatchHistoryRepository historyRepository,
         IDataMaintenanceService dataMaintenanceService,
+        IDevelopmentDataService developmentData,
         IUserNotificationService notifications,
         IApplicationPaths paths)
         : base("Settings", "Manage appearance, playback, EPG, and local application data.",
@@ -49,6 +51,7 @@ public sealed partial class SettingsViewModel : SectionViewModel
         _playbackService = playbackService;
         _historyRepository = historyRepository;
         _dataMaintenanceService = dataMaintenanceService;
+        _developmentData = developmentData;
         _notifications = notifications;
         _paths = paths;
         ApplicationVersion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "Development";
@@ -63,6 +66,7 @@ public sealed partial class SettingsViewModel : SectionViewModel
     public string ApplicationVersion { get; }
     public string DatabaseLocation => _paths.DatabasePath;
     public string LogsLocation => _paths.LogsDirectory;
+    public string DemoDataButtonText => _developmentData.IsLoaded ? "Remove demo library" : "Load demo library";
 
     [RelayCommand(IncludeCancelCommand = true)]
     private async Task SaveAsync(CancellationToken cancellationToken)
@@ -133,6 +137,30 @@ public sealed partial class SettingsViewModel : SectionViewModel
 
         await _historyRepository.ClearAsync();
         StatusMessage = "Watch history cleared.";
+    }
+
+    [RelayCommand]
+    private async Task ToggleDemoDataAsync()
+    {
+        IsBusy = true;
+        try
+        {
+            if (_developmentData.IsLoaded)
+            {
+                await _developmentData.RemoveAsync();
+                StatusMessage = "Development demo library removed.";
+            }
+            else
+            {
+                await _developmentData.LoadAsync();
+                StatusMessage = "Safe demo channels, movies, and series are ready.";
+            }
+            OnPropertyChanged(nameof(DemoDataButtonText));
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]

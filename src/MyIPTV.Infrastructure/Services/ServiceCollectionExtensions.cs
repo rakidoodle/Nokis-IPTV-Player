@@ -48,6 +48,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<JsonSettingsService>();
         services.AddSingleton<ISettingsService, SqliteSettingsService>();
         services.AddSingleton<IDataMaintenanceService, DataMaintenanceService>();
+        services.AddSingleton<IDevelopmentDataService, DevelopmentDataService>();
         services.AddSingleton<IDatabaseService, SqliteDatabaseService>();
         services.AddSingleton<IProfileRepository, SqliteProfileRepository>();
         services.AddSingleton<IFavoriteRepository, SqliteFavoriteRepository>();
