@@ -11,6 +11,9 @@ public sealed partial class LiveTvViewModel : SectionViewModel
     private readonly IPlaybackService _playbackService;
     private readonly IFavoriteRepository _favoriteRepository;
     private readonly IEpgService _epgService;
+    private IReadOnlyList<IptvChannel> _allChannels = [];
+    private IReadOnlyDictionary<string, IptvChannel[]> _channelsByGroup =
+        new Dictionary<string, IptvChannel[]>(StringComparer.OrdinalIgnoreCase);
 
     [ObservableProperty]
     private IReadOnlyList<ChannelCategoryViewModel> _categories = [];
@@ -172,10 +175,12 @@ public sealed partial class LiveTvViewModel : SectionViewModel
     private void UpdateCatalog()
     {
         IReadOnlyList<IptvChannel> allChannels = _channelCatalog.GetAll();
+        _allChannels = allChannels;
         int channelCount = allChannels.Count;
         if (channelCount == 0)
         {
             Categories = [];
+            _channelsByGroup = new Dictionary<string, IptvChannel[]>(StringComparer.OrdinalIgnoreCase);
             FilteredChannels = [];
             SelectedCategory = null;
             SelectedChannel = null;
@@ -187,14 +192,16 @@ public sealed partial class LiveTvViewModel : SectionViewModel
         }
 
         string? previousGroup = SelectedCategory?.Group;
+        _channelsByGroup = allChannels
+            .GroupBy(channel => NormalizeGroup(channel.Group), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.ToArray(), StringComparer.OrdinalIgnoreCase);
         List<ChannelCategoryViewModel> categories =
         [
             new("All channels", channelCount, null),
         ];
-        categories.AddRange(allChannels
-            .GroupBy(channel => NormalizeGroup(channel.Group), StringComparer.OrdinalIgnoreCase)
+        categories.AddRange(_channelsByGroup
             .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
-            .Select(group => new ChannelCategoryViewModel(group.Key, group.Count(), group.Key)));
+            .Select(group => new ChannelCategoryViewModel(group.Key, group.Value.Length, group.Key)));
         Categories = categories;
         SelectedCategory = categories.FirstOrDefault(category =>
             string.Equals(category.Group, previousGroup, StringComparison.OrdinalIgnoreCase)) ?? categories[0];
@@ -208,15 +215,9 @@ public sealed partial class LiveTvViewModel : SectionViewModel
 
     private void ApplyCategory(ChannelCategoryViewModel? category)
     {
-        IReadOnlyList<IptvChannel> allChannels = _channelCatalog.GetAll();
         FilteredChannels = category?.Group is null
-            ? allChannels.ToArray()
-            : allChannels
-                .Where(channel => string.Equals(
-                    NormalizeGroup(channel.Group),
-                    category.Group,
-                    StringComparison.OrdinalIgnoreCase))
-                .ToArray();
+            ? _allChannels
+            : _channelsByGroup.GetValueOrDefault(category.Group) ?? [];
         if (SelectedChannel is not null && !FilteredChannels.Contains(SelectedChannel))
         {
             SelectedChannel = null;

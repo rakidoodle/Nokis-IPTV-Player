@@ -35,6 +35,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - Settings persist start page, theme, language-ready preferences, player defaults, EPG behavior, and safe local-data controls.
 - Daily structured diagnostic logs are written locally through a defense-in-depth credential sanitizer.
 - Central exception policy converts network, malformed-data, file, and database failures into safe user-facing guidance.
+- Large catalogs use background bounded search, indexed category snapshots, cancellation, and recycling UI virtualization.
 
 ## Requirements
 
@@ -84,6 +85,7 @@ See [Series and episodes](docs/series.md) for on-demand episode loading, season 
 See [Settings](docs/settings.md) for application preferences, data controls, and local storage locations.
 See [Logging and diagnostics](docs/logging.md) for log format, redaction, and privacy boundaries.
 See [Error handling](docs/error-handling.md) for failure behavior and troubleshooting boundaries.
+See [Performance](docs/performance.md) for large-catalog design and verification.
 
 ## Local application data
 

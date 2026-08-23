@@ -45,6 +45,12 @@ Provider and parser boundaries translate expected transport, timeout, malformed-
 
 The application registers dispatcher, background-task, and process exception handlers as a final boundary. `IExceptionMessageService` maps known technical exception types to fixed user-safe explanations and never displays raw exception text, URLs, or server responses. Full exceptions flow only to the sanitizing logger. Database initialization adds an explicit error event before startup stops safely.
 
+## Large-catalog performance
+
+Catalog search snapshots data and scans it on a worker thread. It checks cancellation in batches and keeps only the best requested number of ranked results in a bounded ordered set, avoiding a 50,000-object match list followed by a full sort. The UI debounce cancels obsolete searches before publishing results.
+
+The Live TV browser builds a case-insensitive group index once per catalog replacement. Category changes reuse immutable arrays instead of rescanning and normalizing every channel. WPF channel, movie, series, episode, favorites, guide, and search lists enable recycling virtualization and logical scrolling so realized controls track the viewport rather than catalog size.
+
 ## Credential boundary
 
 `ICredentialService` keeps password handling independent from profile and provider code. Its Windows implementation serializes the smallest required credential payload, protects it with DPAPI `CurrentUser` scope, and atomically writes one opaque file per profile under `%LocalAppData%\MyIPTV\Credentials`.

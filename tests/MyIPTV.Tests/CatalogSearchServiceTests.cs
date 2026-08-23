@@ -2,6 +2,7 @@ using MyIPTV.Core.Models;
 using MyIPTV.Infrastructure.Providers;
 using MyIPTV.Infrastructure.Providers.M3U;
 using MyIPTV.Infrastructure.Services;
+using System.Diagnostics;
 
 namespace MyIPTV.Tests;
 
@@ -77,5 +78,35 @@ public sealed class CatalogSearchServiceTests
 
         await Assert.ThrowsExactlyAsync<TaskCanceledException>(
             () => service.SearchAsync("demo", cancellationToken: cancellation.Token));
+    }
+
+    [TestMethod]
+    [Timeout(10_000)]
+    public async Task FiftyThousandEntrySearchReturnsBoundedSortedResults()
+    {
+        const int channelCount = 50_000;
+        Guid profileId = Guid.NewGuid();
+        InMemoryChannelCatalog channels = new();
+        channels.ReplaceForProfile(profileId, Enumerable.Range(0, channelCount)
+            .Select(index => new IptvChannel(
+                index.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                profileId,
+                $"Demo Channel {index:D5}",
+                $"https://example.invalid/{index}",
+                null,
+                "Development",
+                null))
+            .ToArray());
+        CatalogSearchService service = new(channels, new InMemoryMediaCatalog());
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        IReadOnlyList<SearchResult> results = await service.SearchAsync("demo", 50);
+
+        stopwatch.Stop();
+        Assert.HasCount(50, results);
+        Assert.AreEqual("Demo Channel 00000", results[0].Title);
+        Assert.AreEqual("Demo Channel 00049", results[^1].Title);
+        Assert.IsLessThan(TimeSpan.FromSeconds(5), stopwatch.Elapsed,
+            $"Large-catalog search took {stopwatch.Elapsed}.");
     }
 }

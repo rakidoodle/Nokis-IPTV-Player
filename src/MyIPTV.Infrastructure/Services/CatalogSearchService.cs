@@ -19,15 +19,15 @@ public sealed class CatalogSearchService(
         }
 
         int limit = Math.Clamp(maximumResults, 1, 200);
-        IReadOnlyList<IptvChannel> channels = channelCatalog.GetAll();
-        IReadOnlyList<ContentCategory> categories = mediaCatalog.GetCategories();
-        IReadOnlyList<MovieItem> movies = mediaCatalog.GetMovies();
-        IReadOnlyList<SeriesItem> series = mediaCatalog.GetSeries();
-        IReadOnlyList<EpisodeItem> episodes = mediaCatalog.GetEpisodes();
-
         return Task.Run<IReadOnlyList<SearchResult>>(() =>
         {
-            List<RankedResult> matches = [];
+            cancellationToken.ThrowIfCancellationRequested();
+            IReadOnlyList<IptvChannel> channels = channelCatalog.GetAll();
+            IReadOnlyList<ContentCategory> categories = mediaCatalog.GetCategories();
+            IReadOnlyList<MovieItem> movies = mediaCatalog.GetMovies();
+            IReadOnlyList<SeriesItem> series = mediaCatalog.GetSeries();
+            IReadOnlyList<EpisodeItem> episodes = mediaCatalog.GetEpisodes();
+            BoundedResultSet matches = new(limit);
             Add(matches, channels, item => item.Name, item => new(
                 SearchResultKind.LiveChannel,
                 item.Id,
@@ -60,26 +60,22 @@ public sealed class CatalogSearchService(
                 $"{item.Kind} category",
                 item.Kind), normalizedQuery, cancellationToken);
 
-            return matches
-                .OrderBy(match => match.Rank)
-                .ThenBy(match => match.Result.Title, StringComparer.OrdinalIgnoreCase)
-                .Take(limit)
-                .Select(match => match.Result)
-                .ToArray();
+            return matches.Results;
         }, cancellationToken);
     }
 
     private static void Add<T>(
-        ICollection<RankedResult> results,
+        BoundedResultSet results,
         IEnumerable<T> source,
         Func<T, string> title,
         Func<T, SearchResult> map,
         string query,
         CancellationToken cancellationToken)
     {
+        int examined = 0;
         foreach (T item in source)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if ((examined++ & 255) == 0) cancellationToken.ThrowIfCancellationRequested();
             string candidate = title(item);
             int index = candidate.IndexOf(query, StringComparison.OrdinalIgnoreCase);
             if (index >= 0)
@@ -90,4 +86,41 @@ public sealed class CatalogSearchService(
     }
 
     private sealed record RankedResult(int Rank, SearchResult Result);
+
+    private sealed class BoundedResultSet
+    {
+        private readonly int _limit;
+        private readonly SortedSet<RankedResult> _items = new(RankedResultComparer.Instance);
+
+        public BoundedResultSet(int limit) => _limit = limit;
+
+        public IReadOnlyList<SearchResult> Results => _items.Select(item => item.Result).ToArray();
+
+        public void Add(RankedResult item)
+        {
+            _items.Add(item);
+            if (_items.Count > _limit && _items.Max is { } last) _items.Remove(last);
+        }
+    }
+
+    private sealed class RankedResultComparer : IComparer<RankedResult>
+    {
+        public static RankedResultComparer Instance { get; } = new();
+
+        public int Compare(RankedResult? left, RankedResult? right)
+        {
+            if (ReferenceEquals(left, right)) return 0;
+            if (left is null) return -1;
+            if (right is null) return 1;
+            int comparison = left.Rank.CompareTo(right.Rank);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.OrdinalIgnoreCase.Compare(left.Result.Title, right.Result.Title);
+            if (comparison != 0) return comparison;
+            comparison = left.Result.Kind.CompareTo(right.Result.Kind);
+            if (comparison != 0) return comparison;
+            comparison = left.Result.ProfileId.CompareTo(right.Result.ProfileId);
+            if (comparison != 0) return comparison;
+            return StringComparer.Ordinal.Compare(left.Result.Id, right.Result.Id);
+        }
+    }
 }
