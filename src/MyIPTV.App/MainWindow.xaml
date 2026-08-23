@@ -165,6 +165,93 @@
                         </TextBlock>
                     </Grid>
 
+                    <Popup
+                        x:Name="SearchPopup"
+                        AllowsTransparency="True"
+                        DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                        IsOpen="{Binding IsSearchOpen, Mode=TwoWay}"
+                        Placement="Bottom"
+                        PlacementTarget="{Binding ElementName=SearchBox}"
+                        PopupAnimation="Fade"
+                        StaysOpen="False">
+                        <Border
+                            Width="420"
+                            MaxHeight="360"
+                            Margin="0,8,0,0"
+                            Padding="8"
+                            Background="{DynamicResource SurfaceBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                            <Grid>
+                                <ListBox
+                                    AutomationProperties.Name="Search results"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    ItemsSource="{Binding SearchResults}"
+                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                            <Setter Property="Padding" Value="0" />
+                                            <Setter Property="Margin" Value="0,2" />
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button
+                                                Padding="12,9"
+                                                HorizontalContentAlignment="Stretch"
+                                                AutomationProperties.Name="{Binding Title}"
+                                                Command="{Binding DataContext.OpenSearchResultCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource SecondaryButtonStyle}">
+                                                <StackPanel>
+                                                    <TextBlock FontWeight="SemiBold" Text="{Binding Title}" />
+                                                    <TextBlock
+                                                        Margin="0,3,0,0"
+                                                        Foreground="{DynamicResource TextMutedBrush}"
+                                                        FontSize="11"
+                                                        Text="{Binding Subtitle}" />
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource TextMutedBrush}"
+                                    Text="Searching…"
+                                    Visibility="{Binding IsSearchBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                <TextBlock
+                                    Margin="12,18"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource TextMutedBrush}"
+                                    Text="No matches found">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasSearchResults}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsSearchBusy}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                    </Popup>
+
                     <Button
                         Grid.Column="1"
                         AutomationProperties.Name="{Binding ThemeButtonLabel}"

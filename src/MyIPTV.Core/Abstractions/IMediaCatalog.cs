@@ -12,11 +12,18 @@ public interface IMediaCatalog
 
     IReadOnlyList<SeriesItem> GetSeries();
 
+    IReadOnlyList<EpisodeItem> GetEpisodes();
+
     void ReplaceForProfile(
         Guid profileId,
         IReadOnlyList<ContentCategory> categories,
         IReadOnlyList<MovieItem> movies,
         IReadOnlyList<SeriesItem> series);
+
+    void ReplaceSeriesEpisodes(
+        Guid profileId,
+        string seriesId,
+        IReadOnlyList<EpisodeItem> episodes);
 
     void RemoveProfile(Guid profileId);
 }

@@ -61,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPlaybackVideoSource>(provider => provider.GetRequiredService<LibVlcPlaybackService>());
         services.AddSingleton<IActiveProfileService, ActiveProfileService>();
         services.AddSingleton<IProfileService, ProfileService>();
+        services.AddSingleton<ISearchService, CatalogSearchService>();
 
         return services;
     }

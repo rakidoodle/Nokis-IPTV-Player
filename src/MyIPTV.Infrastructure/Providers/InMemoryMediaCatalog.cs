@@ -34,6 +34,14 @@ public sealed class InMemoryMediaCatalog : IMediaCatalog
         }
     }
 
+    public IReadOnlyList<EpisodeItem> GetEpisodes()
+    {
+        lock (_syncRoot)
+        {
+            return _mediaByProfile.Values.SelectMany(media => media.Episodes).ToArray();
+        }
+    }
+
     public void ReplaceForProfile(
         Guid profileId,
         IReadOnlyList<ContentCategory> categories,
@@ -55,7 +63,35 @@ public sealed class InMemoryMediaCatalog : IMediaCatalog
             _mediaByProfile[profileId] = new(
                 categories.ToArray(),
                 movies.ToArray(),
-                series.ToArray());
+                series.ToArray(),
+                []);
+        }
+
+        CatalogChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ReplaceSeriesEpisodes(
+        Guid profileId,
+        string seriesId,
+        IReadOnlyList<EpisodeItem> episodes)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(seriesId);
+        ArgumentNullException.ThrowIfNull(episodes);
+        if (episodes.Any(item => item.ProfileId != profileId || item.SeriesId != seriesId))
+        {
+            throw new ArgumentException("Every episode must belong to the supplied profile and series.", nameof(episodes));
+        }
+
+        lock (_syncRoot)
+        {
+            ProfileMedia existing = _mediaByProfile.TryGetValue(profileId, out ProfileMedia? media)
+                ? media
+                : new([], [], [], []);
+            EpisodeItem[] merged = existing.Episodes
+                .Where(item => item.SeriesId != seriesId)
+                .Concat(episodes)
+                .ToArray();
+            _mediaByProfile[profileId] = existing with { Episodes = merged };
         }
 
         CatalogChanged?.Invoke(this, EventArgs.Empty);
@@ -78,5 +114,6 @@ public sealed class InMemoryMediaCatalog : IMediaCatalog
     private sealed record ProfileMedia(
         ContentCategory[] Categories,
         MovieItem[] Movies,
-        SeriesItem[] Series);
+        SeriesItem[] Series,
+        EpisodeItem[] Episodes);
 }

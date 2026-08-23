@@ -2,6 +2,7 @@ using MyIPTV.App.Services;
 using MyIPTV.App.ViewModels;
 using MyIPTV.Core.Abstractions;
 using MyIPTV.Core.Models;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MyIPTV.Tests;
 
@@ -45,7 +46,18 @@ public sealed class MainWindowViewModelTests
             new FakeApplicationConfiguration(),
             settings ?? new FakeSettingsService(),
             theme ?? new FakeThemeService(),
-            new FakePlaybackService());
+            new FakePlaybackService(),
+            new FakeSearchService(),
+            NullLogger<MainWindowViewModel>.Instance);
+
+    private sealed class FakeSearchService : ISearchService
+    {
+        public Task<IReadOnlyList<SearchResult>> SearchAsync(
+            string query,
+            int maximumResults = 50,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<SearchResult>>([]);
+    }
 
     private sealed class FakeNavigationService : INavigationService
     {

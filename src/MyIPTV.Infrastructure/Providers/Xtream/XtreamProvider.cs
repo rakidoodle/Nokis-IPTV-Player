@@ -174,6 +174,7 @@ public sealed partial class XtreamProvider(
                 }
             }
 
+            mediaCatalog.ReplaceSeriesEpisodes(profile.Id, seriesId, episodes);
             return SeriesDetailsResult.Success(episodes);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)

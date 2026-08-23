@@ -46,6 +46,22 @@ public sealed partial class LiveTvViewModel : SectionViewModel
 
     public bool CanPlaySelectedChannel => SelectedChannel is not null;
 
+    public void SelectSearchResult(Guid profileId, string channelId)
+    {
+        IptvChannel? channel = _channelCatalog.GetAll().FirstOrDefault(item =>
+            item.ProfileId == profileId && string.Equals(item.Id, channelId, StringComparison.Ordinal));
+        if (channel is null)
+        {
+            return;
+        }
+
+        string group = NormalizeGroup(channel.Group);
+        SelectedCategory = Categories.FirstOrDefault(category =>
+            string.Equals(category.Group, group, StringComparison.OrdinalIgnoreCase)) ?? Categories[0];
+        SelectedChannel = FilteredChannels.FirstOrDefault(item =>
+            item.ProfileId == profileId && string.Equals(item.Id, channelId, StringComparison.Ordinal));
+    }
+
     [RelayCommand(CanExecute = nameof(CanPlaySelectedChannel), IncludeCancelCommand = true)]
     private async Task PlaySelectedChannelAsync(CancellationToken cancellationToken)
     {

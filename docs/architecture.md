@@ -41,7 +41,7 @@ SQLite contains profile metadata but no password or token columns. Logs contain 
 
 `IM3uPlaylistParser` reads playlist text incrementally from a stream, maps provider metadata into provider-independent `IptvChannel` records, and returns counts instead of logging individual entries. `IPlaylistImportService` owns local-file and remote-HTTP loading. Remote responses use `ResponseHeadersRead`, so the whole source file is not buffered before parsing.
 
-Successful imports atomically replace that profile's entries in `IChannelCatalog`. The catalog is intentionally in memory during Phase 7; reconnect after an application restart to import it again. Persistent channel tables and indexes belong to the later database phase, while the virtualized channel browser belongs to Phase 11.
+Successful imports atomically replace that profile's entries in `IChannelCatalog`. The catalog is currently in memory; reconnect after an application restart to import it again. Persistent channel tables and indexes belong to the later database phase. The Live TV browser and global search read immutable catalog snapshots.
 
 ## Content providers
 
@@ -58,3 +58,9 @@ Stalker/Ministra support stays isolated under `Infrastructure/Providers/Stalker`
 Playback requests redact stream URLs from their diagnostic text. The engine logs only stable content IDs and content types, does not attach LibVLC diagnostic logging, and never records native media locations.
 
 The Live TV ViewModel reads immutable snapshots from `IChannelCatalog`, builds case-insensitive category summaries, and filters existing channel records without copying stream data. WPF category and channel lists use recycling virtualization so visual-tree size follows the viewport rather than catalog size.
+
+## Search boundary
+
+`ISearchService` exposes provider-independent catalog search. `CatalogSearchService` snapshots the channel and media catalogs, performs cancellable matching away from the UI thread, ranks title prefixes before title substrings, and clamps result counts. The window ViewModel adds a 300 ms debounce and cancels obsolete queries as the user types.
+
+Search results contain stable catalog identifiers, labels, and content kinds only. Stream URLs and provider credentials never cross into the search result model. Selecting a result navigates through `INavigationService`; live-channel results also select the matching channel in the browser.
