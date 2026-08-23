@@ -51,6 +51,12 @@ Catalog search snapshots data and scans it on a worker thread. It checks cancell
 
 The Live TV browser builds a case-insensitive group index once per catalog replacement. Category changes reuse immutable arrays instead of rescanning and normalizing every channel. WPF channel, movie, series, episode, favorites, guide, and search lists enable recycling virtualization and logical scrolling so realized controls track the viewport rather than catalog size.
 
+## SQLite state
+
+Ordered embedded migrations create profiles, channels, movies, series, episodes, favorites, watch history, EPG channels/programs/cache, and settings tables plus their query indexes. Initialization records each migration in `schema_migrations` and runs unapplied changes transactionally.
+
+`CatalogPersistenceCoordinator` serializes catalog-change snapshots on worker tasks and persists metadata transactionally. Playback and artwork URLs are deliberately absent from the schema, preventing Xtream path credentials or signed image queries from becoming ordinary database state. Preferences use SQLite as the primary record with the atomic JSON file retained as a compatibility fallback. SQLite connection pooling is disabled so shutdown and portable test cleanup release database files deterministically.
+
 ## Credential boundary
 
 `ICredentialService` keeps password handling independent from profile and provider code. Its Windows implementation serializes the smallest required credential payload, protects it with DPAPI `CurrentUser` scope, and atomically writes one opaque file per profile under `%LocalAppData%\MyIPTV\Credentials`.
@@ -61,7 +67,7 @@ SQLite contains profile metadata but no password or token columns. Logs contain 
 
 `IM3uPlaylistParser` reads playlist text incrementally from a stream, maps provider metadata into provider-independent `IptvChannel` records, and returns counts instead of logging individual entries. `IPlaylistImportService` owns local-file and remote-HTTP loading. Remote responses use `ResponseHeadersRead`, so the whole source file is not buffered before parsing.
 
-Successful imports atomically replace that profile's entries in `IChannelCatalog`. The catalog is currently in memory; reconnect after an application restart to import it again. Persistent channel tables and indexes belong to the later database phase. The Live TV browser and global search read immutable catalog snapshots.
+Successful imports atomically replace that profile's entries in `IChannelCatalog`. Playable catalogs stay in memory because some legacy playback addresses contain credentials and must never be persisted. A background coordinator stores only safe searchable metadata in indexed SQLite tables. Reconnect after an application restart to reacquire authorized playback addresses. The Live TV browser and global search read immutable runtime snapshots.
 
 ## Content providers
 

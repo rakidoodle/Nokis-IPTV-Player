@@ -17,7 +17,7 @@ public sealed class DatabaseServiceTests
         await service.InitializeAsync();
         await service.InitializeAsync();
 
-        await using (SqliteConnection connection = new($"Data Source={paths.DatabasePath}"))
+        await using (SqliteConnection connection = new($"Data Source={paths.DatabasePath};Pooling=False"))
         {
             await connection.OpenAsync();
 
@@ -28,7 +28,7 @@ public sealed class DatabaseServiceTests
 
             await using SqliteDataReader reader = await command.ExecuteReaderAsync();
             Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(5L, reader.GetInt64(0));
+            Assert.AreEqual(6L, reader.GetInt64(0));
             Assert.AreEqual(1L, reader.GetInt64(1));
         }
 

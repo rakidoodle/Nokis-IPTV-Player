@@ -45,12 +45,14 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IApplicationConfiguration, ApplicationConfiguration>();
         services.AddSingleton<IApplicationPaths, ApplicationPaths>();
         services.AddSingleton<ILoggerProvider, SanitizingFileLoggerProvider>();
-        services.AddSingleton<ISettingsService, JsonSettingsService>();
+        services.AddSingleton<JsonSettingsService>();
+        services.AddSingleton<ISettingsService, SqliteSettingsService>();
         services.AddSingleton<IDataMaintenanceService, DataMaintenanceService>();
         services.AddSingleton<IDatabaseService, SqliteDatabaseService>();
         services.AddSingleton<IProfileRepository, SqliteProfileRepository>();
         services.AddSingleton<IFavoriteRepository, SqliteFavoriteRepository>();
         services.AddSingleton<IWatchHistoryRepository, SqliteWatchHistoryRepository>();
+        services.AddSingleton<ICatalogStateRepository, SqliteCatalogStateRepository>();
         services.AddSingleton<IEpgRepository, SqliteEpgRepository>();
         services.AddSingleton<ICredentialService, WindowsCredentialService>();
         services.AddSingleton<IProfileValidator, ProfileValidator>();

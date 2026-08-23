@@ -36,6 +36,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - Daily structured diagnostic logs are written locally through a defense-in-depth credential sanitizer.
 - Central exception policy converts network, malformed-data, file, and database failures into safe user-facing guidance.
 - Large catalogs use background bounded search, indexed category snapshots, cancellation, and recycling UI virtualization.
+- Versioned SQLite state covers profiles, safe catalog metadata, favorites, history, EPG, and mirrored preferences.
 
 ## Requirements
 
@@ -86,13 +87,14 @@ See [Settings](docs/settings.md) for application preferences, data controls, and
 See [Logging and diagnostics](docs/logging.md) for log format, redaction, and privacy boundaries.
 See [Error handling](docs/error-handling.md) for failure behavior and troubleshooting boundaries.
 See [Performance](docs/performance.md) for large-catalog design and verification.
+See [Database](docs/database.md) for tables, migrations, indexes, and the credential boundary.
 
 ## Local application data
 
 Runtime data is stored under `%LocalAppData%\MyIPTV`:
 
 - `myiptv.db` — versioned SQLite application database
-- `settings.json` — non-sensitive user preferences only
+- `settings.json` — compatibility fallback for non-sensitive user preferences mirrored in SQLite
 - `Cache` — reserved for disposable cached data
 - `Logs` — reserved for application log files
 - `Credentials` — DPAPI-encrypted credential files, one per profile

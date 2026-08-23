@@ -75,6 +75,7 @@ public partial class App : Application
         builder.Services.AddSingleton<IThemeService, ThemeService>();
         builder.Services.AddSingleton<IPlaylistFilePicker, PlaylistFilePicker>();
         builder.Services.AddHostedService<PlaybackHistoryCoordinator>();
+        builder.Services.AddHostedService<CatalogPersistenceCoordinator>();
         builder.Services.AddSingleton<HomeViewModel>();
         builder.Services.AddSingleton<ProfilesViewModel>();
         builder.Services.AddSingleton<LiveTvViewModel>();

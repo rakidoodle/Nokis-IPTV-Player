@@ -89,7 +89,7 @@ public sealed class SqliteProfileRepository(IApplicationPaths paths) : IProfileR
 
     private async Task<SqliteConnection> OpenConnectionAsync(CancellationToken cancellationToken)
     {
-        SqliteConnection connection = new($"Data Source={paths.DatabasePath}");
+        SqliteConnection connection = new($"Data Source={paths.DatabasePath};Pooling=False");
         await connection.OpenAsync(cancellationToken);
         return connection;
     }

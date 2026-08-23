@@ -38,6 +38,7 @@ public sealed partial class SqliteDatabaseService(
             DataSource = paths.DatabasePath,
             Mode = SqliteOpenMode.ReadWriteCreate,
             Cache = SqliteCacheMode.Shared,
+            Pooling = false,
         };
 
         await using SqliteConnection connection = new(connectionString.ToString());
