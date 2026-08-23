@@ -69,6 +69,38 @@ public sealed class ProfileServiceTests
         Assert.IsFalse(editor.ServerAddress.Contains("&amp;", StringComparison.OrdinalIgnoreCase));
     }
 
+    [TestMethod]
+    public async Task ChangingXtreamProfileToStalkerDeletesStalePassword()
+    {
+        using ServiceFixture fixture = await ServiceFixture.CreateAsync();
+        ProfileSaveResult xtream = await fixture.Service.SaveAsync(new ProfileDraft
+        {
+            Name = "Convertible profile",
+            ConnectionType = ProfileConnectionType.XtreamApi,
+            ServerAddress = "https://example.invalid",
+            Username = "old-user",
+            Password = "old-password",
+        });
+        Assert.IsTrue(xtream.IsSuccess);
+        Assert.IsNotNull(xtream.Profile);
+
+        ProfileSaveResult stalker = await fixture.Service.SaveAsync(new ProfileDraft
+        {
+            Id = xtream.Profile.Id,
+            Name = xtream.Profile.Name,
+            ConnectionType = ProfileConnectionType.StalkerPortal,
+            ServerAddress = "https://example.invalid/stalker_portal/c/",
+            Username = "00:1A:79:00:00:01",
+        });
+
+        Assert.IsTrue(stalker.IsSuccess);
+        Assert.IsNull(await fixture.Credentials.RetrieveAsync(xtream.Profile.Id));
+        ProfileDraft? editor = await fixture.Service.GetDraftAsync(xtream.Profile.Id);
+        Assert.IsNotNull(editor);
+        Assert.AreEqual("00:1A:79:00:00:01", editor.Username);
+        Assert.IsNull(editor.Password);
+    }
+
     private static ProfileDraft Draft(string name) => new()
     {
         Name = name,

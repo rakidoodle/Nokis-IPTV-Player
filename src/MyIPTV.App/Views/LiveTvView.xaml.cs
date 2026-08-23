@@ -1,6 +1,8 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using LibVLCSharp.Shared;
 using MyIPTV.App.ViewModels;
@@ -15,6 +17,7 @@ public partial class LiveTvView : UserControl
     private Thickness _previousLayoutMargin;
     private Thickness _previousContentMargin;
     private bool _previousTopmost;
+    private Rect _previousBounds;
 
     public LiveTvView()
     {
@@ -27,6 +30,7 @@ public partial class LiveTvView : UserControl
     {
         if (DataContext is LiveTvViewModel viewModel)
         {
+            viewModel.Player.FullScreenChanged -= OnFullScreenChanged;
             viewModel.Player.FullScreenChanged += OnFullScreenChanged;
             ReattachVideoSurface(viewModel);
         }
@@ -34,13 +38,18 @@ public partial class LiveTvView : UserControl
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
+        // LibVLCSharp renders through a native child window. Detaching it when this
+        // WPF view leaves the visual tree prevents that HWND from covering the next tab.
+        VideoSurface.MediaPlayer = null;
+
         if (DataContext is LiveTvViewModel viewModel)
         {
-            viewModel.Player.FullScreenChanged -= OnFullScreenChanged;
             if (viewModel.Player.IsFullScreen)
             {
                 viewModel.Player.ToggleFullScreenCommand.Execute(null);
             }
+
+            viewModel.Player.FullScreenChanged -= OnFullScreenChanged;
         }
     }
 
@@ -59,6 +68,7 @@ public partial class LiveTvView : UserControl
             _previousLayoutMargin = LayoutRoot.Margin;
             _previousContentMargin = ContentScroller.Margin;
             _previousTopmost = window.Topmost;
+            _previousBounds = new Rect(window.Left, window.Top, window.Width, window.Height);
             if (window is MainWindow mainWindow)
             {
                 mainWindow.EnterContentFullScreen();
@@ -82,10 +92,15 @@ public partial class LiveTvView : UserControl
             ContentScroller.Margin = new Thickness(0);
             Grid.SetRow(ContentScroller, 0);
             Grid.SetRowSpan(ContentScroller, 3);
+            Rect monitorBounds = GetMonitorBounds(window);
+            window.WindowState = WindowState.Normal;
             window.WindowStyle = WindowStyle.None;
             window.ResizeMode = ResizeMode.NoResize;
             window.Topmost = true;
-            window.WindowState = WindowState.Maximized;
+            window.Left = monitorBounds.Left;
+            window.Top = monitorBounds.Top;
+            window.Width = monitorBounds.Width;
+            window.Height = monitorBounds.Height;
         }
         else
         {
@@ -114,9 +129,62 @@ public partial class LiveTvView : UserControl
 
             window.WindowStyle = _previousStyle;
             window.ResizeMode = _previousResizeMode;
-            window.WindowState = _previousState;
             window.Topmost = _previousTopmost;
+            window.WindowState = WindowState.Normal;
+            window.Left = _previousBounds.Left;
+            window.Top = _previousBounds.Top;
+            window.Width = _previousBounds.Width;
+            window.Height = _previousBounds.Height;
+            window.WindowState = _previousState;
         }
+    }
+
+    private static Rect GetMonitorBounds(Window window)
+    {
+        nint windowHandle = new WindowInteropHelper(window).Handle;
+        nint monitorHandle = MonitorFromWindow(windowHandle, MonitorDefaultToNearest);
+        MonitorInfo monitorInfo = new() { Size = Marshal.SizeOf<MonitorInfo>() };
+        if (monitorHandle == 0 || !GetMonitorInfo(monitorHandle, ref monitorInfo))
+        {
+            return new Rect(0, 0, SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
+        }
+
+        Point topLeft = new(monitorInfo.Monitor.Left, monitorInfo.Monitor.Top);
+        Point bottomRight = new(monitorInfo.Monitor.Right, monitorInfo.Monitor.Bottom);
+        if (PresentationSource.FromVisual(window)?.CompositionTarget is { } compositionTarget)
+        {
+            topLeft = compositionTarget.TransformFromDevice.Transform(topLeft);
+            bottomRight = compositionTarget.TransformFromDevice.Transform(bottomRight);
+        }
+
+        return new Rect(topLeft, bottomRight);
+    }
+
+    private const uint MonitorDefaultToNearest = 2;
+
+    [DllImport("user32.dll")]
+    private static extern nint MonitorFromWindow(nint windowHandle, uint flags);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetMonitorInfo(nint monitorHandle, ref MonitorInfo monitorInfo);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    private struct MonitorInfo
+    {
+        public int Size;
+        public NativeRect Monitor;
+        public NativeRect WorkArea;
+        public uint Flags;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeRect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
     }
 
     private void OnChannelSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -139,6 +207,11 @@ public partial class LiveTvView : UserControl
         VideoSurface.MediaPlayer = null;
         Dispatcher.BeginInvoke(() =>
         {
+            if (!IsLoaded || !ReferenceEquals(DataContext, viewModel))
+            {
+                return;
+            }
+
             VideoSurface.MediaPlayer = mediaPlayer;
             VideoSurface.InvalidateVisual();
         }, DispatcherPriority.Loaded);

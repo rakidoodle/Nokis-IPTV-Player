@@ -32,7 +32,9 @@ public sealed partial class ProfileService(
             return null;
         }
 
-        ProfileCredentials? credentials = await credentialService.RetrieveAsync(profileId, cancellationToken);
+        ProfileCredentials? credentials = profile.ConnectionType == ProfileConnectionType.StalkerPortal
+            ? null
+            : await credentialService.RetrieveAsync(profileId, cancellationToken);
         string address = profile.ConnectionType == ProfileConnectionType.M3uPlaylist && credentials is not null
             ? M3uCredentialUrl.Add(profile.ServerAddress, credentials)
             : profile.ServerAddress;
@@ -114,6 +116,12 @@ public sealed partial class ProfileService(
             {
                 await credentialService.DeleteAsync(profile.Id, cancellationToken);
             }
+        }
+        else if (draft.ConnectionType == ProfileConnectionType.StalkerPortal)
+        {
+            // Stalker MAC authentication is stored in the profile itself. Remove any
+            // credential left behind when this profile previously used Xtream or M3U.
+            await credentialService.DeleteAsync(profile.Id, cancellationToken);
         }
         else if (!string.IsNullOrEmpty(draft.Password))
         {
@@ -211,6 +219,11 @@ public sealed partial class ProfileService(
         ProfileDraft draft,
         CancellationToken cancellationToken)
     {
+        if (draft.ConnectionType == ProfileConnectionType.StalkerPortal)
+        {
+            return draft;
+        }
+
         M3uAddressParts suppliedM3u = draft.ConnectionType == ProfileConnectionType.M3uPlaylist
             ? M3uCredentialUrl.Split(draft.ServerAddress)
             : new M3uAddressParts(draft.ServerAddress, null, false);

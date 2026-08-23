@@ -11,4 +11,4 @@ Version 1.0 release acceptance uses a clean, restored Release build rather than 
 7. Publish the self-contained `win-x64` profile and create its checksum.
 8. Launch the published executable and visually verify startup before distributing it.
 
-Build version metadata is centralized in `Directory.Build.props`; packaging reads the same `1.1.0` version.
+Build version metadata is centralized in `Directory.Build.props`; pass that same version to the packaging script.

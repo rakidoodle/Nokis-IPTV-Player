@@ -56,6 +56,26 @@ public sealed class StalkerProviderTests
         Assert.AreEqual("Existing", channelCatalog.GetForProfile(profileId).Single().Name);
     }
 
+    [TestMethod]
+    public async Task MacProfileIgnoresStaleStoredUsernameAndPassword()
+    {
+        Guid profileId = Guid.NewGuid();
+        StubStalkerClient client = new();
+        StalkerProvider provider = new(
+            new StubCredentialService(),
+            client,
+            new InMemoryChannelCatalog(),
+            new InMemoryMediaCatalog(),
+            NullLogger<StalkerProvider>.Instance);
+        IptvProfile profile = CreateProfile(profileId) with { Username = "00:1A:79:00:00:01" };
+
+        ProviderLoadResult result = await provider.LoadCatalogAsync(profile);
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.AreEqual("00:1A:79:00:00:01", client.AuthenticatedUsername);
+        Assert.AreEqual(string.Empty, client.AuthenticatedPassword);
+    }
+
     private static IptvProfile CreateProfile(Guid profileId) =>
         new(
             profileId,
@@ -79,12 +99,18 @@ public sealed class StalkerProviderTests
 
     private sealed class StubStalkerClient(bool unsupported = false) : IStalkerClient
     {
+        public string? AuthenticatedUsername { get; private set; }
+
+        public string? AuthenticatedPassword { get; private set; }
+
         public Task<StalkerSession> AuthenticateAsync(
             string portalAddress,
             string username,
             string password,
             CancellationToken cancellationToken = default)
         {
+            AuthenticatedUsername = username;
+            AuthenticatedPassword = password;
             if (unsupported)
             {
                 throw new StalkerClientException(

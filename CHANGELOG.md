@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0-beta.4 - 2026-08-23
+
+- Detach the native LibVLC video surface while Live TV is hidden so it cannot cover other tabs, then safely reattach it when returning.
+- Use the complete monitor bounds for video full screen so the Windows taskbar is covered on the active display.
+- Prefer a profile's MAC address over stale stored credentials and remove obsolete credentials when converting a profile to Stalker.
+- Refresh Saved Profiles whenever the Profiles tab opens and select the existing entry after a duplicate-name attempt.
+- Give remote M3U downloads a dedicated 120-second timeout for slower playlist servers.
+
 ## 1.2.0-beta.3 - 2026-08-23
 
 - Fix the rotating loading image storyboard name-scope exception.

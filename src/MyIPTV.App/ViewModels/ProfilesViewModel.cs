@@ -106,12 +106,12 @@ public partial class ProfilesViewModel : ObservableObject
     [RelayCommand]
     private async Task LoadAsync()
     {
-        if (IsLoaded || IsBusy)
+        if (IsBusy)
         {
             return;
         }
 
-        await ReloadAsync(profileIdToSelect: null);
+        await ReloadAsync(SelectedProfile?.Id);
         IsLoaded = true;
     }
 
@@ -134,6 +134,17 @@ public partial class ProfilesViewModel : ObservableObject
             {
                 Password = string.Empty;
                 await ReloadAsync(result.Profile.Id);
+            }
+            else if (string.Equals(
+                         result.Message,
+                         "A profile with this name already exists.",
+                         StringComparison.Ordinal))
+            {
+                string requestedName = ProfileName.Trim();
+                await ReloadAsync(profileIdToSelect: null);
+                SelectedProfile = Profiles.FirstOrDefault(profile =>
+                    string.Equals(profile.Name.Trim(), requestedName, StringComparison.OrdinalIgnoreCase));
+                SetStatus("That profile already exists and has been selected.", isError: true);
             }
         });
     }

@@ -42,7 +42,7 @@ public partial class App : Application
         {
             IApplicationConfiguration configuration =
                 serviceProvider.GetRequiredService<IApplicationConfiguration>();
-            client.Timeout = TimeSpan.FromSeconds(configuration.Network.TimeoutSeconds);
+            client.Timeout = TimeSpan.FromSeconds(configuration.Network.PlaylistTimeoutSeconds);
         });
         builder.Services
             .AddHttpClient("Xtream", (serviceProvider, client) =>

@@ -40,6 +40,9 @@ public static class ServiceCollectionExtensions
             .Validate(
                 options => options.TimeoutSeconds is >= 5 and <= 300,
                 "Network timeout must be between 5 and 300 seconds.")
+            .Validate(
+                options => options.PlaylistTimeoutSeconds is >= 30 and <= 300,
+                "Playlist timeout must be between 30 and 300 seconds.")
             .ValidateOnStart();
 
         services.AddSingleton<IApplicationConfiguration, ApplicationConfiguration>();

@@ -25,8 +25,12 @@ public sealed partial class StalkerProvider(
             return ProviderLoadResult.Failure("This provider can only load Stalker/Ministra profiles.");
         }
 
-        ProfileCredentials? credentials = await credentialService.RetrieveAsync(profile.Id, cancellationToken);
-        string? account = credentials?.Username ?? profile.Username;
+        string? profileAccount = profile.Username?.Trim();
+        bool usesMacAuthentication = IsMacAddress(profileAccount);
+        ProfileCredentials? credentials = usesMacAuthentication
+            ? null
+            : await credentialService.RetrieveAsync(profile.Id, cancellationToken);
+        string? account = usesMacAuthentication ? profileAccount : credentials?.Username ?? profileAccount;
         if (string.IsNullOrWhiteSpace(account))
         {
             return ProviderLoadResult.Failure("Enter the portal MAC address again.");
@@ -38,7 +42,7 @@ public sealed partial class StalkerProvider(
             StalkerSession session = await client.AuthenticateAsync(
                 profile.ServerAddress,
                 account,
-                credentials?.Password ?? string.Empty,
+                usesMacAuthentication ? string.Empty : credentials?.Password ?? string.Empty,
                 cancellationToken);
             IReadOnlyList<StalkerChannelDto> channelDtos =
                 await client.GetLiveChannelsAsync(profile.ServerAddress, session, cancellationToken);
@@ -125,6 +129,12 @@ public sealed partial class StalkerProvider(
         string normalized = value.Trim();
         return normalized.Length <= maximumLength ? normalized : normalized[..maximumLength];
     }
+
+    private static bool IsMacAddress(string? value) =>
+        !string.IsNullOrWhiteSpace(value) &&
+        System.Text.RegularExpressions.Regex.IsMatch(
+            value.Trim(),
+            "^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}$");
 
     [LoggerMessage(EventId = 5201, Level = LogLevel.Information, Message = "Loading Ministra catalog for profile {ProfileId}.")]
     private partial void LogCatalogLoadStarted(Guid profileId);
