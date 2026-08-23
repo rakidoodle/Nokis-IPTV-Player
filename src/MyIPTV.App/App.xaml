@@ -23,7 +23,7 @@
                 <views:MoviesView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:SeriesViewModel}">
-                <views:CatalogView />
+                <views:SeriesView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:FavoritesViewModel}">
                 <views:FavoritesView />

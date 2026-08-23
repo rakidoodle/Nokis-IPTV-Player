@@ -1,0 +1,113 @@
+<UserControl x:Class="MyIPTV.App.Views.SeriesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:MyIPTV.App.Controls"
+             xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+             PreviewKeyDown="OnPreviewKeyDown">
+    <Grid Margin="32,24,32,20">
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock AutomationProperties.HeadingLevel="Level1" FontSize="30" FontWeight="SemiBold" Text="{Binding Title}" />
+            <TextBlock Margin="0,6,0,0" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="15" Text="{Binding Subtitle}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" Margin="0,18,0,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+            <ScrollViewer.Style><Style TargetType="ScrollViewer"><Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers><DataTrigger Binding="{Binding HasSeries}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers>
+            </Style></ScrollViewer.Style>
+            <Grid MinWidth="840">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="220" /><ColumnDefinition Width="250" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                <Border Padding="10" Style="{StaticResource CardBorderStyle}">
+                    <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                        <TextBlock FontSize="17" FontWeight="SemiBold" Text="Series" />
+                        <ListBox Grid.Row="1" Margin="0,10,0,0" AutomationProperties.Name="Series catalog"
+                                 ItemsSource="{Binding Series}" SelectedItem="{Binding SelectedSeries, Mode=TwoWay}"
+                                 ItemContainerStyle="{StaticResource NavigationItemStyle}" ScrollViewer.CanContentScroll="True"
+                                 VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                                 Style="{StaticResource NavigationListBoxStyle}">
+                            <ListBox.ItemTemplate><DataTemplate>
+                                <Grid Margin="3"><Grid.ColumnDefinitions><ColumnDefinition Width="44" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <Border Width="38" Height="54" Background="{DynamicResource SurfaceElevatedBrush}" CornerRadius="5">
+                                        <Image AutomationProperties.Name="{Binding Title}" Source="{Binding PosterUrl}" Stretch="UniformToFill" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="8,3,0,0">
+                                        <TextBlock FontWeight="SemiBold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Margin="0,4,0,0" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Text="{Binding Genre}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate></ListBox.ItemTemplate>
+                        </ListBox>
+                        <Button Grid.Row="2" Margin="0,8,0,0" AutomationProperties.Name="{Binding FavoriteButtonText}"
+                                Command="{Binding ToggleFavoriteCommand}" Content="{Binding FavoriteButtonText}"
+                                Style="{StaticResource SecondaryButtonStyle}" />
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="1" Margin="12,0,0,0" Padding="10" Style="{StaticResource CardBorderStyle}">
+                    <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="130" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                        <TextBlock FontSize="17" FontWeight="SemiBold" Text="Seasons" />
+                        <ListBox Grid.Row="1" Margin="0,8,0,0" AutomationProperties.Name="Series seasons"
+                                 ItemsSource="{Binding Seasons}" SelectedItem="{Binding SelectedSeason, Mode=TwoWay}"
+                                 ItemContainerStyle="{StaticResource NavigationItemStyle}" Style="{StaticResource NavigationListBoxStyle}">
+                            <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding DisplayName}" /></DataTemplate></ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock Grid.Row="2" Margin="0,10,0,0" FontSize="17" FontWeight="SemiBold" Text="Episodes" />
+                        <ListBox Grid.Row="3" Margin="0,8,0,0" AutomationProperties.Name="Season episodes"
+                                 ItemsSource="{Binding Episodes}" SelectedItem="{Binding SelectedEpisode, Mode=TwoWay}"
+                                 ItemContainerStyle="{StaticResource NavigationItemStyle}" ScrollViewer.CanContentScroll="True"
+                                 VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                                 Style="{StaticResource NavigationListBoxStyle}">
+                            <ListBox.ItemTemplate><DataTemplate><StackPanel Margin="3">
+                                <TextBlock FontWeight="SemiBold" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Margin="0,3,0,0" Foreground="{DynamicResource AccentBrush}" FontSize="11" Text="{Binding ProgressLabel}" />
+                            </StackPanel></DataTemplate></ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="2" Margin="12,0,0,0" Padding="14" Style="{StaticResource CardBorderStyle}">
+                    <Grid><Grid.RowDefinitions><RowDefinition Height="220" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                        <Border Background="Black" CornerRadius="9">
+                            <vlc:VideoView AutomationProperties.Name="Episode video player" Background="Black" MediaPlayer="{Binding Player.NativeMediaPlayer}">
+                                <Grid Background="Black" Visibility="{Binding Player.ShowPlayerOverlay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock HorizontalAlignment="Center" FontFamily="Segoe Fluent Icons" Foreground="{DynamicResource TextMutedBrush}" FontSize="38" Text="&#xE8D6;" />
+                                        <TextBlock Margin="0,10,0,0" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding Player.StatusMessage}" />
+                                    </StackPanel>
+                                </Grid>
+                            </vlc:VideoView>
+                        </Border>
+                        <ScrollViewer Grid.Row="1" Margin="0,10,0,0" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock AutomationProperties.HeadingLevel="Level2" FontSize="21" FontWeight="SemiBold" Text="{Binding SelectedSeries.Title}" TextWrapping="Wrap" />
+                                <WrapPanel Margin="0,6,0,0">
+                                    <TextBlock Foreground="{DynamicResource AccentBrush}" Text="{Binding SelectedSeries.ReleaseDate}" />
+                                    <TextBlock Margin="12,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding SelectedSeries.Rating}" />
+                                </WrapPanel>
+                                <TextBlock Margin="0,7,0,0" Foreground="{DynamicResource TextMutedBrush}" Text="{Binding DetailsStatus}" TextWrapping="Wrap" />
+                                <TextBlock Margin="0,9,0,0" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding SelectedSeries.Description}" TextWrapping="Wrap" />
+                                <TextBlock Margin="0,10,0,0" FontWeight="SemiBold" Text="{Binding SelectedEpisode.Title}" />
+                                <TextBlock Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding SelectedEpisode.Description}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </ScrollViewer>
+                        <WrapPanel Grid.Row="2" Margin="0,10,0,0">
+                            <Button AutomationProperties.Name="Play selected episode" Command="{Binding PlayEpisodeCommand}" Content="Play episode" Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button Margin="8,0,0,0" AutomationProperties.Name="Continue selected episode" Command="{Binding ContinueEpisodeCommand}" Content="Continue watching" Style="{StaticResource SecondaryButtonStyle}" />
+                            <Button Margin="8,0,0,0" AutomationProperties.Name="Toggle episode full screen" Command="{Binding Player.ToggleFullScreenCommand}" Style="{StaticResource IconButtonStyle}" ToolTip="Full screen">
+                                <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE740;" />
+                            </Button>
+                        </WrapPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+        <Border Grid.Row="1" Margin="0,18,0,0">
+            <Border.Style><Style TargetType="Border" BasedOn="{StaticResource CardBorderStyle}"><Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers><DataTrigger Binding="{Binding HasSeries}" Value="True"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers>
+            </Style></Border.Style>
+            <controls:StatePanel Glyph="{Binding EmptyGlyph}" Message="{Binding EmptyMessage}" State="{Binding State}" Title="{Binding EmptyTitle}" />
+        </Border>
+        <TextBlock Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Loading episodes…"
+                   Visibility="{Binding IsLoadingDetails, Converter={StaticResource BooleanToVisibilityConverter}}" />
+    </Grid>
+</UserControl>

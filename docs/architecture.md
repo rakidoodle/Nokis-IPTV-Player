@@ -86,3 +86,9 @@ History keys use the same stable profile/content identity as favorites. Stored r
 The movie browser joins immutable `IMediaCatalog` snapshots with stable favorite and watch-history keys. Its card ViewModels contain provider metadata and state needed by the UI, while the underlying credential-bearing playback URL remains on the redacting Core movie model and is passed only to `IPlaybackService` when Play or Continue Watching is invoked.
 
 Categories and movie rows use recycling virtualization. Background history notifications marshal refreshes to the captured UI synchronization context and preserve the current category/movie selection where possible.
+
+## Series browser
+
+The series browser starts with the immutable catalog summary and requests full episode details only after a series is selected. It resolves the owning profile to an `IContentProvider`, so provider-specific API calls and authentication remain outside the UI layer. Newer selections cancel obsolete detail requests and catalog publication is suppressed from recursively restarting the active load.
+
+Episodes are grouped into ordered season ViewModels and joined to watch history by stable profile and episode identifiers. Play and Continue Watching pass the currently authorized catalog URL directly to the playback boundary; favorites and history persist no stream addresses or credentials. Virtualized series and episode lists keep the visual tree bounded for large libraries.
