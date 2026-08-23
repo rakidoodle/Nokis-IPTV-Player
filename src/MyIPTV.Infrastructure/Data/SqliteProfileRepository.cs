@@ -7,6 +7,8 @@ namespace MyIPTV.Infrastructure.Data;
 
 public sealed class SqliteProfileRepository(IApplicationPaths paths) : IProfileRepository
 {
+    public event EventHandler? ProfilesChanged;
+
     public async Task<IReadOnlyList<IptvProfile>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
@@ -76,6 +78,7 @@ public sealed class SqliteProfileRepository(IApplicationPaths paths) : IProfileR
         command.Parameters.AddWithValue("$createdUtc", profile.CreatedUtc.ToString("O", CultureInfo.InvariantCulture));
         command.Parameters.AddWithValue("$updatedUtc", profile.UpdatedUtc.ToString("O", CultureInfo.InvariantCulture));
         await command.ExecuteNonQueryAsync(cancellationToken);
+        ProfilesChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -85,6 +88,7 @@ public sealed class SqliteProfileRepository(IApplicationPaths paths) : IProfileR
         command.CommandText = "DELETE FROM profiles WHERE id = $id;";
         command.Parameters.AddWithValue("$id", id.ToString("D"));
         await command.ExecuteNonQueryAsync(cancellationToken);
+        ProfilesChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private async Task<SqliteConnection> OpenConnectionAsync(CancellationToken cancellationToken)

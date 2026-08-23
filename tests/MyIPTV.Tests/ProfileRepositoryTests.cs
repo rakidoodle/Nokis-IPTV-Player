@@ -16,6 +16,8 @@ public sealed class ProfileRepositoryTests
         SqliteDatabaseService database = new(paths, NullLogger<SqliteDatabaseService>.Instance);
         await database.InitializeAsync();
         SqliteProfileRepository repository = new(paths);
+        int changeCount = 0;
+        repository.ProfilesChanged += (_, _) => changeCount++;
         DateTimeOffset now = DateTimeOffset.UtcNow;
         IptvProfile expected = new(
             Guid.NewGuid(),
@@ -33,6 +35,7 @@ public sealed class ProfileRepositoryTests
         Assert.AreEqual(expected.Id, actual.Id);
         Assert.AreEqual(expected.Name, actual.Name);
         Assert.AreEqual(expected.ServerAddress, actual.ServerAddress);
+        Assert.AreEqual(1, changeCount);
 
         await using (SqliteConnection connection = new($"Data Source={paths.DatabasePath}"))
         {

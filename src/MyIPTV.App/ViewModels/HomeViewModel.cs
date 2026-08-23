@@ -13,10 +13,14 @@ public sealed partial class HomeViewModel : ObservableObject
     private readonly IChannelCatalog _channelCatalog;
     private readonly IMediaCatalog _mediaCatalog;
     private readonly IPlaybackService _playbackService;
+    private readonly IProfileRepository? _profileRepository;
     private readonly SynchronizationContext? _synchronizationContext;
 
     [ObservableProperty]
     private int _favoriteCount;
+
+    [ObservableProperty]
+    private int _profileCount;
 
     [ObservableProperty]
     private IReadOnlyList<RecentlyWatchedItemViewModel> _recentItems = [];
@@ -30,7 +34,8 @@ public sealed partial class HomeViewModel : ObservableObject
         IWatchHistoryRepository historyRepository,
         IChannelCatalog channelCatalog,
         IMediaCatalog mediaCatalog,
-        IPlaybackService playbackService)
+        IPlaybackService playbackService,
+        IProfileRepository? profileRepository = null)
     {
         _navigationService = navigationService;
         _favoriteRepository = favoriteRepository;
@@ -38,11 +43,17 @@ public sealed partial class HomeViewModel : ObservableObject
         _channelCatalog = channelCatalog;
         _mediaCatalog = mediaCatalog;
         _playbackService = playbackService;
+        _profileRepository = profileRepository;
         _synchronizationContext = SynchronizationContext.Current;
         favoriteRepository.FavoritesChanged += OnFavoritesChanged;
         historyRepository.HistoryChanged += OnHistoryChanged;
         channelCatalog.ChannelsChanged += OnCatalogChanged;
         mediaCatalog.CatalogChanged += OnCatalogChanged;
+        if (profileRepository is not null)
+        {
+            profileRepository.ProfilesChanged += OnProfilesChanged;
+            _ = RefreshProfilesAsync();
+        }
         _ = RefreshFavoritesAsync();
         _ = RefreshHistoryAsync();
     }
@@ -57,6 +68,8 @@ public sealed partial class HomeViewModel : ObservableObject
     public bool HasRecentItems => RecentItems.Count > 0;
 
     public string RecentSummary => HasRecentItems ? "Ready to continue" : "Nothing played yet";
+
+    public string ProfileSummary => ProfileCount == 0 ? "No source connected" : "Configured sources";
 
     public bool CanPlayRecent => SelectedRecentItem is not null && FindPlaybackRequest(SelectedRecentItem.Item) is not null;
 
@@ -94,6 +107,28 @@ public sealed partial class HomeViewModel : ObservableObject
     }
 
     private async void OnFavoritesChanged(object? sender, EventArgs e) => await RefreshFavoritesAsync();
+
+    private async void OnProfilesChanged(object? sender, EventArgs e)
+    {
+        if (_synchronizationContext is not null && SynchronizationContext.Current != _synchronizationContext)
+        {
+            _synchronizationContext.Post(async _ => await RefreshProfilesAsync(), null);
+            return;
+        }
+
+        await RefreshProfilesAsync();
+    }
+
+    private async Task RefreshProfilesAsync()
+    {
+        if (_profileRepository is null)
+        {
+            return;
+        }
+
+        ProfileCount = (await _profileRepository.GetAllAsync()).Count;
+        OnPropertyChanged(nameof(ProfileSummary));
+    }
 
     private async Task RefreshFavoritesAsync() =>
         FavoriteCount = (await _favoriteRepository.GetAllAsync()).Count;

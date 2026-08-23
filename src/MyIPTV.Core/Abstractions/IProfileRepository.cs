@@ -4,6 +4,8 @@ namespace MyIPTV.Core.Abstractions;
 
 public interface IProfileRepository
 {
+    event EventHandler? ProfilesChanged;
+
     Task<IReadOnlyList<IptvProfile>> GetAllAsync(CancellationToken cancellationToken = default);
 
     Task<IptvProfile?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);

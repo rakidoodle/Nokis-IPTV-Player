@@ -69,6 +69,8 @@ public sealed class SeriesViewModelTests
 
     private sealed class StubProfileRepository(Guid profileId) : IProfileRepository
     {
+        public event EventHandler? ProfilesChanged { add { } remove { } }
+
         private readonly IptvProfile _profile = new(
             profileId, "Demo", ProfileConnectionType.XtreamApi, "https://example.invalid", "demo",
             DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
