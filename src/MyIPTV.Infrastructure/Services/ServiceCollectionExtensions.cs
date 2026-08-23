@@ -11,6 +11,8 @@ using MyIPTV.Infrastructure.Providers.Stalker;
 using MyIPTV.Infrastructure.Security;
 using MyIPTV.Infrastructure.Playback;
 using MyIPTV.Infrastructure.Epg;
+using MyIPTV.Infrastructure.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace MyIPTV.Infrastructure.Services;
 
@@ -42,6 +44,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IApplicationConfiguration, ApplicationConfiguration>();
         services.AddSingleton<IApplicationPaths, ApplicationPaths>();
+        services.AddSingleton<ILoggerProvider, SanitizingFileLoggerProvider>();
         services.AddSingleton<ISettingsService, JsonSettingsService>();
         services.AddSingleton<IDataMaintenanceService, DataMaintenanceService>();
         services.AddSingleton<IDatabaseService, SqliteDatabaseService>();

@@ -33,6 +33,12 @@ Application configuration describes deployment-time behavior such as network tim
 
 The Settings ViewModel reads and atomically writes the non-sensitive JSON preference record. Startup applies the saved theme, player volume, aspect ratio, and selected start page before presenting the main window. EPG preferences are shared with the Guide screen through the same service. Cache maintenance is limited to the resolved application cache directory; credential and database directories are separate and never included.
 
+## Diagnostic logging
+
+Microsoft logging abstractions carry structured events from startup, profile connection, parsing, playback, EPG, database, and exception boundaries. A daily JSON-lines file provider writes information-or-higher events under the local Logs directory. Before serialization it sanitizes rendered messages and exceptions, removing bearer credentials, sensitive key/value assignments, and every HTTP query string. Provider-specific clients additionally remove framework HTTP loggers so complete legacy authentication URLs never enter the pipeline.
+
+File logging is intentionally fail-safe: an unavailable log directory reports only a generic type to the debugger and never interrupts the application. Technical logs remain local and should still be reviewed before being shared.
+
 ## Credential boundary
 
 `ICredentialService` keeps password handling independent from profile and provider code. Its Windows implementation serializes the smallest required credential payload, protects it with DPAPI `CurrentUser` scope, and atomically writes one opaque file per profile under `%LocalAppData%\MyIPTV\Credentials`.
