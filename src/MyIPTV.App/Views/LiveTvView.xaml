@@ -170,12 +170,12 @@
                                     Text="{Binding Player.Title}"
                                     TextTrimming="CharacterEllipsis" />
                                 <TextBlock Margin="0,5,0,0" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Text="NOW" />
-                                <TextBlock Text="{Binding Player.CurrentProgram}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding SelectedCurrentProgram}" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock Foreground="{DynamicResource TextMutedBrush}" Text="{Binding EmptyTitle}" TextTrimming="CharacterEllipsis" />
                                 <TextBlock Margin="0,5,0,0" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Text="NEXT" />
-                                <TextBlock Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding Player.NextProgram}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Foreground="{DynamicResource TextSecondaryBrush}" Text="{Binding SelectedNextProgram}" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                         </Grid>
                     </Border>

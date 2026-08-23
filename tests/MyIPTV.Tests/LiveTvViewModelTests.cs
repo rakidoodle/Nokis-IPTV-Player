@@ -77,7 +77,7 @@ public sealed class LiveTvViewModelTests
         FakePlaybackService playback = new();
         FakeFavoriteRepository favorites = new();
         LiveTvViewModel viewModel = new(
-            catalog, playback, new PlayerViewModel(playback, playback), favorites);
+            catalog, playback, new PlayerViewModel(playback, playback), favorites, new FakeEpgService());
         Guid profileId = Guid.NewGuid();
         IptvChannel channel = Channel("favorite-7", "Demo News", "News", profileId);
         catalog.ReplaceForProfile(profileId, [channel]);
@@ -86,6 +86,30 @@ public sealed class LiveTvViewModelTests
         await viewModel.ToggleFavoriteCommand.ExecuteAsync(null);
 
         Assert.IsTrue(await favorites.ContainsAsync(profileId, ContentKind.LiveTv, "favorite-7"));
+    }
+
+    [TestMethod]
+    public void SelectingMappedChannelDisplaysCurrentAndNextPrograms()
+    {
+        InMemoryChannelCatalog catalog = new();
+        FakePlaybackService playback = new();
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        FakeEpgService epg = new()
+        {
+            NowNext = new(
+                new("demo.8", now.AddMinutes(-10), now.AddMinutes(20), "Current News", null),
+                new("demo.8", now.AddMinutes(20), now.AddMinutes(50), "Next News", null)),
+        };
+        LiveTvViewModel viewModel = new(
+            catalog, playback, new PlayerViewModel(playback, playback), new FakeFavoriteRepository(), epg);
+        Guid profileId = Guid.NewGuid();
+        IptvChannel channel = Channel("8", "Demo News", "News", profileId);
+        catalog.ReplaceForProfile(profileId, [channel]);
+
+        viewModel.SelectedChannel = channel;
+
+        Assert.AreEqual("Current News", viewModel.SelectedCurrentProgram);
+        Assert.AreEqual("Next News", viewModel.SelectedNextProgram);
     }
 
     private static IptvChannel Channel(string id, string name, string group, Guid profileId) =>
@@ -99,5 +123,6 @@ public sealed class LiveTvViewModelTests
             $"demo.{id}");
 
     private static LiveTvViewModel CreateViewModel(InMemoryChannelCatalog catalog, FakePlaybackService playback) =>
-        new(catalog, playback, new PlayerViewModel(playback, playback), new FakeFavoriteRepository());
+        new(catalog, playback, new PlayerViewModel(playback, playback),
+            new FakeFavoriteRepository(), new FakeEpgService());
 }

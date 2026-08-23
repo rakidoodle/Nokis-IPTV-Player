@@ -74,3 +74,9 @@ Search results contain stable catalog identifiers, labels, and content kinds onl
 `IWatchHistoryRepository` persists minimal playback history behind a provider-independent interface. `PlaybackHistoryCoordinator` is a hosted service that observes player state, checkpoints active VOD every 15 seconds, and flushes current progress during graceful shutdown. The database is initialized before hosted services start, preventing startup races with migrations.
 
 History keys use the same stable profile/content identity as favorites. Stored rows contain a title, timestamp, position, and optional duration, but no stream location or credential. A resume request resolves the current stream from the in-memory catalog and gives LibVLC only the saved start position.
+
+## EPG pipeline
+
+`IXmlTvParser` incrementally reads XML with DTD and external entities prohibited, normalizes accepted timestamps to UTC, and produces provider-independent channel/program records. `IEpgService` validates local or HTTP sources, limits decompressed data, performs conditional HTTP refresh, and activates cached guide data. The source address is represented in SQLite and logs only by a SHA-256 identifier.
+
+`IEpgRepository` atomically replaces a source's cached channels and programs and uses indexed UTC fields for guide and now/next lookups. The Guide ViewModel requests a bounded time window, while Live TV maps the selected channel's EPG ID to a current/next lookup. Local-time conversion occurs only in display ViewModels.

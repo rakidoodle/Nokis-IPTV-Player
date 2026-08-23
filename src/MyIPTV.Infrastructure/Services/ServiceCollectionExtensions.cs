@@ -10,6 +10,7 @@ using MyIPTV.Infrastructure.Providers.Xtream;
 using MyIPTV.Infrastructure.Providers.Stalker;
 using MyIPTV.Infrastructure.Security;
 using MyIPTV.Infrastructure.Playback;
+using MyIPTV.Infrastructure.Epg;
 
 namespace MyIPTV.Infrastructure.Services;
 
@@ -46,6 +47,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IProfileRepository, SqliteProfileRepository>();
         services.AddSingleton<IFavoriteRepository, SqliteFavoriteRepository>();
         services.AddSingleton<IWatchHistoryRepository, SqliteWatchHistoryRepository>();
+        services.AddSingleton<IEpgRepository, SqliteEpgRepository>();
         services.AddSingleton<ICredentialService, WindowsCredentialService>();
         services.AddSingleton<IProfileValidator, ProfileValidator>();
         services.AddSingleton<IProfileConnectionTester, ProfileConnectionTester>();
@@ -64,6 +66,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IActiveProfileService, ActiveProfileService>();
         services.AddSingleton<IProfileService, ProfileService>();
         services.AddSingleton<ISearchService, CatalogSearchService>();
+        services.AddSingleton<IXmlTvParser, XmlTvParser>();
+        services.AddSingleton<IEpgService, EpgService>();
 
         return services;
     }

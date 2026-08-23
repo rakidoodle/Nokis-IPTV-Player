@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tv generator-info-name="MyIPTV synthetic development fixture">
+  <channel id="demo.news">
+    <display-name>Demo News</display-name>
+  </channel>
+  <channel id="demo.sports">
+    <display-name>Demo Sports</display-name>
+  </channel>
+  <programme start="20260823070000 +0800" stop="20260823090000 +0800" channel="demo.news">
+    <title>Morning Headlines</title>
+    <desc>Safe synthetic news program used for local development.</desc>
+  </programme>
+  <programme start="20260823090000 +0800" stop="20260823110000 +0800" channel="demo.news">
+    <title>Community Report</title>
+    <desc>Safe synthetic community program used for local development.</desc>
+  </programme>
+  <programme start="20260823110000 +0800" stop="20260823130000 +0800" channel="demo.news">
+    <title>World Update</title>
+  </programme>
+  <programme start="20260823070000 +0800" stop="20260823100000 +0800" channel="demo.sports">
+    <title>Classic Match Replay</title>
+  </programme>
+  <programme start="20260823100000 +0800" stop="20260823120000 +0800" channel="demo.sports">
+    <title>Sports Desk</title>
+  </programme>
+  <programme start="20260823120000 +0800" stop="20260823140000 +0800" channel="demo.sports">
+    <title>Weekend Highlights</title>
+  </programme>
+</tv>

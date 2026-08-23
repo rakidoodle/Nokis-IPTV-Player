@@ -89,7 +89,8 @@ public sealed class MainWindowViewModelTests
                 new FakeChannelCatalog(),
                 playback,
                 new PlayerViewModel(playback, playback),
-                new FakeFavoriteRepository());
+                new FakeFavoriteRepository(),
+                new FakeEpgService());
         }
 
         private HomeViewModel CreateHomeViewModel()

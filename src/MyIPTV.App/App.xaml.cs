@@ -60,6 +60,14 @@ public partial class App : Application
                 client.Timeout = TimeSpan.FromSeconds(configuration.Network.TimeoutSeconds);
             })
             .RemoveAllLoggers();
+        builder.Services
+            .AddHttpClient("Epg", (serviceProvider, client) =>
+            {
+                IApplicationConfiguration configuration =
+                    serviceProvider.GetRequiredService<IApplicationConfiguration>();
+                client.Timeout = TimeSpan.FromSeconds(configuration.Network.TimeoutSeconds);
+            })
+            .RemoveAllLoggers();
 
         builder.Services.AddSingleton<INavigationService, NavigationService>();
         builder.Services.AddSingleton<IUserNotificationService, UserNotificationService>();

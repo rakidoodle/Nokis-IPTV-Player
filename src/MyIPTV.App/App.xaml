@@ -29,7 +29,7 @@
                 <views:FavoritesView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:GuideViewModel}">
-                <views:SectionView />
+                <views:GuideView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:SettingsViewModel}">
                 <views:SectionView />

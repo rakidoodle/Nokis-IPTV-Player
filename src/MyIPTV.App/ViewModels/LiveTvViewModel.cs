@@ -10,6 +10,7 @@ public sealed partial class LiveTvViewModel : SectionViewModel
     private readonly IChannelCatalog _channelCatalog;
     private readonly IPlaybackService _playbackService;
     private readonly IFavoriteRepository _favoriteRepository;
+    private readonly IEpgService _epgService;
 
     [ObservableProperty]
     private IReadOnlyList<ChannelCategoryViewModel> _categories = [];
@@ -26,11 +27,18 @@ public sealed partial class LiveTvViewModel : SectionViewModel
     [ObservableProperty]
     private bool _isSelectedFavorite;
 
+    [ObservableProperty]
+    private string _selectedCurrentProgram = "Program information unavailable";
+
+    [ObservableProperty]
+    private string _selectedNextProgram = "Next program unavailable";
+
     public LiveTvViewModel(
         IChannelCatalog channelCatalog,
         IPlaybackService playbackService,
         PlayerViewModel player,
-        IFavoriteRepository favoriteRepository)
+        IFavoriteRepository favoriteRepository,
+        IEpgService epgService)
         : base(
         "Live TV",
         "Browse channels from your authorized IPTV profiles.",
@@ -41,9 +49,11 @@ public sealed partial class LiveTvViewModel : SectionViewModel
         _channelCatalog = channelCatalog;
         _playbackService = playbackService;
         _favoriteRepository = favoriteRepository;
+        _epgService = epgService;
         Player = player;
         channelCatalog.ChannelsChanged += OnChannelsChanged;
         favoriteRepository.FavoritesChanged += OnFavoritesChanged;
+        epgService.EpgChanged += OnEpgChanged;
         UpdateCatalog();
     }
 
@@ -89,6 +99,8 @@ public sealed partial class LiveTvViewModel : SectionViewModel
                 channel.Name,
                 channel.StreamUrl,
                 channel.LogoUrl,
+                SelectedCurrentProgram,
+                SelectedNextProgram,
                 ProfileId: channel.ProfileId),
             cancellationToken);
     }
@@ -117,6 +129,7 @@ public sealed partial class LiveTvViewModel : SectionViewModel
         PlaySelectedChannelCommand.NotifyCanExecuteChanged();
         ToggleFavoriteCommand.NotifyCanExecuteChanged();
         _ = RefreshSelectedFavoriteAsync(value);
+        _ = RefreshSelectedProgramsAsync(value);
     }
 
     private void OnChannelsChanged(object? sender, EventArgs e) => UpdateCatalog();
@@ -132,6 +145,27 @@ public sealed partial class LiveTvViewModel : SectionViewModel
         {
             IsSelectedFavorite = isFavorite;
             OnPropertyChanged(nameof(FavoriteButtonText));
+        }
+    }
+
+    private async void OnEpgChanged(object? sender, EventArgs e) =>
+        await RefreshSelectedProgramsAsync(SelectedChannel);
+
+    private async Task RefreshSelectedProgramsAsync(IptvChannel? channel)
+    {
+        if (channel is null)
+        {
+            SelectedCurrentProgram = "Program information unavailable";
+            SelectedNextProgram = "Next program unavailable";
+            return;
+        }
+
+        string channelId = string.IsNullOrWhiteSpace(channel.EpgId) ? channel.Name : channel.EpgId;
+        EpgNowNext programs = await _epgService.GetNowNextAsync(channelId, DateTimeOffset.UtcNow);
+        if (ReferenceEquals(channel, SelectedChannel))
+        {
+            SelectedCurrentProgram = programs.Current?.Title ?? "Program information unavailable";
+            SelectedNextProgram = programs.Next?.Title ?? "Next program unavailable";
         }
     }
 
