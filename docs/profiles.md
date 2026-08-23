@@ -8,7 +8,7 @@ The Profiles screen manages IPTV sources that you own or are authorized to acces
 - **Xtream API** accepts an HTTP/HTTPS server address, username, and password.
 - **Stalker / Ministra Portal** accepts an HTTP/HTTPS portal address plus the username and password issued for a supported subscriber REST connection.
 
-URLs containing embedded credentials or sensitive query parameters are rejected. Enter credentials in the dedicated fields instead.
+M3U URLs may contain the common `username` and `password` query parameters supplied by a provider. MyIPTV removes those parameters before saving profile metadata, protects the credentials with Windows DPAPI, and reconstructs the request only when editing, testing, or loading that profile. URL user-info and token/key parameters remain rejected. Xtream and Stalker credentials belong in the dedicated fields.
 
 ## Using the profile manager
 

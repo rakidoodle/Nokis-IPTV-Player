@@ -8,7 +8,7 @@ namespace MyIPTV.Infrastructure.Playback;
 public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackVideoSource, IDisposable
 {
     private static readonly HashSet<string> SupportedAspectRatios =
-        new(StringComparer.OrdinalIgnoreCase) { "Default", "16:9", "4:3", "21:9", "1:1" };
+        new(StringComparer.OrdinalIgnoreCase) { "Fit", "16:9", "4:3", "21:9", "1:1" };
     private readonly SemaphoreSlim _operationGate = new(1, 1);
     private readonly LibVLC _libVlc;
     private readonly ILogger<LibVlcPlaybackService> _logger;
@@ -18,6 +18,8 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
     private TimeSpan? _pendingStartPosition;
     private TimeSpan _lastPosition;
     private TimeSpan? _lastDuration;
+    private int _volume = 80;
+    private int _volumeBeforeMute = 80;
 
     public LibVlcPlaybackService(ILogger<LibVlcPlaybackService> logger)
     {
@@ -31,7 +33,7 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
         MediaPlayer.Stopped += OnStopped;
         MediaPlayer.EndReached += OnEndReached;
         MediaPlayer.EncounteredError += OnEncounteredError;
-        MediaPlayer.Volume = 80;
+        MediaPlayer.Volume = _volume;
         StatusMessage = "Player idle";
     }
 
@@ -47,11 +49,11 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
 
     public string StatusMessage { get; private set; }
 
-    public int Volume => Math.Clamp(MediaPlayer.Volume, 0, 100);
+    public int Volume => _volume;
 
     public bool IsMuted => MediaPlayer.Mute;
 
-    public string AspectRatio { get; private set; } = "Default";
+    public string AspectRatio { get; private set; } = "Fit";
 
     public TimeSpan Position => State is MediaPlaybackState.Stopped or MediaPlaybackState.Ended or MediaPlaybackState.Error
         ? _lastPosition
@@ -134,14 +136,38 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
     public void SetVolume(int volume)
     {
         ThrowIfDisposed();
-        MediaPlayer.Volume = Math.Clamp(volume, 0, 100);
+        _volume = Math.Clamp(volume, 0, 100);
+        MediaPlayer.Volume = _volume;
+        if (_volume > 0)
+        {
+            _volumeBeforeMute = _volume;
+            MediaPlayer.Mute = false;
+        }
+        else
+        {
+            MediaPlayer.Mute = true;
+        }
         NotifyChanged();
     }
 
     public void ToggleMute()
     {
         ThrowIfDisposed();
-        MediaPlayer.Mute = !MediaPlayer.Mute;
+        if (MediaPlayer.Mute)
+        {
+            if (_volume == 0)
+            {
+                _volume = Math.Max(1, _volumeBeforeMute);
+                MediaPlayer.Volume = _volume;
+            }
+
+            MediaPlayer.Mute = false;
+        }
+        else
+        {
+            _volumeBeforeMute = Math.Max(1, _volume);
+            MediaPlayer.Mute = true;
+        }
         NotifyChanged();
     }
 
@@ -160,9 +186,9 @@ public sealed partial class LibVlcPlaybackService : IPlaybackService, IPlaybackV
     public void SetAspectRatio(string aspectRatio)
     {
         ThrowIfDisposed();
-        string selected = SupportedAspectRatios.Contains(aspectRatio) ? aspectRatio : "Default";
+        string selected = SupportedAspectRatios.Contains(aspectRatio) ? aspectRatio : "Fit";
         AspectRatio = selected;
-        MediaPlayer.AspectRatio = selected == "Default" ? null : selected;
+        MediaPlayer.AspectRatio = selected == "Fit" ? null : selected;
         NotifyChanged();
     }
 

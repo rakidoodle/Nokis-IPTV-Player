@@ -18,7 +18,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\package-win-x64.ps1
 
 The script creates:
 
-- `artifacts\MyIPTV-1.0.0-win-x64.zip`
+- `artifacts\MyIPTV-1.1.0-win-x64.zip`
 - `artifacts\SHA256SUMS.txt`
 - the unpacked verification copy under `artifacts\publish\win-x64`
 

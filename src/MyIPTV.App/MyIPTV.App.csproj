@@ -18,6 +18,8 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Resource Include="Assets\brand-logo.png" />
+    <Resource Include="Assets\app-icon.png" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -26,6 +28,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
 </Project>

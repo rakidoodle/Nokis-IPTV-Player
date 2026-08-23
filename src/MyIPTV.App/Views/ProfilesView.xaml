@@ -158,14 +158,18 @@
                                 Style="{StaticResource FormTextBoxStyle}"
                                 Text="{Binding ProfileName, UpdateSourceTrigger=PropertyChanged}" />
 
-                            <TextBlock Text="Connection type" />
                             <ComboBox
-                                Margin="0,7,0,14"
+                                Margin="0,0,0,14"
                                 AutomationProperties.Name="Connection type"
-                                DisplayMemberPath="Label"
                                 ItemsSource="{Binding ProfileTypes}"
                                 SelectedItem="{Binding SelectedProfileType, Mode=TwoWay}"
-                                Style="{StaticResource FormComboBoxStyle}" />
+                                Style="{StaticResource FormComboBoxStyle}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Foreground="#111827" Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
 
                             <TextBlock Text="Server / URL / local playlist" />
                             <Grid Margin="0,7,0,14">
@@ -209,7 +213,7 @@
                                     Margin="0,0,0,14"
                                     Foreground="{DynamicResource WarningBrush}"
                                     FontSize="12"
-                                    Text="Password is encrypted for your Windows account and is never stored in the database or logs."
+                                    Text="Credentials are protected for your Windows account and are never stored in the database or logs. M3U links may also include username and password query parameters."
                                     TextWrapping="Wrap" />
                             </StackPanel>
                         </StackPanel>

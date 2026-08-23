@@ -60,9 +60,9 @@ public partial class ProfilesViewModel : ObservableObject
         _logger = logger;
         ProfileTypes =
         [
-            new("M3U Playlist", ProfileConnectionType.M3uPlaylist),
-            new("Xtream API", ProfileConnectionType.XtreamApi),
-            new("Stalker / Ministra Portal", ProfileConnectionType.StalkerPortal),
+            new("M3U", ProfileConnectionType.M3uPlaylist),
+            new("Xtream", ProfileConnectionType.XtreamApi),
+            new("Stalker", ProfileConnectionType.StalkerPortal),
         ];
         _selectedProfileType = ProfileTypes[0];
     }
@@ -75,8 +75,7 @@ public partial class ProfilesViewModel : ObservableObject
 
     public bool HasSelectedProfile => SelectedProfile is not null;
 
-    public bool ShowsCredentialFields =>
-        SelectedProfileType.Value != ProfileConnectionType.M3uPlaylist;
+    public bool ShowsCredentialFields => SelectedProfileType is not null;
 
     public bool ShowsBrowseButton =>
         SelectedProfileType.Value == ProfileConnectionType.M3uPlaylist;
@@ -180,7 +179,7 @@ public partial class ProfilesViewModel : ObservableObject
         }
     }
 
-    partial void OnSelectedProfileChanged(IptvProfile? value)
+    async partial void OnSelectedProfileChanged(IptvProfile? value)
     {
         DeleteCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(HasSelectedProfile));
@@ -190,23 +189,24 @@ public partial class ProfilesViewModel : ObservableObject
             return;
         }
 
-        ProfileName = value.Name;
-        SelectedProfileType = ProfileTypes.Single(option => option.Value == value.ConnectionType);
-        ServerAddress = value.ServerAddress;
-        Username = value.Username ?? string.Empty;
-        Password = string.Empty;
-        SetStatus("Editing profile. Leave password blank to keep the saved Windows-protected password.", isError: false);
+        ProfileDraft? draft = await _profileService.GetDraftAsync(value.Id);
+        if (draft is null || SelectedProfile?.Id != value.Id)
+        {
+            return;
+        }
+
+        ProfileName = draft.Name;
+        SelectedProfileType = ProfileTypes.Single(option => option.Value == draft.ConnectionType);
+        ServerAddress = draft.ServerAddress;
+        Username = draft.Username ?? string.Empty;
+        Password = draft.Password ?? string.Empty;
+        SetStatus("Editing profile. Saved credentials are available for this Windows user.", isError: false);
     }
 
     partial void OnSelectedProfileTypeChanged(ProfileTypeOption value)
     {
         OnPropertyChanged(nameof(ShowsCredentialFields));
         OnPropertyChanged(nameof(ShowsBrowseButton));
-        if (value.Value == ProfileConnectionType.M3uPlaylist)
-        {
-            Username = string.Empty;
-            Password = string.Empty;
-        }
     }
 
     private ProfileDraft BuildDraft() =>
@@ -216,8 +216,8 @@ public partial class ProfilesViewModel : ObservableObject
             Name = ProfileName,
             ConnectionType = SelectedProfileType.Value,
             ServerAddress = ServerAddress,
-            Username = ShowsCredentialFields ? Username : null,
-            Password = ShowsCredentialFields ? Password : null,
+            Username = Username,
+            Password = Password,
         };
 
     private async Task ReloadAsync(Guid? profileIdToSelect)

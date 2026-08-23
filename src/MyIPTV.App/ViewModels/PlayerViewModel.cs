@@ -17,7 +17,7 @@ public partial class PlayerViewModel : ObservableObject
     private int _volume;
 
     [ObservableProperty]
-    private string _selectedAspectRatio = "Default";
+    private string _selectedAspectRatio = "Fit";
 
     [ObservableProperty]
     private PlaybackTrack? _selectedAudioTrack;
@@ -36,7 +36,7 @@ public partial class PlayerViewModel : ObservableObject
         _synchronizationContext = SynchronizationContext.Current;
         NativeMediaPlayer = videoSource.NativeMediaPlayer;
         _volume = playbackService.Volume;
-        AspectRatios = ["Default", "16:9", "4:3", "21:9", "1:1"];
+        AspectRatios = ["Fit", "16:9", "4:3", "21:9", "1:1"];
         playbackService.PlaybackChanged += OnPlaybackChanged;
         RefreshFromService();
     }

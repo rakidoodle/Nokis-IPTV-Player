@@ -3,14 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
              PreviewKeyDown="OnPreviewKeyDown">
-    <Grid Margin="32,24,32,20">
+    <Grid x:Name="LayoutRoot" Margin="32,24,32,20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel>
+        <StackPanel x:Name="PageHeading">
             <TextBlock
                 AutomationProperties.HeadingLevel="Level1"
                 FontSize="30"
@@ -24,18 +24,21 @@
         </StackPanel>
 
         <ScrollViewer
+            x:Name="ContentScroller"
             Grid.Row="1"
             Margin="0,20,0,0"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Disabled">
             <Grid MinWidth="840">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="165" />
-                    <ColumnDefinition Width="250" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="CategoryColumn" Width="165" MinWidth="120" />
+                    <ColumnDefinition x:Name="CategorySplitterColumn" Width="5" />
+                    <ColumnDefinition x:Name="ChannelColumn" Width="250" MinWidth="170" />
+                    <ColumnDefinition x:Name="ChannelSplitterColumn" Width="5" />
+                    <ColumnDefinition Width="*" MinWidth="300" />
                 </Grid.ColumnDefinitions>
 
-                <Border Padding="12" Style="{StaticResource CardBorderStyle}">
+                <Border x:Name="CategoryPanel" Padding="12" Style="{StaticResource CardBorderStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -62,7 +65,18 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Column="1" Margin="12,0,0,0" Padding="12" Style="{StaticResource CardBorderStyle}">
+                <GridSplitter
+                    x:Name="CategorySplitter"
+                    Grid.Column="1"
+                    Width="5"
+                    HorizontalAlignment="Stretch"
+                    Background="Transparent"
+                    Cursor="SizeWE"
+                    ResizeBehavior="PreviousAndNext"
+                    ResizeDirection="Columns"
+                    ToolTip="Resize categories" />
+
+                <Border x:Name="ChannelPanel" Grid.Column="2" Margin="7,0" Padding="12" Style="{StaticResource CardBorderStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -111,7 +125,18 @@
                     </Grid>
                 </Border>
 
-                <Grid Grid.Column="2" Margin="12,0,0,0">
+                <GridSplitter
+                    x:Name="ChannelSplitter"
+                    Grid.Column="3"
+                    Width="5"
+                    HorizontalAlignment="Stretch"
+                    Background="Transparent"
+                    Cursor="SizeWE"
+                    ResizeBehavior="PreviousAndNext"
+                    ResizeDirection="Columns"
+                    ToolTip="Resize channels" />
+
+                <Grid x:Name="VideoPanel" Grid.Column="4" Margin="7,0,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
@@ -149,7 +174,7 @@
                         </vlc:VideoView>
                     </Border>
 
-                    <Border Grid.Row="1" Margin="0,12,0,0" Padding="14" Style="{StaticResource CardBorderStyle}">
+                    <Border x:Name="ProgramDetailsPanel" Grid.Row="1" Margin="0,12,0,0" Padding="14" Style="{StaticResource CardBorderStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="52" />
@@ -183,7 +208,7 @@
             </Grid>
         </ScrollViewer>
 
-        <Border Grid.Row="2" Margin="0,16,0,0" Padding="12" Style="{StaticResource CardBorderStyle}">
+        <Border x:Name="PlaybackControlsPanel" Grid.Row="2" Margin="0,16,0,0" Padding="12" Style="{StaticResource CardBorderStyle}">
             <ScrollViewer
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Disabled">
@@ -194,9 +219,9 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="150" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="120" />
-                    <ColumnDefinition Width="120" />
-                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="150" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
@@ -243,39 +268,52 @@
                     ToolTip="Reconnect">
                     <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE72C;" />
                 </Button>
-                <ComboBox
+                <StackPanel
                     Grid.Column="5"
-                    Margin="10,0,0,0"
-                    AutomationProperties.Name="Aspect ratio"
-                    ItemsSource="{Binding Player.AspectRatios}"
-                    SelectedItem="{Binding Player.SelectedAspectRatio}"
-                    Style="{StaticResource FormComboBoxStyle}"
-                    ToolTip="Aspect ratio" />
-                <ComboBox
+                    Margin="10,0,0,0">
+                    <TextBlock Margin="2,0,0,3" Foreground="{DynamicResource TextMutedBrush}" FontSize="10" Text="VIDEO SIZE" />
+                    <ComboBox
+                        AutomationProperties.Name="Video size"
+                        ItemsSource="{Binding Player.AspectRatios}"
+                        SelectedItem="{Binding Player.SelectedAspectRatio}"
+                        Style="{StaticResource FormComboBoxStyle}"
+                        ToolTip="Video size and aspect ratio" />
+                </StackPanel>
+                <StackPanel
                     Grid.Column="6"
-                    Margin="10,0,0,0"
-                    AutomationProperties.Name="Audio track"
-                    DisplayMemberPath="Name"
-                    ItemsSource="{Binding Player.AudioTracks}"
-                    SelectedItem="{Binding Player.SelectedAudioTrack}"
-                    Style="{StaticResource FormComboBoxStyle}"
-                    ToolTip="Audio track" />
-                <ComboBox
+                    Margin="10,0,0,0">
+                    <TextBlock Margin="2,0,0,3" Foreground="{DynamicResource TextMutedBrush}" FontSize="10" Text="AUDIO" />
+                    <ComboBox
+                        AutomationProperties.Name="Audio track"
+                        DisplayMemberPath="Name"
+                        ItemsSource="{Binding Player.AudioTracks}"
+                        SelectedItem="{Binding Player.SelectedAudioTrack}"
+                        Style="{StaticResource FormComboBoxStyle}"
+                        ToolTip="Choose an audio track when the stream provides more than one" />
+                </StackPanel>
+                <StackPanel
                     Grid.Column="7"
-                    Margin="10,0,0,0"
-                    AutomationProperties.Name="Subtitle track"
-                    DisplayMemberPath="Name"
-                    ItemsSource="{Binding Player.SubtitleTracks}"
-                    SelectedItem="{Binding Player.SelectedSubtitleTrack}"
-                    Style="{StaticResource FormComboBoxStyle}"
-                    ToolTip="Subtitles" />
+                    Margin="10,0,0,0">
+                    <TextBlock Margin="2,0,0,3" Foreground="{DynamicResource TextMutedBrush}" FontSize="10" Text="SUBTITLES" />
+                    <ComboBox
+                        AutomationProperties.Name="Subtitle track"
+                        DisplayMemberPath="Name"
+                        ItemsSource="{Binding Player.SubtitleTracks}"
+                        SelectedItem="{Binding Player.SelectedSubtitleTrack}"
+                        Style="{StaticResource FormComboBoxStyle}"
+                        ToolTip="Choose subtitles when the stream provides them" />
+                </StackPanel>
                 <Button
                     Grid.Column="9"
                     AutomationProperties.Name="Toggle full screen"
                     Command="{Binding Player.ToggleFullScreenCommand}"
-                    Style="{StaticResource IconButtonStyle}"
+                    Padding="12,8"
+                    Style="{StaticResource SecondaryButtonStyle}"
                     ToolTip="Full screen">
-                    <TextBlock FontFamily="Segoe Fluent Icons" Text="&#xE740;" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="0,0,7,0" FontFamily="Segoe Fluent Icons" Text="&#xE740;" />
+                        <TextBlock Text="Full screen" />
+                    </StackPanel>
                 </Button>
             </Grid>
             </ScrollViewer>

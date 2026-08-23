@@ -34,6 +34,23 @@ public sealed class XtreamClientTests
     }
 
     [TestMethod]
+    public async Task AuthenticateAsyncAcceptsSingleOutputFormatString()
+    {
+        using HttpClient httpClient = new(new DelegatingStubHandler(_ => JsonResponse("""
+            {"user_info":{"auth":"1","status":"Active","allowed_output_formats":"m3u8"}}
+            """)));
+        XtreamClient client = new(new StubHttpClientFactory(httpClient));
+
+        XtreamAuthenticationDto result = await client.AuthenticateAsync(
+            "https://example.invalid",
+            "user",
+            "password");
+
+        Assert.IsNotNull(result.UserInfo?.AllowedOutputFormats);
+        Assert.AreEqual("m3u8", result.UserInfo.AllowedOutputFormats.Single());
+    }
+
+    [TestMethod]
     public async Task GetLiveStreamsAsyncReadsStringEncodedNumbers()
     {
         using HttpClient httpClient = new(new DelegatingStubHandler(_ => JsonResponse("""
@@ -47,6 +64,37 @@ public sealed class XtreamClientTests
             "password");
 
         Assert.AreEqual(42, streams.Single().StreamId);
+    }
+
+    [TestMethod]
+    public async Task GetLiveStreamsAsyncAcceptsNumericStringFieldsAndKeyedObjects()
+    {
+        using HttpClient httpClient = new(new DelegatingStubHandler(_ => JsonResponse("""
+            {"42":{"stream_id":"42","name":9001,"category_id":7}}
+            """)));
+        XtreamClient client = new(new StubHttpClientFactory(httpClient));
+
+        IReadOnlyList<XtreamLiveStreamDto> streams = await client.GetLiveStreamsAsync(
+            "https://example.invalid",
+            "user",
+            "password");
+
+        Assert.AreEqual("9001", streams.Single().Name);
+        Assert.AreEqual("7", streams.Single().CategoryId);
+    }
+
+    [TestMethod]
+    public async Task EmptyObjectCatalogResponseIsTreatedAsAnEmptyList()
+    {
+        using HttpClient httpClient = new(new DelegatingStubHandler(_ => JsonResponse("{}")));
+        XtreamClient client = new(new StubHttpClientFactory(httpClient));
+
+        IReadOnlyList<XtreamLiveStreamDto> streams = await client.GetLiveStreamsAsync(
+            "https://example.invalid",
+            "user",
+            "password");
+
+        Assert.IsEmpty(streams);
     }
 
     [TestMethod]

@@ -7,8 +7,9 @@ The application separates the interface from provider, database, credential, and
 ## Features
 
 - Multiple M3U/M3U8, Xtream-compatible, and supported Stalker/Ministra profiles
+- Duplicate-name protection and Windows-protected credentials that are restored when editing a profile
 - Local and remote playlists with streaming, cancellable parsing
-- Live TV categories, virtualized channel lists, current/next program details, and playback controls
+- Live TV with resizable category/channel panels, full screen, volume, track selection, and current/next program details
 - Movie and series browsers with provider metadata, seasons, episodes, favorites, and resume progress
 - XMLTV EPG with safe parsing, caching, timezone conversion, now/next data, and a TV guide
 - Debounced global search across channels, movies, series, episodes, and categories
@@ -51,7 +52,7 @@ Runtime data is created under `%LocalAppData%\MyIPTV`. Source code, tests, and b
 
 For normal use with the release ZIP:
 
-1. Extract `MyIPTV-1.0.0-win-x64.zip` to a folder you control.
+1. Extract `MyIPTV-1.1.0-win-x64.zip` to a folder you control.
 2. Open the extracted folder and double-click `MyIPTV.App.exe`.
 3. Open **Profiles**, choose **Add**, select the correct connection type, and enter the details issued by your provider.
 4. Choose **Test Connection**, then **Connect** to load the catalog.
@@ -131,7 +132,7 @@ MVVM keeps screen logic out of code-behind. Interfaces define what a service doe
 
 ## Supported IPTV Sources
 
-- **M3U/M3U8:** local files and HTTP/HTTPS playlists; common `tvg-id`, `tvg-name`, `tvg-logo`, and `group-title` metadata
+- **M3U/M3U8:** local files and HTTP/HTTPS playlists, including provider-issued username/password query links; common `tvg-id`, `tvg-name`, `tvg-logo`, and `group-title` metadata
 - **Xtream-compatible APIs:** normal username/password authentication, live/VOD/series catalogs, episodes, categories, and available short EPG data
 - **Stalker/Ministra:** authorized username/password REST v2 portals that return direct HTTP/HTTPS channels
 - **XMLTV:** local files and HTTP/HTTPS XML or XML.GZ sources
@@ -153,7 +154,7 @@ Prefer HTTPS because plain HTTP cannot protect credentials or media traffic in t
 
 - **The app does not start:** extract the entire ZIP before running; do not launch the executable from inside the archive. Review `%LocalAppData%\MyIPTV\Logs`.
 - **Windows shows a warning:** this local build is not code-signed. Verify `artifacts\SHA256SUMS.txt` against the ZIP before running it.
-- **Connection test fails:** confirm the address, account, internet connection, and subscription status. Use the dedicated username/password fields; credential-bearing URLs are rejected.
+- **Connection test fails:** confirm the address, account, internet connection, and subscription status. Provider-issued M3U username/password query links are accepted and separated into Windows-protected storage; other embedded tokens remain blocked.
 - **A certificate error appears:** the server certificate is invalid or untrusted. MyIPTV will not bypass it; contact the provider.
 - **Channels load but do not play:** the source may be offline, expired, DRM-protected, or use a codec/protocol unsupported by the bundled LibVLC runtime.
 - **EPG is empty:** check the XMLTV source and channel IDs, then refresh the Guide. Provider channel names and XMLTV IDs must map correctly.

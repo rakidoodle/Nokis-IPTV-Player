@@ -101,7 +101,7 @@ public sealed partial class M3uPlaylistImportService(
     {
         HttpClient client = httpClientFactory.CreateClient("Iptv");
         using HttpRequestMessage request = new(HttpMethod.Get, profile.ServerAddress);
-        request.Headers.UserAgent.ParseAdd("MyIPTV/1.0");
+        request.Headers.UserAgent.ParseAdd("MyIPTV/1.1");
         using HttpResponseMessage response = await client.SendAsync(
             request,
             HttpCompletionOption.ResponseHeadersRead,

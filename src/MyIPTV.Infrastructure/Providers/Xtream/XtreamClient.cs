@@ -12,6 +12,12 @@ public sealed class XtreamClient(IHttpClientFactory httpClientFactory) : IXtream
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
     {
         NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        Converters =
+        {
+            new FlexibleStringConverter(),
+            new FlexibleStringArrayConverter(),
+            new FlexibleListConverterFactory(),
+        },
     };
 
     public Task<XtreamAuthenticationDto> AuthenticateAsync(
@@ -124,7 +130,7 @@ public sealed class XtreamClient(IHttpClientFactory httpClientFactory) : IXtream
         Uri requestUri = BuildApiUri(serverAddress, username, password, action, parameters);
         HttpClient client = httpClientFactory.CreateClient("Xtream");
         using HttpRequestMessage request = new(HttpMethod.Get, requestUri);
-        request.Headers.UserAgent.ParseAdd("MyIPTV/1.0");
+        request.Headers.UserAgent.ParseAdd("MyIPTV/1.1");
         using HttpResponseMessage response = await client.SendAsync(
             request,
             HttpCompletionOption.ResponseHeadersRead,

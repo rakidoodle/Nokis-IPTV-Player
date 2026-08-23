@@ -9,9 +9,9 @@ public sealed class ProfileConnectionTypeToLabelConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
         value switch
         {
-            ProfileConnectionType.M3uPlaylist => "M3U Playlist",
-            ProfileConnectionType.XtreamApi => "Xtream API",
-            ProfileConnectionType.StalkerPortal => "Stalker / Ministra",
+            ProfileConnectionType.M3uPlaylist => "M3U",
+            ProfileConnectionType.XtreamApi => "Xtream",
+            ProfileConnectionType.StalkerPortal => "Stalker",
             _ => "Unknown",
         };
 

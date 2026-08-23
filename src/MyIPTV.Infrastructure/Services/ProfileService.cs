@@ -22,11 +22,39 @@ public sealed partial class ProfileService(
     public Task<IReadOnlyList<IptvProfile>> GetAllAsync(CancellationToken cancellationToken = default) =>
         repository.GetAllAsync(cancellationToken);
 
+    public async Task<ProfileDraft?> GetDraftAsync(
+        Guid profileId,
+        CancellationToken cancellationToken = default)
+    {
+        IptvProfile? profile = await repository.GetByIdAsync(profileId, cancellationToken);
+        if (profile is null)
+        {
+            return null;
+        }
+
+        ProfileCredentials? credentials = await credentialService.RetrieveAsync(profileId, cancellationToken);
+        string address = profile.ConnectionType == ProfileConnectionType.M3uPlaylist && credentials is not null
+            ? M3uCredentialUrl.Add(profile.ServerAddress, credentials)
+            : profile.ServerAddress;
+        return new ProfileDraft
+        {
+            Id = profile.Id,
+            Name = profile.Name,
+            ConnectionType = profile.ConnectionType,
+            ServerAddress = address,
+            Username = credentials?.Username ?? profile.Username,
+            Password = credentials?.Password,
+        };
+    }
+
     public async Task<ProfileSaveResult> SaveAsync(
         ProfileDraft draft,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(draft);
+        IptvProfile? existing = draft.Id.HasValue
+            ? await repository.GetByIdAsync(draft.Id.Value, cancellationToken)
+            : null;
         ProfileCredentials? existingCredentials = draft.Id.HasValue
             ? await credentialService.RetrieveAsync(draft.Id.Value, cancellationToken)
             : null;
@@ -39,16 +67,25 @@ public sealed partial class ProfileService(
             return ProfileSaveResult.Failure(validation.Message);
         }
 
+        IReadOnlyList<IptvProfile> profiles = await repository.GetAllAsync(cancellationToken);
+        if (profiles.Any(profile =>
+                profile.Id != draft.Id &&
+                string.Equals(profile.Name.Trim(), draft.Name.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            return ProfileSaveResult.Failure("A profile with this name already exists.");
+        }
+
+        M3uAddressParts m3uParts = draft.ConnectionType == ProfileConnectionType.M3uPlaylist
+            ? M3uCredentialUrl.Split(draft.ServerAddress.Trim())
+            : new M3uAddressParts(draft.ServerAddress.Trim(), null, false);
+
         DateTimeOffset now = DateTimeOffset.UtcNow;
-        IptvProfile? existing = draft.Id.HasValue
-            ? await repository.GetByIdAsync(draft.Id.Value, cancellationToken)
-            : null;
         IptvProfile profile = new(
             draft.Id ?? Guid.NewGuid(),
             draft.Name.Trim(),
             draft.ConnectionType,
-            draft.ServerAddress.Trim(),
-            NullIfWhiteSpace(draft.Username),
+            m3uParts.SanitizedAddress,
+            draft.ConnectionType == ProfileConnectionType.M3uPlaylist ? null : NullIfWhiteSpace(draft.Username),
             existing?.CreatedUtc ?? now,
             now);
 
@@ -65,7 +102,18 @@ public sealed partial class ProfileService(
 
         if (draft.ConnectionType == ProfileConnectionType.M3uPlaylist)
         {
-            await credentialService.DeleteAsync(profile.Id, cancellationToken);
+            ProfileCredentials? suppliedCredentials = m3uParts.Credentials ??
+                (!string.IsNullOrEmpty(draft.Password)
+                    ? new ProfileCredentials(NullIfWhiteSpace(draft.Username), draft.Password)
+                    : null);
+            if (suppliedCredentials is not null)
+            {
+                await credentialService.StoreAsync(profile.Id, suppliedCredentials, cancellationToken);
+            }
+            else if (existing?.ConnectionType != ProfileConnectionType.M3uPlaylist)
+            {
+                await credentialService.DeleteAsync(profile.Id, cancellationToken);
+            }
         }
         else if (!string.IsNullOrEmpty(draft.Password))
         {
@@ -126,8 +174,9 @@ public sealed partial class ProfileService(
             item => item.ConnectionType == saved.Profile.ConnectionType);
         if (provider is not null)
         {
+            IptvProfile effectiveProfile = await WithStoredCredentialsAsync(saved.Profile, cancellationToken);
             ProviderLoadResult loaded = await provider.LoadCatalogAsync(
-                saved.Profile,
+                effectiveProfile,
                 cancellationToken);
             if (!loaded.IsSuccess)
             {
@@ -162,7 +211,10 @@ public sealed partial class ProfileService(
         ProfileDraft draft,
         CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(draft.Password) || !draft.Id.HasValue)
+        M3uAddressParts suppliedM3u = draft.ConnectionType == ProfileConnectionType.M3uPlaylist
+            ? M3uCredentialUrl.Split(draft.ServerAddress)
+            : new M3uAddressParts(draft.ServerAddress, null, false);
+        if (!string.IsNullOrEmpty(draft.Password) || suppliedM3u.Credentials is not null || !draft.Id.HasValue)
         {
             return draft;
         }
@@ -177,10 +229,27 @@ public sealed partial class ProfileService(
                 Id = draft.Id,
                 Name = draft.Name,
                 ConnectionType = draft.ConnectionType,
-                ServerAddress = draft.ServerAddress,
-                Username = draft.Username,
+                ServerAddress = draft.ConnectionType == ProfileConnectionType.M3uPlaylist
+                    ? M3uCredentialUrl.Add(draft.ServerAddress, credentials)
+                    : draft.ServerAddress,
+                Username = credentials.Username ?? draft.Username,
                 Password = credentials.Password,
             };
+    }
+
+    private async Task<IptvProfile> WithStoredCredentialsAsync(
+        IptvProfile profile,
+        CancellationToken cancellationToken)
+    {
+        if (profile.ConnectionType != ProfileConnectionType.M3uPlaylist)
+        {
+            return profile;
+        }
+
+        ProfileCredentials? credentials = await credentialService.RetrieveAsync(profile.Id, cancellationToken);
+        return credentials is null
+            ? profile
+            : profile with { ServerAddress = M3uCredentialUrl.Add(profile.ServerAddress, credentials) };
     }
 
     private static string? NullIfWhiteSpace(string? value) =>

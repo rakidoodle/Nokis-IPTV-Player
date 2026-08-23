@@ -6,6 +6,8 @@ public interface IProfileService
 {
     Task<IReadOnlyList<IptvProfile>> GetAllAsync(CancellationToken cancellationToken = default);
 
+    Task<ProfileDraft?> GetDraftAsync(Guid profileId, CancellationToken cancellationToken = default);
+
     Task<ProfileSaveResult> SaveAsync(ProfileDraft draft, CancellationToken cancellationToken = default);
 
     Task DeleteAsync(Guid profileId, CancellationToken cancellationToken = default);

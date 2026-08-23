@@ -9,7 +9,7 @@ public sealed class ProfileValidatorTests
     private readonly ProfileValidator _validator = new();
 
     [TestMethod]
-    public void ValidateRejectsCredentialsEmbeddedInUrl()
+    public void ValidateAcceptsM3uCredentialsEmbeddedInUrl()
     {
         ProfileDraft draft = new()
         {
@@ -19,6 +19,19 @@ public sealed class ProfileValidatorTests
         };
 
         ProfileValidationResult result = _validator.Validate(draft, requireCredentials: false);
+
+        Assert.IsTrue(result.IsValid);
+    }
+
+    [TestMethod]
+    public void ValidateStillRejectsM3uTokensEmbeddedInUrl()
+    {
+        ProfileValidationResult result = _validator.Validate(new()
+        {
+            Name = "Unsafe",
+            ConnectionType = ProfileConnectionType.M3uPlaylist,
+            ServerAddress = "https://example.invalid/list.m3u?token=synthetic-secret",
+        }, requireCredentials: false);
 
         Assert.IsFalse(result.IsValid);
         StringAssert.Contains(result.Message, "password or token");

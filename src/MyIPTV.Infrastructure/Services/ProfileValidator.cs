@@ -52,10 +52,20 @@ public sealed class ProfileValidator : IProfileValidator
             return ProfileValidationResult.Failure("Do not place usernames or passwords inside the URL.");
         }
 
-        if (ContainsSensitiveQuery(uri.Query))
+        if (ContainsDisallowedSensitiveQuery(uri.Query, draft.ConnectionType))
         {
             return ProfileValidationResult.Failure(
                 "This URL appears to contain a password or token. Enter credentials in their dedicated fields instead.");
+        }
+
+        M3uAddressParts m3uParts = draft.ConnectionType == ProfileConnectionType.M3uPlaylist
+            ? M3uCredentialUrl.Split(address)
+            : new M3uAddressParts(address, null, false);
+        if (m3uParts.HadCredentialParameters &&
+            (m3uParts.Credentials is null || string.IsNullOrWhiteSpace(m3uParts.Credentials.Username)))
+        {
+            return ProfileValidationResult.Failure(
+                "M3U links with credentials must include both a username and password.");
         }
 
         if (draft.ConnectionType is ProfileConnectionType.XtreamApi or ProfileConnectionType.StalkerPortal &&
@@ -90,7 +100,9 @@ public sealed class ProfileValidator : IProfileValidator
         Path.IsPathFullyQualified(address) ||
         (Uri.TryCreate(address, UriKind.Absolute, out Uri? uri) && uri.IsFile);
 
-    private static bool ContainsSensitiveQuery(string query)
+    private static bool ContainsDisallowedSensitiveQuery(
+        string query,
+        ProfileConnectionType connectionType)
     {
         if (string.IsNullOrEmpty(query))
         {
@@ -100,7 +112,12 @@ public sealed class ProfileValidator : IProfileValidator
         foreach (string component in query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
         {
             string name = Uri.UnescapeDataString(component.Split('=', 2)[0]);
-            if (SensitiveQueryNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+            bool isM3uAccountField = connectionType == ProfileConnectionType.M3uPlaylist &&
+                                     (name.Equals("username", StringComparison.OrdinalIgnoreCase) ||
+                                      name.Equals("user", StringComparison.OrdinalIgnoreCase) ||
+                                      name.Equals("password", StringComparison.OrdinalIgnoreCase) ||
+                                      name.Equals("pass", StringComparison.OrdinalIgnoreCase));
+            if (!isM3uAccountField && SensitiveQueryNames.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -108,4 +125,5 @@ public sealed class ProfileValidator : IProfileValidator
 
         return false;
     }
+
 }

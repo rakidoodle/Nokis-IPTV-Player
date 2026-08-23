@@ -78,7 +78,7 @@ public sealed partial class ProfileConnectionTester(
     {
         HttpClient client = httpClientFactory.CreateClient("Iptv");
         using HttpRequestMessage request = new(HttpMethod.Get, draft.ServerAddress);
-        request.Headers.UserAgent.ParseAdd("MyIPTV/1.0");
+        request.Headers.UserAgent.ParseAdd("MyIPTV/1.1");
 
         using HttpResponseMessage response = await client.SendAsync(
             request,
