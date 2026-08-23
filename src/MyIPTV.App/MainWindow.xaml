@@ -9,6 +9,8 @@
         MinWidth="760"
         MinHeight="560"
         Background="{DynamicResource AppBackgroundBrush}"
+        KeyboardNavigation.TabNavigation="Continue"
+        PreviewKeyDown="OnPreviewKeyDown"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <converters:ResponsiveSidebarWidthConverter x:Key="ResponsiveSidebarWidthConverter" />
@@ -135,6 +137,7 @@
                         VerticalAlignment="Center">
                         <TextBox
                             x:Name="SearchBox"
+                            AutomationProperties.HelpText="Press Control+F from anywhere in the application to search."
                             AutomationProperties.Name="Search media"
                             Style="{StaticResource SearchTextBoxStyle}"
                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />

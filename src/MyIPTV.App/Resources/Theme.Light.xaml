@@ -9,7 +9,7 @@
     <SolidColorBrush x:Key="BorderBrush" Color="#D4DEE9" />
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="#475569" />
-    <SolidColorBrush x:Key="TextMutedBrush" Color="#64748B" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="#526176" />
     <SolidColorBrush x:Key="AccentBrush" Color="#0284C7" />
     <SolidColorBrush x:Key="AccentStrongBrush" Color="#0369A1" />
     <SolidColorBrush x:Key="AccentTextBrush" Color="#FFFFFF" />

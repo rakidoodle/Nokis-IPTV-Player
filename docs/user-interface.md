@@ -23,8 +23,11 @@ Colors are semantic resources rather than hard-coded control colors. `Theme.Dark
 - Navigation uses a standard `ListBox`, supporting Tab and arrow-key operation.
 - Interactive controls have explicit accessible names and tooltips where useful.
 - Focused controls receive a high-contrast accent outline.
+- `Ctrl+F` moves focus directly to global search; `Escape` releases it.
+- Check boxes and sliders use the same visible focus treatment as buttons and fields.
 - Pages expose level-one headings and readable empty-state descriptions.
 - Text and controls use scalable WPF device-independent units.
+- Dark and light semantic palettes use strengthened secondary text contrast.
 
 ## Content states
 
