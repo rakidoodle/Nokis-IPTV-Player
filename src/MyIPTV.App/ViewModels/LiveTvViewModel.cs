@@ -8,6 +8,7 @@ namespace MyIPTV.App.ViewModels;
 public sealed partial class LiveTvViewModel : SectionViewModel
 {
     private readonly IChannelCatalog _channelCatalog;
+    private readonly IActiveProfileService _activeProfileService;
     private readonly IPlaybackService _playbackService;
     private readonly IFavoriteRepository _favoriteRepository;
     private readonly IEpgService _epgService;
@@ -38,6 +39,7 @@ public sealed partial class LiveTvViewModel : SectionViewModel
 
     public LiveTvViewModel(
         IChannelCatalog channelCatalog,
+        IActiveProfileService activeProfileService,
         IPlaybackService playbackService,
         PlayerViewModel player,
         IFavoriteRepository favoriteRepository,
@@ -50,11 +52,13 @@ public sealed partial class LiveTvViewModel : SectionViewModel
         "\uE714")
     {
         _channelCatalog = channelCatalog;
+        _activeProfileService = activeProfileService;
         _playbackService = playbackService;
         _favoriteRepository = favoriteRepository;
         _epgService = epgService;
         Player = player;
         channelCatalog.ChannelsChanged += OnChannelsChanged;
+        activeProfileService.ActiveProfileChanged += OnActiveProfileChanged;
         favoriteRepository.FavoritesChanged += OnFavoritesChanged;
         epgService.EpgChanged += OnEpgChanged;
         UpdateCatalog();
@@ -137,6 +141,8 @@ public sealed partial class LiveTvViewModel : SectionViewModel
 
     private void OnChannelsChanged(object? sender, EventArgs e) => UpdateCatalog();
 
+    private void OnActiveProfileChanged(object? sender, EventArgs e) => UpdateCatalog();
+
     private async void OnFavoritesChanged(object? sender, EventArgs e) =>
         await RefreshSelectedFavoriteAsync(SelectedChannel);
 
@@ -174,7 +180,10 @@ public sealed partial class LiveTvViewModel : SectionViewModel
 
     private void UpdateCatalog()
     {
-        IReadOnlyList<IptvChannel> allChannels = _channelCatalog.GetAll();
+        IptvProfile? activeProfile = _activeProfileService.ActiveProfile;
+        IReadOnlyList<IptvChannel> allChannels = activeProfile is null
+            ? _channelCatalog.GetAll()
+            : _channelCatalog.GetForProfile(activeProfile.Id);
         _allChannels = allChannels;
         int channelCount = allChannels.Count;
         if (channelCount == 0)
@@ -205,6 +214,10 @@ public sealed partial class LiveTvViewModel : SectionViewModel
         Categories = categories;
         SelectedCategory = categories.FirstOrDefault(category =>
             string.Equals(category.Group, previousGroup, StringComparison.OrdinalIgnoreCase)) ?? categories[0];
+        // Profiles commonly reuse category names. If the new category value compares
+        // equal to the old one, the generated property hook does not run, so refresh
+        // the channel list explicitly from the newly active profile's lookup.
+        ApplyCategory(SelectedCategory);
 
         string channelLabel = channelCount == 1 ? "channel" : "channels";
         SetEmptyContent(

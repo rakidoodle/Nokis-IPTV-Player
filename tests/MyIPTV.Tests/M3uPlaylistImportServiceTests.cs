@@ -68,6 +68,22 @@ public sealed class M3uPlaylistImportServiceTests
         Assert.HasCount(0, catalog.GetAll());
     }
 
+    [TestMethod]
+    public async Task ImportAsyncRetriesAStalledHeaderRequest()
+    {
+        RetryingHttpMessageHandler handler = new();
+        HttpClient client = new(handler);
+        InMemoryChannelCatalog catalog = new();
+        M3uPlaylistImportService importer = CreateImporter(catalog, client);
+
+        PlaylistImportResult result = await importer.ImportAsync(
+            CreateProfile("https://playlist.example.invalid/retry.m3u"));
+
+        Assert.IsTrue(result.IsSuccess);
+        Assert.AreEqual(2, handler.RequestCount);
+        Assert.AreEqual("Recovered channel", catalog.GetAll().Single().Name);
+    }
+
     private static M3uPlaylistImportService CreateImporter(
         InMemoryChannelCatalog catalog,
         HttpClient client) =>
@@ -98,5 +114,27 @@ public sealed class M3uPlaylistImportServiceTests
             HttpRequestMessage request,
             CancellationToken cancellationToken) =>
             Task.FromResult(response);
+    }
+
+    private sealed class RetryingHttpMessageHandler : HttpMessageHandler
+    {
+        public int RequestCount { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            RequestCount++;
+            if (RequestCount == 1)
+            {
+                return Task.FromCanceled<HttpResponseMessage>(new CancellationToken(canceled: true));
+            }
+
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    "#EXTM3U\n#EXTINF:-1,Recovered channel\nhttps://example.invalid/recovered.m3u8"),
+            });
+        }
     }
 }

@@ -31,9 +31,9 @@
             VerticalScrollBarVisibility="Disabled">
             <Grid MinWidth="840">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition x:Name="CategoryColumn" Width="165" MinWidth="120" />
+                    <ColumnDefinition x:Name="CategoryColumn" Width="300" MinWidth="220" />
                     <ColumnDefinition x:Name="CategorySplitterColumn" Width="5" />
-                    <ColumnDefinition x:Name="ChannelColumn" Width="250" MinWidth="170" />
+                    <ColumnDefinition x:Name="ChannelColumn" Width="300" MinWidth="240" />
                     <ColumnDefinition x:Name="ChannelSplitterColumn" Width="5" />
                     <ColumnDefinition Width="*" MinWidth="300" />
                 </Grid.ColumnDefinitions>

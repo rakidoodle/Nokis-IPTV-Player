@@ -109,11 +109,11 @@ public partial class LiveTvView : UserControl
             LayoutRoot.Margin = _previousLayoutMargin;
             ContentScroller.Margin = _previousContentMargin;
             VideoPanel.Margin = new Thickness(7, 0, 0, 0);
-            CategoryColumn.MinWidth = 120;
-            ChannelColumn.MinWidth = 170;
-            CategoryColumn.Width = new GridLength(165);
+            CategoryColumn.MinWidth = 220;
+            ChannelColumn.MinWidth = 240;
+            CategoryColumn.Width = new GridLength(300);
             CategorySplitterColumn.Width = new GridLength(5);
-            ChannelColumn.Width = new GridLength(250);
+            ChannelColumn.Width = new GridLength(300);
             ChannelSplitterColumn.Width = new GridLength(5);
             PageHeading.Visibility = Visibility.Visible;
             CategoryPanel.Visibility = Visibility.Visible;

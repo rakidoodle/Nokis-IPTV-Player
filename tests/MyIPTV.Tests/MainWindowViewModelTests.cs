@@ -4,6 +4,7 @@ using MyIPTV.Core.Abstractions;
 using MyIPTV.Core.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 using MyIPTV.Infrastructure.Providers;
+using MyIPTV.Infrastructure.Services;
 
 namespace MyIPTV.Tests;
 
@@ -100,6 +101,7 @@ public sealed class MainWindowViewModelTests
             FakePlaybackService playback = new();
             return new LiveTvViewModel(
                 new FakeChannelCatalog(),
+                new ActiveProfileService(),
                 playback,
                 new PlayerViewModel(playback, playback),
                 new FakeFavoriteRepository(),

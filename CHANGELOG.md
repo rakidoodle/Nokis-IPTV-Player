@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0-beta.5 - 2026-08-23
+
+- Make the wider, readable Live TV category and channel panels the default layout.
+- Filter Live TV to the currently connected profile and refresh immediately when the active profile changes.
+- Retry stalled or transient remote M3U response-header requests before reporting a timeout.
+
 ## 1.2.0-beta.4 - 2026-08-23
 
 - Detach the native LibVLC video surface while Live TV is hidden so it cannot cover other tabs, then safely reattach it when returning.

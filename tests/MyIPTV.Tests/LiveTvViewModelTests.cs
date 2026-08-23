@@ -1,6 +1,7 @@
 using MyIPTV.App.ViewModels;
 using MyIPTV.Core.Models;
 using MyIPTV.Infrastructure.Providers.M3U;
+using MyIPTV.Infrastructure.Services;
 
 namespace MyIPTV.Tests;
 
@@ -29,6 +30,25 @@ public sealed class LiveTvViewModelTests
         Assert.HasCount(2, viewModel.Categories);
         Assert.AreEqual("All channels", viewModel.SelectedCategory?.Name);
         Assert.HasCount(1, viewModel.FilteredChannels);
+    }
+
+    [TestMethod]
+    public void ChangingActiveProfileShowsOnlyThatProfilesChannels()
+    {
+        InMemoryChannelCatalog catalog = new();
+        ActiveProfileService activeProfiles = new();
+        FakePlaybackService playback = new();
+        LiveTvViewModel viewModel = CreateViewModel(catalog, playback, activeProfiles);
+        Guid firstId = Guid.NewGuid();
+        Guid secondId = Guid.NewGuid();
+        catalog.ReplaceForProfile(firstId, [Channel("first", "First News", "News", firstId)]);
+        catalog.ReplaceForProfile(secondId, [Channel("second", "Second News", "News", secondId)]);
+
+        activeProfiles.SetActive(Profile(firstId, "First"));
+        Assert.AreEqual("First News", viewModel.FilteredChannels.Single().Name);
+
+        activeProfiles.SetActive(Profile(secondId, "Second"));
+        Assert.AreEqual("Second News", viewModel.FilteredChannels.Single().Name);
     }
 
     [TestMethod]
@@ -77,7 +97,8 @@ public sealed class LiveTvViewModelTests
         FakePlaybackService playback = new();
         FakeFavoriteRepository favorites = new();
         LiveTvViewModel viewModel = new(
-            catalog, playback, new PlayerViewModel(playback, playback), favorites, new FakeEpgService());
+            catalog, new ActiveProfileService(), playback,
+            new PlayerViewModel(playback, playback), favorites, new FakeEpgService());
         Guid profileId = Guid.NewGuid();
         IptvChannel channel = Channel("favorite-7", "Demo News", "News", profileId);
         catalog.ReplaceForProfile(profileId, [channel]);
@@ -101,7 +122,8 @@ public sealed class LiveTvViewModelTests
                 new("demo.8", now.AddMinutes(20), now.AddMinutes(50), "Next News", null)),
         };
         LiveTvViewModel viewModel = new(
-            catalog, playback, new PlayerViewModel(playback, playback), new FakeFavoriteRepository(), epg);
+            catalog, new ActiveProfileService(), playback,
+            new PlayerViewModel(playback, playback), new FakeFavoriteRepository(), epg);
         Guid profileId = Guid.NewGuid();
         IptvChannel channel = Channel("8", "Demo News", "News", profileId);
         catalog.ReplaceForProfile(profileId, [channel]);
@@ -122,7 +144,20 @@ public sealed class LiveTvViewModelTests
             group,
             $"demo.{id}");
 
-    private static LiveTvViewModel CreateViewModel(InMemoryChannelCatalog catalog, FakePlaybackService playback) =>
-        new(catalog, playback, new PlayerViewModel(playback, playback),
+    private static LiveTvViewModel CreateViewModel(
+        InMemoryChannelCatalog catalog,
+        FakePlaybackService playback,
+        ActiveProfileService? activeProfiles = null) =>
+        new(catalog, activeProfiles ?? new ActiveProfileService(), playback, new PlayerViewModel(playback, playback),
             new FakeFavoriteRepository(), new FakeEpgService());
+
+    private static IptvProfile Profile(Guid id, string name) =>
+        new(
+            id,
+            name,
+            ProfileConnectionType.M3uPlaylist,
+            "https://example.invalid/list.m3u",
+            null,
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow);
 }

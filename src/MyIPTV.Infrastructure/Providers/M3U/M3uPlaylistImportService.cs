@@ -11,6 +11,8 @@ public sealed partial class M3uPlaylistImportService(
     IChannelCatalog channelCatalog,
     ILogger<M3uPlaylistImportService> logger) : IPlaylistImportService
 {
+    private const int MaximumRequestAttempts = 3;
+    private static readonly TimeSpan ResponseHeaderTimeout = TimeSpan.FromSeconds(20);
     private readonly ILogger<M3uPlaylistImportService> _logger = logger;
 
     public async Task<PlaylistImportResult> ImportAsync(
@@ -100,12 +102,9 @@ public sealed partial class M3uPlaylistImportService(
         CancellationToken cancellationToken)
     {
         HttpClient client = httpClientFactory.CreateClient("Iptv");
-        using HttpRequestMessage request = new(HttpMethod.Get, profile.ServerAddress);
-        request.Headers.UserAgent.ParseAdd("VLC/3.0.21 LibVLC/3.0.21");
-        request.Headers.Accept.ParseAdd("application/x-mpegURL, application/vnd.apple.mpegurl, text/plain, */*");
-        using HttpResponseMessage response = await client.SendAsync(
-            request,
-            HttpCompletionOption.ResponseHeadersRead,
+        using HttpResponseMessage response = await SendWithRetryAsync(
+            client,
+            profile.ServerAddress,
             cancellationToken);
 
         if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
@@ -125,6 +124,41 @@ public sealed partial class M3uPlaylistImportService(
 
         await using Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         return await parser.ParseAsync(stream, profile.Id, cancellationToken);
+    }
+
+    private static async Task<HttpResponseMessage> SendWithRetryAsync(
+        HttpClient client,
+        string address,
+        CancellationToken cancellationToken)
+    {
+        for (int attempt = 1; attempt <= MaximumRequestAttempts; attempt++)
+        {
+            using HttpRequestMessage request = new(HttpMethod.Get, address);
+            request.Headers.UserAgent.ParseAdd("VLC/3.0.21 LibVLC/3.0.21");
+            request.Headers.Accept.ParseAdd("application/x-mpegURL, application/vnd.apple.mpegurl, text/plain, */*");
+            using CancellationTokenSource headerTimeout =
+                CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            headerTimeout.CancelAfter(ResponseHeaderTimeout);
+
+            try
+            {
+                return await client.SendAsync(
+                    request,
+                    HttpCompletionOption.ResponseHeadersRead,
+                    headerTimeout.Token);
+            }
+            catch (OperationCanceledException) when (
+                !cancellationToken.IsCancellationRequested && attempt < MaximumRequestAttempts)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(250 * attempt), cancellationToken);
+            }
+            catch (HttpRequestException) when (attempt < MaximumRequestAttempts)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(250 * attempt), cancellationToken);
+            }
+        }
+
+        throw new OperationCanceledException("Playlist server did not respond after multiple attempts.");
     }
 
     private static bool IsLocalPath(string address) =>
