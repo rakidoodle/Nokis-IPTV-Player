@@ -35,6 +35,8 @@ public sealed class XtreamProviderTests
         Assert.HasCount(1, result.Catalog.Movies);
         Assert.HasCount(1, result.Catalog.Series);
         Assert.AreEqual("202", result.Catalog.Movies.Single().Id);
+        Assert.AreEqual("2026", result.Catalog.Movies.Single().Year);
+        Assert.AreEqual("Synthetic plot", result.Catalog.Movies.Single().Description);
         Assert.AreEqual("303", result.Catalog.Series.Single().Id);
         IptvChannel channel = channelCatalog.GetForProfile(profileId).Single();
         Assert.AreEqual("Demo News", channel.Name);
@@ -172,6 +174,9 @@ public sealed class XtreamProviderTests
                     Name = "Demo Movie",
                     CategoryId = "7",
                     ContainerExtension = "mkv",
+                    Plot = "Synthetic plot",
+                    Year = JsonDocument.Parse("2026").RootElement.Clone(),
+                    Duration = "1h 30m",
                 }]);
 
         public Task<IReadOnlyList<XtreamSeriesDto>> GetSeriesAsync(

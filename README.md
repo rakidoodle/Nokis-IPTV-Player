@@ -30,6 +30,7 @@ The repository currently contains the verified .NET 10/WPF application foundatio
 - SQLite-backed favorites persist channels, movies, and series by stable provider IDs.
 - Recently watched history saves VOD progress and offers Continue Watching from Home.
 - XMLTV EPG supports timezone-safe parsing, channel mapping, current/next programs, conditional refresh, and a virtualized guide.
+- The VOD browser provides categories, posters, provider metadata, playback, favorites, and Continue Watching.
 
 ## Requirements
 
@@ -74,6 +75,7 @@ See [Global search](docs/search.md) for matching, ranking, keyboard use, and cur
 See [Favorites](docs/favorites.md) for persistence, stable IDs, and stored data.
 See [Recently watched](docs/recently-watched.md) for saved progress, resume behavior, and privacy.
 See [XMLTV program guide](docs/epg.md) for source setup, channel mapping, caching, and timezone behavior.
+See [Movies and VOD](docs/movies.md) for metadata, playback, favorites, and resume behavior.
 
 ## Local application data
 

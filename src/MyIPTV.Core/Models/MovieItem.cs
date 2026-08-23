@@ -8,7 +8,10 @@ public sealed record MovieItem(
     string StreamUrl,
     string? PosterUrl,
     string? Rating,
-    string? ContainerExtension)
+    string? ContainerExtension,
+    string? Description = null,
+    string? Year = null,
+    string? Duration = null)
 {
     public override string ToString() =>
         $"MovieItem {{ Id = {Id}, ProfileId = {ProfileId}, Name = {Name}, StreamUrl = [REDACTED] }}";

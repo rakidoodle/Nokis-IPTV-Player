@@ -80,3 +80,9 @@ History keys use the same stable profile/content identity as favorites. Stored r
 `IXmlTvParser` incrementally reads XML with DTD and external entities prohibited, normalizes accepted timestamps to UTC, and produces provider-independent channel/program records. `IEpgService` validates local or HTTP sources, limits decompressed data, performs conditional HTTP refresh, and activates cached guide data. The source address is represented in SQLite and logs only by a SHA-256 identifier.
 
 `IEpgRepository` atomically replaces a source's cached channels and programs and uses indexed UTC fields for guide and now/next lookups. The Guide ViewModel requests a bounded time window, while Live TV maps the selected channel's EPG ID to a current/next lookup. Local-time conversion occurs only in display ViewModels.
+
+## VOD browser
+
+The movie browser joins immutable `IMediaCatalog` snapshots with stable favorite and watch-history keys. Its card ViewModels contain provider metadata and state needed by the UI, while the underlying credential-bearing playback URL remains on the redacting Core movie model and is passed only to `IPlaybackService` when Play or Continue Watching is invoked.
+
+Categories and movie rows use recycling virtualization. Background history notifications marshal refreshes to the captured UI synchronization context and preserve the current category/movie selection where possible.

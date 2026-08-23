@@ -255,7 +255,10 @@ public sealed partial class XtreamProvider(
             streamUrl,
             NormalizeOptional(item.StreamIcon, 2_048),
             NormalizeOptional(item.Rating, 32),
-            extension);
+            extension,
+            NormalizeOptional(item.Plot, 4_096),
+            NormalizeOptional(JsonScalar(item.Year) ?? item.ReleaseDate, 64),
+            NormalizeOptional(item.Duration, 64));
     }
 
     private static SeriesItem MapSeries(IptvProfile profile, XtreamSeriesDto item) =>
@@ -313,6 +316,13 @@ public sealed partial class XtreamProvider(
             JsonValueKind.Number => value.GetRawText(),
             _ => null,
         };
+
+    private static string? JsonScalar(JsonElement value) => value.ValueKind switch
+    {
+        JsonValueKind.String => value.GetString(),
+        JsonValueKind.Number => value.GetRawText(),
+        _ => null,
+    };
 
     private static string Normalize(string? value, string fallback, int maximumLength)
     {

@@ -9,51 +9,156 @@ public sealed partial class MoviesViewModel : SectionViewModel
 {
     private readonly IMediaCatalog _mediaCatalog;
     private readonly IFavoriteRepository _favoriteRepository;
+    private readonly IWatchHistoryRepository _historyRepository;
+    private readonly IPlaybackService _playbackService;
+    private readonly SynchronizationContext? _synchronizationContext;
+    private IReadOnlyList<MovieCardViewModel> _allMovies = [];
 
-    [ObservableProperty] private IReadOnlyList<FavoriteContentViewModel> _items = [];
-    [ObservableProperty] private FavoriteContentViewModel? _selectedItem;
+    [ObservableProperty] private IReadOnlyList<MovieCategoryViewModel> _categories = [];
+    [ObservableProperty] private MovieCategoryViewModel? _selectedCategory;
+    [ObservableProperty] private IReadOnlyList<MovieCardViewModel> _filteredMovies = [];
+    [ObservableProperty] private MovieCardViewModel? _selectedMovie;
 
-    public MoviesViewModel(IMediaCatalog mediaCatalog, IFavoriteRepository favoriteRepository)
-        : base("Movies", "Browse movies supplied by your connected provider.", "No movies yet",
+    public MoviesViewModel(
+        IMediaCatalog mediaCatalog,
+        IFavoriteRepository favoriteRepository,
+        IWatchHistoryRepository historyRepository,
+        IPlaybackService playbackService,
+        PlayerViewModel player)
+        : base("Movies", "Browse and play movies supplied by your connected provider.", "No movies yet",
             "Movies will appear here when a supported profile is connected.", "\uE8B2")
     {
         _mediaCatalog = mediaCatalog;
         _favoriteRepository = favoriteRepository;
+        _historyRepository = historyRepository;
+        _playbackService = playbackService;
+        _synchronizationContext = SynchronizationContext.Current;
+        Player = player;
         mediaCatalog.CatalogChanged += OnSourceChanged;
         favoriteRepository.FavoritesChanged += OnSourceChanged;
+        historyRepository.HistoryChanged += OnSourceChanged;
         _ = RefreshAsync();
     }
 
-    public bool HasItems => Items.Count > 0;
-    public bool CanToggleFavorite => SelectedItem is not null;
-    public string FavoriteButtonText => SelectedItem?.IsFavorite == true ? "Remove favorite" : "Add favorite";
+    public PlayerViewModel Player { get; }
+    public bool HasMovies => Categories.Count > 0;
+    public bool CanUseSelectedMovie => SelectedMovie is not null;
+    public bool CanContinueSelected => SelectedMovie?.CanContinue == true;
+    public string FavoriteButtonText => SelectedMovie?.IsFavorite == true ? "Remove favorite" : "Add favorite";
 
-    partial void OnSelectedItemChanged(FavoriteContentViewModel? value)
+    partial void OnSelectedCategoryChanged(MovieCategoryViewModel? value) => ApplyCategory(value);
+
+    partial void OnSelectedMovieChanged(MovieCardViewModel? value)
     {
-        ToggleFavoriteCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(CanUseSelectedMovie));
+        OnPropertyChanged(nameof(CanContinueSelected));
         OnPropertyChanged(nameof(FavoriteButtonText));
+        PlayMovieCommand.NotifyCanExecuteChanged();
+        ContinueMovieCommand.NotifyCanExecuteChanged();
+        ToggleFavoriteCommand.NotifyCanExecuteChanged();
     }
 
-    [RelayCommand(CanExecute = nameof(CanToggleFavorite))]
+    [RelayCommand(CanExecute = nameof(CanUseSelectedMovie), IncludeCancelCommand = true)]
+    private Task PlayMovieAsync(CancellationToken cancellationToken) =>
+        PlaySelectedAsync(continueWatching: false, cancellationToken);
+
+    [RelayCommand(CanExecute = nameof(CanContinueSelected), IncludeCancelCommand = true)]
+    private Task ContinueMovieAsync(CancellationToken cancellationToken) =>
+        PlaySelectedAsync(continueWatching: true, cancellationToken);
+
+    [RelayCommand(CanExecute = nameof(CanUseSelectedMovie))]
     private async Task ToggleFavoriteAsync(CancellationToken cancellationToken)
     {
-        if (SelectedItem is null) return;
-        bool newValue = !SelectedItem.IsFavorite;
-        await _favoriteRepository.SetAsync(SelectedItem.ToFavorite(), newValue, cancellationToken);
+        if (SelectedMovie is null) return;
+        await _favoriteRepository.SetAsync(
+            SelectedMovie.ToFavorite(), !SelectedMovie.IsFavorite, cancellationToken);
     }
 
-    private async void OnSourceChanged(object? sender, EventArgs e) => await RefreshAsync();
+    private async Task PlaySelectedAsync(bool continueWatching, CancellationToken cancellationToken)
+    {
+        if (SelectedMovie is null) return;
+        MovieItem movie = SelectedMovie.Movie;
+        await _playbackService.PlayAsync(new(
+            movie.Id,
+            ContentKind.Movie,
+            movie.Name,
+            movie.StreamUrl,
+            movie.PosterUrl,
+            StartPosition: continueWatching ? SelectedMovie.History?.Position : null,
+            ProfileId: movie.ProfileId), cancellationToken);
+    }
+
+    private async void OnSourceChanged(object? sender, EventArgs e)
+    {
+        if (_synchronizationContext is not null && SynchronizationContext.Current != _synchronizationContext)
+        {
+            _synchronizationContext.Post(async _ => await RefreshAsync(), null);
+            return;
+        }
+
+        await RefreshAsync();
+    }
 
     private async Task RefreshAsync()
     {
-        HashSet<(Guid, ContentKind, string)> favorites = (await _favoriteRepository.GetAllAsync())
-            .Select(item => (item.ProfileId, item.ContentKind, item.ContentId)).ToHashSet();
-        Items = _mediaCatalog.GetMovies().Select(item => new FavoriteContentViewModel(
-            item.ProfileId, ContentKind.Movie, item.Id, item.Name, "Movie",
-            favorites.Contains((item.ProfileId, ContentKind.Movie, item.Id)))).ToArray();
-        SelectedItem = Items.Count == 0 ? null : Items[0];
-        OnPropertyChanged(nameof(HasItems));
-        SetEmptyContent(Items.Count == 0 ? "No movies yet" : $"{Items.Count:N0} movies loaded",
-            Items.Count == 0 ? "Connect an Xtream profile to load movies." : "Select a movie to manage its favorite status.");
+        (Guid ProfileId, string Id)? previousSelection = SelectedMovie is null
+            ? null
+            : (SelectedMovie.ProfileId, SelectedMovie.Id);
+        string? previousCategory = SelectedCategory?.CategoryId;
+        IReadOnlyList<MovieItem> movies = _mediaCatalog.GetMovies();
+        IReadOnlyList<ContentCategory> mediaCategories = _mediaCatalog.GetCategories();
+        Task<IReadOnlyList<FavoriteItem>> favoritesTask = _favoriteRepository.GetAllAsync();
+        Task<IReadOnlyList<WatchHistoryItem>> historyTask = _historyRepository.GetRecentAsync(500);
+        await Task.WhenAll(favoritesTask, historyTask);
+        IReadOnlyList<FavoriteItem> favoriteItems = await favoritesTask;
+        IReadOnlyList<WatchHistoryItem> historyItems = await historyTask;
+        HashSet<(Guid, string)> favorites = favoriteItems
+            .Where(item => item.ContentKind == ContentKind.Movie)
+            .Select(item => (item.ProfileId, item.ContentId)).ToHashSet();
+        Dictionary<(Guid, string), WatchHistoryItem> history = historyItems
+            .Where(item => item.ContentKind == ContentKind.Movie)
+            .ToDictionary(item => (item.ProfileId, item.ContentId));
+        Dictionary<(Guid, string), string> categoryNames = mediaCategories
+            .Where(category => category.Kind == ContentKind.Movie)
+            .ToDictionary(category => (category.ProfileId, category.Id), category => category.Name);
+        MovieCardViewModel[] cards = movies.Select(movie => new MovieCardViewModel(
+            movie,
+            categoryNames.GetValueOrDefault((movie.ProfileId, movie.CategoryId), "Uncategorized"),
+            favorites.Contains((movie.ProfileId, movie.Id)),
+            history.GetValueOrDefault((movie.ProfileId, movie.Id)))).ToArray();
+
+        _allMovies = cards;
+        Categories = BuildCategories(cards);
+        SelectedCategory = Categories.FirstOrDefault(category =>
+            string.Equals(category.CategoryId, previousCategory, StringComparison.OrdinalIgnoreCase)) ??
+            (Categories.Count == 0 ? null : Categories[0]);
+        ApplyCategory(SelectedCategory);
+        if (previousSelection.HasValue)
+        {
+            SelectedMovie = FilteredMovies.FirstOrDefault(movie =>
+                movie.ProfileId == previousSelection.Value.ProfileId && movie.Id == previousSelection.Value.Id) ??
+                SelectedMovie;
+        }
+        OnPropertyChanged(nameof(HasMovies));
+        SetEmptyContent(cards.Length == 0 ? "No movies yet" : $"{cards.Length:N0} movies loaded",
+            cards.Length == 0 ? "Connect an Xtream profile to load movies." : "Choose a movie to view details or start playback.");
+    }
+
+    private static List<MovieCategoryViewModel> BuildCategories(MovieCardViewModel[] cards)
+    {
+        if (cards.Length == 0) return [];
+        List<MovieCategoryViewModel> categories = [new("All movies", cards.Length, null)];
+        categories.AddRange(cards.GroupBy(card => card.CategoryName, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new MovieCategoryViewModel(group.Key, group.Count(), group.Key)));
+        return categories;
+    }
+
+    private void ApplyCategory(MovieCategoryViewModel? category)
+    {
+        FilteredMovies = _allMovies.Where(card => category?.CategoryId is null ||
+                card.CategoryName.Equals(category.CategoryId, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        SelectedMovie = FilteredMovies.Count == 0 ? null : FilteredMovies[0];
     }
 }

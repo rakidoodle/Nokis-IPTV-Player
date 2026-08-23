@@ -20,7 +20,7 @@
                 <views:LiveTvView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:MoviesViewModel}">
-                <views:CatalogView />
+                <views:MoviesView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:SeriesViewModel}">
                 <views:CatalogView />

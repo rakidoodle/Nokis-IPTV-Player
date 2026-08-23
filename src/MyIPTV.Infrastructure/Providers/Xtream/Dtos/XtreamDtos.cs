@@ -67,6 +67,18 @@ public sealed class XtreamVodStreamDto
 
     [JsonPropertyName("container_extension")]
     public string? ContainerExtension { get; init; }
+
+    [JsonPropertyName("plot")]
+    public string? Plot { get; init; }
+
+    [JsonPropertyName("year")]
+    public JsonElement Year { get; init; }
+
+    [JsonPropertyName("releaseDate")]
+    public string? ReleaseDate { get; init; }
+
+    [JsonPropertyName("duration")]
+    public string? Duration { get; init; }
 }
 
 public sealed class XtreamSeriesDto
