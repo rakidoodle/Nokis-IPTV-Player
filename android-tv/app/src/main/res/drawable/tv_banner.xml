@@ -1,0 +1,5 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape android:shape="rectangle"><solid android:color="#0C111B"/><size android:width="320dp" android:height="180dp"/></shape></item>
+    <item android:drawable="@drawable/brand" android:width="86dp" android:height="112dp" android:left="22dp" android:top="34dp"/>
+    <item android:drawable="@drawable/tv_wordmark" android:width="168dp" android:height="76dp" android:left="128dp" android:top="52dp"/>
+</layer-list>

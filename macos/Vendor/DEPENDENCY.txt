@@ -1,0 +1,3 @@
+VLCKit 3.7.3
+URL: https://download.videolan.org/cocoapods/prod/VLCKit-3.7.3-319ed2c0-79128878.tar.xz
+SHA-256: 019afdae4e2e2d0f3ac325fac8f7ba0af25dca70b9d157df7d60db88e0be8e5d

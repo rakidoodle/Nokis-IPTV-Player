@@ -1,0 +1,13 @@
+.build/
+Vendor/parts/
+Vendor/*.tar.xz
+Vendor/VLCKit.framework/
+Vendor/VLCKit-binary/
+Vendor/download.log
+dist/
+Tests/Fixtures/*.mp4
+Tests/Fixtures/*results.json
+.DS_Store
+Vendor/VLCKit - binary package/
+
+._*

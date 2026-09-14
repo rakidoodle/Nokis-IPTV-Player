@@ -43,3 +43,16 @@ secrets.json
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Native platform outputs and private local configuration
+._*
+.DS_Store
+**/.gradle/
+**/.kotlin/
+**/.tools/
+**/local.properties
+**/dist/
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
