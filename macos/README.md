@@ -42,4 +42,4 @@ Real-provider testing is separate. Enter your source credentials in the app, the
 
 ## Licenses and distribution
 
-VLCKit and its bundled dependencies retain their upstream license notices inside the framework. VLCKit is dynamically linked, and the app bundles the upstream LGPL license. VLCKit source: https://code.videolan.org/videolan/VLCKit (3.7.3 / 319ed2c0); libVLC source: https://code.videolan.org/videolan/vlc (79128878). Preserve notices and corresponding-source obligations if redistributing binaries. This project has not been published or deployed.
+VLCKit and its bundled dependencies retain their upstream license notices inside the framework. VLCKit is dynamically linked, and the app bundles the upstream LGPL license. VLCKit source: https://code.videolan.org/videolan/VLCKit (3.7.3 / 319ed2c0); libVLC source: https://code.videolan.org/videolan/vlc (79128878). Preserve notices and corresponding-source obligations if redistributing binaries. Public preview downloads are provided in this repository’s Releases.
