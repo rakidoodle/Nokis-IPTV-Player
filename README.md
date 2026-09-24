@@ -1,6 +1,6 @@
 # Noki’s IPTV Player
 
-[![Feed my Baby](assets/paypal-support.svg)](https://paypal.me/RuffyTrinidad)
+<a href="https://paypal.me/RuffyTrinidad" class="btn" target="_blank">Support to feed my baby.</a>
 
 
 IPTV players for **Windows, macOS, Android TV, and Google TV**. Add your own M3U playlist, Xtream account, or supported Stalker portal to browse live channels, movies, series, favorites, and TV guides.
