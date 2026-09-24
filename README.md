@@ -1,6 +1,7 @@
 # Noki’s IPTV Player
 
-<a href="https://paypal.me/RuffyTrinidad" class="btn" target="_blank">Donate</a>
+<a href="https://paypal.me/RuffyTrinidad" target="_blank">Support my work to feed my baby</a>
+
 
 IPTV players for **Windows, macOS, Android TV, and Google TV**. Add your own M3U playlist, Xtream account, or supported Stalker portal to browse live channels, movies, series, favorites, and TV guides.
 
